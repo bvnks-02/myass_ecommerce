@@ -1,0 +1,303 @@
+﻿Analyzing myass_ecommerce...                                    
+
+  error - Target of URI doesn't exist: '../error/failures.dart' - lib\core\usecases\usecase.dart:2:8 - uri_does_not_exist
+   info - The type parameter name 'Type' matches a visible type name - lib\core\usecases\usecase.dart:4:24 - avoid_types_as_parameter_names
+  error - The name 'Failure' isn't a type, so it can't be used as a type argument - lib\core\usecases\usecase.dart:5:17 - non_type_as_type_argument
+  error - Target of URI doesn't exist: '../../theme/app_theme.dart' - lib\features\admin\presentation\screens\admin_dashboard_screen.dart:2:8 - uri_does_not_exist
+  error - Undefined name 'AppTheme' - lib\features\admin\presentation\screens\admin_dashboard_screen.dart:12:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_dashboard_screen.dart:68:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_dashboard_screen.dart:70:50 - deprecated_member_use
+  error - Target of URI doesn't exist: '../../theme/app_theme.dart' - lib\features\admin\presentation\screens\admin_orders_screen.dart:3:8 - uri_does_not_exist
+  error - Undefined name 'AppTheme' - lib\features\admin\presentation\screens\admin_orders_screen.dart:72:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_orders_screen.dart:91:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_orders_screen.dart:112:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_orders_screen.dart:164:46 - deprecated_member_use
+  error - Target of URI doesn't exist: '../../theme/app_theme.dart' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../features/products/domain/entities/product_entity.dart' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:7:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../features/products/data/models/product_model.dart' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:8:8 - uri_does_not_exist
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\admin\presentation\screens\admin_product_list_screen.dart:20:8 - non_type_as_type_argument
+  error - Undefined name 'ProductModel' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:39:42 - undefined_identifier
+  error - Undefined class 'ProductEntity' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:98:35 - undefined_class
+  error - Undefined name 'AppTheme' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:116:32 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:145:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:182:53 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\admin\presentation\screens\admin_product_list_screen.dart:240:45 - use_build_context_synchronously
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\admin\presentation\screens\admin_product_list_screen.dart:245:52 - use_build_context_synchronously
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:282:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:284:33 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:296:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:315:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\admin\presentation\screens\admin_product_list_screen.dart:347:55 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\admin\presentation\screens\admin_product_list_screen.dart:363:48 - undefined_identifier
+  error - Target of URI doesn't exist: '../providers/auth_provider.dart' - lib\features\auth\presentation\screens\forgot_password_screen.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\auth\presentation\screens\forgot_password_screen.dart:4:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\forgot_password_screen.dart:27:40 - non_type_as_type_argument
+  error - Undefined name 'AppTheme' - lib\features\auth\presentation\screens\forgot_password_screen.dart:53:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\forgot_password_screen.dart:81:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\forgot_password_screen.dart:91:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\forgot_password_screen.dart:93:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\forgot_password_screen.dart:99:61 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/auth_provider.dart' - lib\features\auth\presentation\screens\login_screen.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\auth\presentation\screens\login_screen.dart:5:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\login_screen.dart:32:40 - non_type_as_type_argument
+  error - Undefined name 'AppTheme' - lib\features\auth\presentation\screens\login_screen.dart:54:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:66:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:78:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:105:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:130:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:156:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:178:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:217:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:224:57 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:230:57 - deprecated_member_use
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\login_screen.dart:241:56 - non_type_as_type_argument
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\login_screen.dart:248:56 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:262:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:303:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:305:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:313:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:317:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:343:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:347:35 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/auth_provider.dart' - lib\features\auth\presentation\screens\register_screen.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\auth\presentation\screens\register_screen.dart:5:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\register_screen.dart:33:40 - non_type_as_type_argument
+  error - Undefined name 'AppTheme' - lib\features\auth\presentation\screens\register_screen.dart:60:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:72:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:117:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:150:55 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:192:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:199:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:205:61 - deprecated_member_use
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\register_screen.dart:216:60 - non_type_as_type_argument
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\auth\presentation\screens\register_screen.dart:224:60 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:255:29 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:257:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:265:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:269:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:295:31 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\register_screen.dart:299:35 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/cart_provider.dart' - lib\features\cart\presentation\screens\cart_screen.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\features\cart\presentation\screens\cart_screen.dart:7:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\cart\presentation\screens\cart_screen.dart:8:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../services/api_service.dart' - lib\features\cart\presentation\screens\cart_screen.dart:9:8 - uri_does_not_exist
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:25:24 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:27:26 - undefined_identifier
+  error - The name 'CartProvider' isn't a type, so it can't be used as a type argument - lib\features\cart\presentation\screens\cart_screen.dart:34:22 - non_type_as_type_argument
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\cart\presentation\screens\cart_screen.dart:36:20 - unchecked_use_of_nullable_value
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\cart\presentation\screens\cart_screen.dart:48:39 - unchecked_use_of_nullable_value
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\cart\presentation\screens\cart_screen.dart:50:43 - unchecked_use_of_nullable_value
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\features\cart\presentation\screens\cart_screen.dart:51:60 - cast_to_non_type
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:101:32 - undefined_identifier
+  error - Undefined class 'ProductEntity' - lib\features\cart\presentation\screens\cart_screen.dart:115:7 - undefined_class
+  error - Undefined class 'CartProvider' - lib\features\cart\presentation\screens\cart_screen.dart:115:44 - undefined_class
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\cart\presentation\screens\cart_screen.dart:134:35 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:180:26 - undefined_identifier
+  error - Undefined class 'CartProvider' - lib\features\cart\presentation\screens\cart_screen.dart:232:32 - undefined_class
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:238:16 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\cart\presentation\screens\cart_screen.dart:240:49 - deprecated_member_use
+  error - Undefined class 'CartProvider' - lib\features\cart\presentation\screens\cart_screen.dart:314:28 - undefined_class
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\features\cart\presentation\screens\cart_screen.dart:335:42 - cast_to_non_type
+  error - Undefined name 'ApiService' - lib\features\cart\presentation\screens\cart_screen.dart:343:27 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\cart\presentation\screens\cart_screen.dart:358:30 - undefined_identifier
+  error - Target of URI doesn't exist: '../providers/favorites_provider.dart' - lib\features\favorites\presentation\screens\favorites_screen.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/cart_provider.dart' - lib\features\favorites\presentation\screens\favorites_screen.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\features\favorites\presentation\screens\favorites_screen.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\favorites\presentation\screens\favorites_screen.dart:7:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'product_details_screen.dart' - lib\features\favorites\presentation\screens\favorites_screen.dart:8:8 - uri_does_not_exist
+  error - Undefined name 'AppTheme' - lib\features\favorites\presentation\screens\favorites_screen.dart:16:24 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\favorites\presentation\screens\favorites_screen.dart:18:26 - undefined_identifier
+  error - The name 'FavoritesProvider' isn't a type, so it can't be used as a type argument - lib\features\favorites\presentation\screens\favorites_screen.dart:25:22 - non_type_as_type_argument
+  error - The property 'favoriteItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\favorites\presentation\screens\favorites_screen.dart:27:25 - unchecked_use_of_nullable_value
+  error - The property 'favoriteItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\favorites\presentation\screens\favorites_screen.dart:40:36 - unchecked_use_of_nullable_value
+  error - The property 'favoriteItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\favorites\presentation\screens\favorites_screen.dart:42:43 - unchecked_use_of_nullable_value
+  error - Undefined class 'ProductEntity' - lib\features\favorites\presentation\screens\favorites_screen.dart:99:29 - undefined_class
+  error - The name 'FavoritesProvider' isn't a type, so it can't be used as a type argument - lib\features\favorites\presentation\screens\favorites_screen.dart:100:22 - non_type_as_type_argument
+  error - The name 'CartProvider' isn't a type, so it can't be used as a type argument - lib\features\favorites\presentation\screens\favorites_screen.dart:100:41 - non_type_as_type_argument
+  error - The method 'isFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\favorites\presentation\screens\favorites_screen.dart:102:38 - unchecked_use_of_nullable_value
+  error - The method 'ProductDetailsScreen' isn't defined for the type 'FavoritesScreen' - lib\features\favorites\presentation\screens\favorites_screen.dart:109:39 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\favorites\presentation\screens\favorites_screen.dart:155:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\favorites\presentation\screens\favorites_screen.dart:156:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\favorites\presentation\screens\favorites_screen.dart:186:49 - deprecated_member_use
+  error - The method 'toggleFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\favorites\presentation\screens\favorites_screen.dart:199:35 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\favorites\presentation\screens\favorites_screen.dart:204:47 - deprecated_member_use
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\onboarding\presentation\screens\onboarding_screen.dart:3:8 - uri_does_not_exist
+  error - Undefined name 'AppTheme' - lib\features\onboarding\presentation\screens\onboarding_screen.dart:55:24 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\onboarding\presentation\screens\onboarding_screen.dart:170:35 - deprecated_member_use
+  error - Target of URI doesn't exist: '../providers/auth_provider.dart' - lib\features\onboarding\presentation\screens\splash_screen.dart:4:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\onboarding\presentation\screens\splash_screen.dart:36:40 - non_type_as_type_argument
+  error - Target of URI doesn't exist: '../../../../core/error/failures.dart' - lib\features\products\domain\repositories\product_repository.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../entities/product_entity.dart' - lib\features\products\domain\repositories\product_repository.dart:3:8 - uri_does_not_exist
+  error - The name 'Failure' isn't a type, so it can't be used as a type argument - lib\features\products\domain\repositories\product_repository.dart:6:17 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\domain\repositories\product_repository.dart:6:31 - non_type_as_type_argument
+  error - The name 'Failure' isn't a type, so it can't be used as a type argument - lib\features\products\domain\repositories\product_repository.dart:7:17 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\domain\repositories\product_repository.dart:7:31 - non_type_as_type_argument
+  error - Target of URI doesn't exist: '../../../../core/error/failures.dart' - lib\features\products\domain\usecases\get_products.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../entities/product_entity.dart' - lib\features\products\domain\usecases\get_products.dart:4:8 - uri_does_not_exist
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\domain\usecases\get_products.dart:7:43 - non_type_as_type_argument
+  error - The name 'Failure' isn't a type, so it can't be used as a type argument - lib\features\products\domain\usecases\get_products.dart:13:17 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\domain\usecases\get_products.dart:13:31 - non_type_as_type_argument
+  error - Target of URI doesn't exist: '../../domain/entities/product_entity.dart' - lib\features\products\presentation\providers\products_provider.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../../domain/usecases/get_featured_products.dart' - lib\features\products\presentation\providers\products_provider.dart:4:8 - uri_does_not_exist
+  error - Undefined class 'GetFeaturedProducts' - lib\features\products\presentation\providers\products_provider.dart:9:9 - undefined_class
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\providers\products_provider.dart:16:8 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\providers\products_provider.dart:17:8 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\providers\products_provider.dart:21:8 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\providers\products_provider.dart:22:8 - non_type_as_type_argument
+  error - The property 'message' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\providers\products_provider.dart:35:26 - unchecked_use_of_nullable_value
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\products\presentation\screens\home_screen.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\features\products\presentation\screens\home_screen.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../features/products/presentation/providers/products_provider.dart' - lib\features\products\presentation\screens\home_screen.dart:7:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/cart_provider.dart' - lib\features\products\presentation\screens\home_screen.dart:8:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/favorites_provider.dart' - lib\features\products\presentation\screens\home_screen.dart:9:8 - uri_does_not_exist
+   info - Don't use 'BuildContext's across async gaps - lib\features\products\presentation\screens\home_screen.dart:36:28 - use_build_context_synchronously
+  error - The name 'ProductsProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:36:41 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:39:8 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:39:46 - non_type_as_type_argument
+  error - The property 'id' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:42:38 - unchecked_use_of_nullable_value
+  error - The property 'id' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:45:38 - unchecked_use_of_nullable_value
+  error - The property 'category' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:47:36 - unchecked_use_of_nullable_value
+  error - The name 'ProductsProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:55:25 - non_type_as_type_argument
+  error - The property 'isLoading' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:57:34 - unchecked_use_of_nullable_value
+  error - The property 'products' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:58:34 - unchecked_use_of_nullable_value
+  error - The property 'products' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:63:52 - unchecked_use_of_nullable_value
+  error - The property 'products' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:71:51 - unchecked_use_of_nullable_value
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:91:28 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:125:41 - deprecated_member_use
+  error - The name 'CartProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:151:20 - non_type_as_type_argument
+  error - The property 'itemCount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:161:28 - unchecked_use_of_nullable_value
+  error - The property 'itemCount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:172:35 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:315:35 - deprecated_member_use
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:321:33 - non_type_as_type_argument
+  error - Undefined class 'ProductEntity' - lib\features\products\presentation\screens\home_screen.dart:353:28 - undefined_class
+  error - The name 'FavoritesProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:354:21 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:407:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:408:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:438:49 - deprecated_member_use
+  error - The name 'FavoritesProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:449:37 - non_type_as_type_argument
+  error - The method 'isFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:451:54 - unchecked_use_of_nullable_value
+  error - The method 'toggleFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:454:39 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\products\presentation\screens\home_screen.dart:459:51 - deprecated_member_use
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:484:52 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\home_screen.dart:485:14 - non_type_as_type_argument
+  error - The property 'name' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:514:22 - unchecked_use_of_nullable_value
+  error - Invalid constant value - lib\features\products\presentation\screens\home_screen.dart:534:43 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\home_screen.dart:534:43 - undefined_identifier
+  error - The property 'name' can't be unconditionally accessed because the receiver can be 'null' - lib\features\products\presentation\screens\home_screen.dart:547:22 - unchecked_use_of_nullable_value
+  error - Invalid constant value - lib\features\products\presentation\screens\home_screen.dart:567:43 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\home_screen.dart:567:43 - undefined_identifier
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\features\products\presentation\screens\product_details_screen.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/cart_provider.dart' - lib\features\products\presentation\screens\product_details_screen.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/favorites_provider.dart' - lib\features\products\presentation\screens\product_details_screen.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\products\presentation\screens\product_details_screen.dart:7:8 - uri_does_not_exist
+  error - Undefined class 'ProductEntity' - lib\features\products\presentation\screens\product_details_screen.dart:10:9 - undefined_class
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:38:24 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:40:26 - undefined_identifier
+  error - The name 'FavoritesProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\product_details_screen.dart:47:20 - non_type_as_type_argument
+  error - The method 'isFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\products\presentation\screens\product_details_screen.dart:49:44 - unchecked_use_of_nullable_value
+  error - The method 'toggleFavorite' can't be unconditionally invoked because the receiver can be 'null' - lib\features\products\presentation\screens\product_details_screen.dart:56:29 - unchecked_use_of_nullable_value
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:97:23 - undefined_identifier
+  error - Invalid constant value - lib\features\products\presentation\screens\product_details_screen.dart:109:58 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:109:58 - undefined_identifier
+  error - Invalid constant value - lib\features\products\presentation\screens\product_details_screen.dart:113:28 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:113:28 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:142:29 - undefined_identifier
+  error - Invalid constant value - lib\features\products\presentation\screens\product_details_screen.dart:180:26 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:180:26 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:188:28 - undefined_identifier
+  error - Invalid constant value - lib\features\products\presentation\screens\product_details_screen.dart:194:30 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:194:30 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:225:22 - undefined_identifier
+  error - The name 'CartProvider' isn't a type, so it can't be used as a type argument - lib\features\products\presentation\screens\product_details_screen.dart:271:21 - non_type_as_type_argument
+  error - The method 'addToCart' can't be unconditionally invoked because the receiver can be 'null' - lib\features\products\presentation\screens\product_details_screen.dart:280:22 - unchecked_use_of_nullable_value
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:286:38 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:292:34 - undefined_identifier
+  error - Invalid constant value - lib\features\products\presentation\screens\product_details_screen.dart:369:30 - invalid_constant
+  error - Undefined name 'AppTheme' - lib\features\products\presentation\screens\product_details_screen.dart:369:30 - undefined_identifier
+  error - Target of URI doesn't exist: '../theme/app_theme.dart' - lib\features\profile\presentation\screens\profile_screen.dart:3:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../providers/auth_provider.dart' - lib\features\profile\presentation\screens\profile_screen.dart:4:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'admin/admin_dashboard_screen.dart' - lib\features\profile\presentation\screens\profile_screen.dart:5:8 - uri_does_not_exist
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\profile\presentation\screens\profile_screen.dart:23:19 - non_type_as_type_argument
+  error - Undefined class 'AuthProvider' - lib\features\profile\presentation\screens\profile_screen.dart:27:27 - undefined_class
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\profile\presentation\screens\profile_screen.dart:39:21 - non_type_as_type_argument
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:44:28 - undefined_identifier
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:46:30 - undefined_identifier
+  error - The method 'refreshRole' can't be unconditionally invoked because the receiver can be 'null' - lib\features\profile\presentation\screens\profile_screen.dart:56:47 - unchecked_use_of_nullable_value
+  error - The property 'isLoading' can't be unconditionally accessed because the receiver can be 'null' - lib\features\profile\presentation\screens\profile_screen.dart:60:30 - unchecked_use_of_nullable_value
+  error - Undefined class 'AuthProvider' - lib\features\profile\presentation\screens\profile_screen.dart:83:30 - undefined_class
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:94:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:96:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:118:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:119:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:135:33 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:168:16 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:170:48 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:219:16 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:221:48 - deprecated_member_use
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:273:16 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:315:38 - deprecated_member_use
+  error - Undefined class 'AuthProvider' - lib\features\profile\presentation\screens\profile_screen.dart:334:25 - undefined_class
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:338:16 - undefined_identifier
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\profile\presentation\screens\profile_screen.dart:340:48 - deprecated_member_use
+  error - The name 'AdminDashboardScreen' isn't a class - lib\features\profile\presentation\screens\profile_screen.dart:363:49 - creation_with_non_type
+  error - Undefined name 'AppTheme' - lib\features\profile\presentation\screens\profile_screen.dart:449:26 - undefined_identifier
+  error - The name 'AuthProvider' isn't a type, so it can't be used as a type argument - lib\features\profile\presentation\screens\profile_screen.dart:470:31 - non_type_as_type_argument
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\profile\presentation\screens\profile_screen.dart:473:30 - use_build_context_synchronously
+  error - Target of URI doesn't exist: 'screens/splash_screen.dart' - lib\main.dart:5:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/onboarding_screen.dart' - lib\main.dart:6:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/home_screen.dart' - lib\main.dart:7:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/cart_screen.dart' - lib\main.dart:8:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/favorites_screen.dart' - lib\main.dart:9:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/profile_screen.dart' - lib\main.dart:10:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'providers/auth_provider.dart' - lib\main.dart:15:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/login_screen.dart' - lib\main.dart:17:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/register_screen.dart' - lib\main.dart:18:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: 'screens/forgot_password_screen.dart' - lib\main.dart:19:8 - uri_does_not_exist
+  error - The method 'AuthProvider' isn't defined for the type 'MyApp' - lib\main.dart:43:47 - undefined_method
+  error - The name 'SplashScreen' isn't a class - lib\main.dart:51:21 - creation_with_non_type
+  error - The name 'OnboardingScreen' isn't a class - lib\main.dart:53:45 - creation_with_non_type
+  error - The name 'LoginScreen' isn't a class - lib\main.dart:54:40 - creation_with_non_type
+  error - The name 'RegisterScreen' isn't a class - lib\main.dart:55:43 - creation_with_non_type
+  error - The name 'ForgotPasswordScreen' isn't a class - lib\main.dart:56:50 - creation_with_non_type
+  error - The name 'CartScreen' isn't a class - lib\main.dart:58:39 - creation_with_non_type
+  error - The name 'FavoritesScreen' isn't a class - lib\main.dart:59:44 - creation_with_non_type
+  error - The name 'ProfileScreen' isn't a class - lib\main.dart:60:42 - creation_with_non_type
+  error - The name 'HomeScreen' isn't a class - lib\main.dart:78:11 - creation_with_non_type
+  error - The name 'CartScreen' isn't a class - lib\main.dart:79:11 - creation_with_non_type
+  error - The name 'FavoritesScreen' isn't a class - lib\main.dart:80:11 - creation_with_non_type
+  error - The name 'ProfileScreen' isn't a class - lib\main.dart:81:11 - creation_with_non_type
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\providers\cart_provider.dart:2:8 - uri_does_not_exist
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\providers\cart_provider.dart:12:36 - cast_to_non_type
+  error - Undefined class 'ProductEntity' - lib\providers\cart_provider.dart:25:18 - undefined_class
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\providers\cart_provider.dart:27:37 - cast_to_non_type
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\providers\cart_provider.dart:43:37 - cast_to_non_type
+  error - The name 'ProductEntity' isn't a type, so it can't be used in an 'as' expression - lib\providers\cart_provider.dart:50:37 - cast_to_non_type
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\providers\favorites_provider.dart:2:8 - uri_does_not_exist
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\providers\favorites_provider.dart:5:14 - non_type_as_type_argument
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\providers\favorites_provider.dart:7:8 - non_type_as_type_argument
+  error - The property 'id' can't be unconditionally accessed because the receiver can be 'null' - lib\providers\favorites_provider.dart:10:52 - unchecked_use_of_nullable_value
+  error - Undefined class 'ProductEntity' - lib\providers\favorites_provider.dart:13:23 - undefined_class
+  error - The property 'id' can't be unconditionally accessed because the receiver can be 'null' - lib\providers\favorites_provider.dart:15:22 - unchecked_use_of_nullable_value
+  error - Undefined class 'ProductEntity' - lib\providers\favorites_provider.dart:26:23 - undefined_class
+  error - The property 'id' can't be unconditionally accessed because the receiver can be 'null' - lib\providers\favorites_provider.dart:34:53 - unchecked_use_of_nullable_value
+  error - Target of URI doesn't exist: '../features/products/domain/entities/product_entity.dart' - lib\services\api_service.dart:2:8 - uri_does_not_exist
+  error - Target of URI doesn't exist: '../features/products/data/models/product_model.dart' - lib\services\api_service.dart:3:8 - uri_does_not_exist
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\services\api_service.dart:8:22 - non_type_as_type_argument
+  error - Undefined name 'ProductModel' - lib\services\api_service.dart:12:33 - undefined_identifier
+   info - Don't invoke 'print' in production code - lib\services\api_service.dart:14:7 - avoid_print
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\services\api_service.dart:20:22 - non_type_as_type_argument
+  error - Undefined name 'ProductModel' - lib\services\api_service.dart:24:33 - undefined_identifier
+   info - Don't invoke 'print' in production code - lib\services\api_service.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\api_service.dart:67:7 - avoid_print
+  error - The name 'ProductEntity' isn't a type, so it can't be used as a type argument - lib\services\api_service.dart:72:15 - non_type_as_type_argument
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:74:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:83:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:92:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:101:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:110:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:119:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:128:7 - undefined_method
+  error - The method 'ProductModel' isn't defined for the type 'ApiService' - lib\services\api_service.dart:137:7 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\theme\app_theme.dart:139:27 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\theme\app_theme.dart:142:29 - deprecated_member_use
+
