@@ -33,6 +33,10 @@ class AuthProvider extends ChangeNotifier {
       await _supabase.auth.signInWithPassword(email: email, password: password);
       // Fetch the role immediately so isAdmin is available before navigation
       await refreshRole();
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('An error occurred during sign in.');
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -43,11 +47,19 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      await _supabase.auth.signUp(
+      final response = await _supabase.auth.signUp(
         email: email,
         password: password,
         data: fullName != null ? {'full_name': fullName} : null,
       );
+      if (response.session != null) {
+        _user = response.session?.user;
+        await refreshRole();
+      }
+    } on AuthException catch (e) {
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('An error occurred during registration.');
     } finally {
       _isLoading = false;
       notifyListeners();

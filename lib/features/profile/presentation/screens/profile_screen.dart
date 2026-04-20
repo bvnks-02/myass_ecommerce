@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../admin/presentation/screens/admin_dashboard_screen.dart';
@@ -17,22 +18,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthProvider>(context, listen: false).refreshRole();
+      _initData();
     });
   }
 
-  void _updateControllers(AuthProvider authProvider) {
+  void _initData() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.user != null) {
-      final name = authProvider.user!.userMetadata?['full_name'] ?? 'No Name';
-      final email = authProvider.user!.email ?? 'No Email';
+      _nameController.text = authProvider.user!.userMetadata?['full_name'] ?? '';
+      _emailController.text = authProvider.user!.email ?? '';
+      _phoneController.text = authProvider.user!.userMetadata?['phone'] ?? '';
+    }
+  }
 
-      if (_nameController.text != name) _nameController.text = name;
-      if (_emailController.text != email) _emailController.text = email;
+  Future<void> _updateProfile() async {
+    setState(() => _isSaving = true);
+    try {
+      final supabase = Supabase.instance.client;
+      await supabase.auth.updateUser(
+        UserAttributes(
+          data: {
+            'full_name': _nameController.text,
+            'phone': _phoneController.text,
+          },
+        ),
+      );
+      if (mounted) {
+        Provider.of<AuthProvider>(context, listen: false).refreshRole();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile updated successfully!')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
+      }
     }
   }
 
@@ -40,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, _) {
-        _updateControllers(authProvider);
 
         return Scaffold(
           backgroundColor: AppTheme.blackColor,
@@ -130,38 +163,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Column(
-              children: [
-                Text(
-                  'DEBUG INFO:',
-                  style: TextStyle(
-                      color: Colors.red[300],
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'UID: ${authProvider.user?.id ?? "None"}',
-                  style: const TextStyle(color: Colors.white54, fontSize: 9),
-                ),
-                Text(
-                  'DB Role: "${authProvider.userRole ?? "null"}"',
-                  style: const TextStyle(color: Colors.white54, fontSize: 9),
-                ),
-                Text(
-                  'DB Status: ${authProvider.isAuthenticated ? "Connected" : "Not connected"}',
-                  style: const TextStyle(color: Colors.white54, fontSize: 9),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -189,18 +190,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
           const SizedBox(height: 20),
           _buildInfoField(Icons.person, 'Full Name', _nameController),
           const SizedBox(height: 15),
-          _buildInfoField(Icons.email, 'E-mail', _emailController),
+          _buildInfoField(Icons.email, 'E-mail', _emailController, readOnly: true),
           const SizedBox(height: 15),
           _buildInfoField(Icons.phone, 'Phone', _phoneController),
+          const SizedBox(height: 25),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: _isSaving ? null : _updateProfile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              child: _isSaving
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                          color: Colors.black, strokeWidth: 2),
+                    )
+                  : const Text(
+                      'Update Profile',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _buildInfoField(
-      IconData icon, String label, TextEditingController controller) {
+      IconData icon, String label, TextEditingController controller,
+      {bool readOnly = false}) {
     return TextField(
       controller: controller,
+      readOnly: readOnly,
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.white),
         labelText: label,
@@ -477,7 +509,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Provider.of<AuthProvider>(context, listen: false);
               await authProvider.signOut();
               if (mounted) {
-                Navigator.of(context).pushReplacementNamed('/login');
+                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
               }
             },
             child: const Text(

@@ -42,14 +42,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content: Text(
-                  'Registration successful. You can now log in.')),
+                  'Registration successful.')),
         );
-        Navigator.pop(context);
+        if (authProvider.isAuthenticated) {
+          if (authProvider.isAdmin) {
+             Navigator.pushReplacementNamed(context, '/admin');
+          } else {
+             Navigator.pushReplacementNamed(context, '/home');
+          }
+        } else {
+          Navigator.pop(context);
+        }
       }
     } catch (e) {
       if (mounted) {
+        final message = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+          SnackBar(content: Text(message)),
         );
       }
     } finally {
