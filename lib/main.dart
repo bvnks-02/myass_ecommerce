@@ -148,9 +148,14 @@ class _MainScreenState extends State<MainScreen> {
                     child: BottomNavigationBar(
                       currentIndex: _currentIndex,
                       onTap: (index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
+                        if (index == 2) {
+                          // Watch icon - navigate to watch detail screen
+                          Navigator.pushNamed(context, '/watch_details');
+                        } else {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        }
                       },
                       backgroundColor: Colors.transparent,
                       elevation: 0,
