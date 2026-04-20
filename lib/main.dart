@@ -116,7 +116,7 @@ class _MainScreenState extends State<MainScreen> {
                   height: 65,
                   margin: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E).withValues(alpha: 0.85),
+                    color: const Color(0xFF1C1C1E).withValues(alpha: 0.90),
                     borderRadius: BorderRadius.circular(35),
                     border: Border.all(
                       color: Colors.white.withValues(alpha: 0.1),
