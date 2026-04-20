@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use, sized_box_for_whitespace, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../theme/app_theme.dart';

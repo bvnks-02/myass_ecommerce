@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unused_import
+// ignore_for_file: deprecated_member_use, unused_import, unused_field, prefer_final_fields
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,11 +27,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final PageController _pageController = PageController();
 
   // ── Palette
-  static const _bg      = Color(0xFF111111);
-  static const _surface = Color(0xFF1A1A1A);
-  static const _card    = Color(0xFF222222);
-  static const _divider = Color(0xFF222222);
-  static const _accent  = Color(0xFFFF6B00);
+  static const _bg      = Color(0xFF000000);
+  static const _surface = Color(0xFF151515);
+  static const _card    = Color(0xFF1C1C1E);
+  static const _divider = Color(0xFF1C1C1E);
+  static const _accent  = Color(0xFFFFFFFF);
 
   List<Color> get _colorValues {
     return widget.product.colors.map((colorName) {
