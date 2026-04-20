@@ -19,6 +19,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   bool _isSaving = false;
+  List<Map<String, dynamic>> _orders = [];
+  bool _isLoadingOrders = false;
 
   @override
   void initState() {
@@ -26,7 +28,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<AuthProvider>(context, listen: false).refreshRole();
       _initData();
+      _fetchOrderHistory();
     });
+  }
+
+  Future<void> _fetchOrderHistory() async {
+    setState(() => _isLoadingOrders = true);
+    try {
+      final supabase = Supabase.instance.client;
+      final user = supabase.auth.currentUser;
+      if (user == null) return;
+
+      final response = await supabase
+          .from('orders')
+          .select('*, order_items(*, products(name))')
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
+
+      if (mounted) {
+        setState(() {
+          _orders = List<Map<String, dynamic>>.from(response);
+          _isLoadingOrders = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoadingOrders = false);
+      }
+    }
   }
 
   void _initData() {
@@ -68,6 +97,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() => _isSaving = false);
       }
     }
+  }
+
+  Future<void> _refreshOrders() async {
+    await _fetchOrderHistory();
   }
 
   @override
@@ -261,38 +294,78 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order History',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Order History',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              if (!_isLoadingOrders)
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: Colors.white70, size: 20),
+                  onPressed: _refreshOrders,
+                ),
+            ],
           ),
           const SizedBox(height: 15),
-          _buildOrderItem(
-            'Order #1234',
-            'Sony WH-1000XM4',
-            '\$349.99',
-            'Delivered',
-            Colors.green,
-          ),
-          const SizedBox(height: 10),
-          _buildOrderItem(
-            'Order #1233',
-            'Bose QuietComfort 45',
-            '\$329.00',
-            'Confirmed',
-            Colors.white,
-          ),
-          const SizedBox(height: 10),
-          _buildOrderItem(
-            'Order #1232',
-            'Apple AirPods Pro',
-            '\$249.00',
-            'Pending',
-            Colors.orange,
-          ),
+          if (_isLoadingOrders)
+            const Center(
+              child: CircularProgressIndicator(color: Colors.white),
+            )
+          else if (_orders.isEmpty)
+            Center(
+              child: Column(
+                children: [
+                  Icon(Icons.receipt_long, color: Colors.grey[600], size: 50),
+                  const SizedBox(height: 10),
+                  Text(
+                    'No orders yet',
+                    style: TextStyle(color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            )
+          else
+            ..._orders.map((order) {
+              final orderId = '#${order['id']}';
+              final status = order['status'] ?? 'Pending';
+              final total = order['total_amount']?.toString() ?? '0';
+              final orderItems = order['order_items'] as List<dynamic>? ?? [];
+              final productName = orderItems.isNotEmpty
+                  ? (orderItems[0]['products']?['name'] as String?) ?? 'Product'
+                  : 'Product';
+
+              Color statusColor;
+              switch (status.toLowerCase()) {
+                case 'delivered':
+                  statusColor = Colors.green;
+                  break;
+                case 'confirmed':
+                  statusColor = Colors.white;
+                  break;
+                case 'cancelled':
+                  statusColor = Colors.red;
+                  break;
+                default:
+                  statusColor = Colors.orange;
+              }
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _buildOrderItem(
+                  'Order $orderId',
+                  productName,
+                  '$total DA',
+                  status,
+                  statusColor,
+                ),
+              );
+            }).toList(),
         ],
       ),
     );

@@ -30,40 +30,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   void initState() {
     super.initState();
     _fetchProducts();
-    // Debug: Check all products and their references
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _debugCheckAllProducts();
-    });
-  }
-
-  Future<void> _debugCheckAllProducts() async {
-    try {
-      debugPrint('=== DEBUG: Checking all products and their order references ===');
-      
-      // Get all products
-      final products = await _supabase.from('products').select('id, name');
-      
-      for (final product in products) {
-        final productId = product['id'];
-        final productName = product['name'];
-        
-        // Check order references for each product
-        final orderRefs = await _supabase
-            .from('order_items')
-            .select('order_id')
-            .eq('product_id', productId);
-        
-        debugPrint('Product: $productName (ID: $productId) - References: ${orderRefs.length}');
-        
-        if (orderRefs.isNotEmpty) {
-          debugPrint('  -> Referenced in orders: ${orderRefs.map((r) => r['order_id']).toList()}');
-        }
-      }
-      
-      debugPrint('=== DEBUG: End of product analysis ===');
-    } catch (e) {
-      debugPrint('Error in debug check: $e');
-    }
   }
 
   Future<void> _fetchProducts() async {
@@ -92,35 +58,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
   Future<void> _deleteProduct(int id) async {
     try {
-      debugPrint('=== Attempting to delete product ID: $id ===');
-      
-      // Try to use the safe_delete_product function first
-      try {
-        final result = await _supabase.rpc('safe_delete_product', params: {'product_id': id});
-        debugPrint('RPC function result: $result');
-        if (result == true) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Produit supprimé avec succès'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            _fetchProducts(); // Refresh list
-          }
-          return;
-        }
-      } catch (rpcError) {
-        // RPC function not available, fall back to manual handling
-        debugPrint('RPC function not available, using manual deletion: $rpcError');
-      }
-
-      // Always perform force delete directly without checking references
-      debugPrint('Performing force delete for product $id');
       await _forceDeleteProductDirectly(id);
-      
     } catch (e) {
-      debugPrint('Error during deletion of product $id: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -134,26 +73,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
   Future<void> _forceDeleteProductDirectly(int id) async {
     try {
-      debugPrint('Starting force delete for product $id');
-      
-      // First, try to delete all order_items references
-      debugPrint('Deleting order items for product $id');
-      final orderItemsDelete = await _supabase
-          .from('order_items')
-          .delete()
-          .eq('product_id', id);
-      
-      debugPrint('Order items deleted: $orderItemsDelete');
-      
-      // Then delete the product
-      debugPrint('Deleting product $id');
-      final productDelete = await _supabase
-          .from('products')
-          .delete()
-          .eq('id', id);
-      
-      debugPrint('Product deleted: $productDelete');
-      
+      await _supabase.from('order_items').delete().eq('product_id', id);
+      await _supabase.from('products').delete().eq('id', id);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -164,46 +86,13 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         _fetchProducts();
       }
     } catch (e) {
-      debugPrint('Error in force delete: $e');
-      
-      // If it's still a foreign key error, try a different approach
-      if (e.toString().contains('order_items_product_id_fkey')) {
-        debugPrint('Foreign key constraint still active, trying alternative approach');
-        
-        try {
-          // Try using raw SQL or different approach
-          await _supabase.rpc('force_delete_product_with_dependencies', params: {'product_id': id});
-          
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Produit supprimé avec succès'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            _fetchProducts();
-          }
-        } catch (rpcError) {
-          debugPrint('RPC approach failed: $rpcError');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Failed to delete. Please contact system administrator.'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        }
-      } else {
-        // Other type of error
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Failed to delete: $e'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to delete: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }

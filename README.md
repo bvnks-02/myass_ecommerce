@@ -1,6 +1,6 @@
 # MYASS E-commerce Mobile App
 
-A complete e-commerce mobile app for MYASS Smart Watches store with Flutter frontend, PHP backend, and MySQL database.
+A complete e-commerce mobile app for MYASS Smart Watches store with Flutter frontend and Supabase backend.
 
 ## Features
 
@@ -9,33 +9,33 @@ A complete e-commerce mobile app for MYASS Smart Watches store with Flutter fron
 - **Shopping Cart**: Add to cart functionality with quantity management
 - **Favorites**: Save favorite products
 - **User Profile**: Manage account and view order history
-- **Order Management**: Complete order flow with WhatsApp notifications
+- **Order Management**: Complete order flow
 - **Search**: Product search functionality
 - **Categories**: Filter by product categories (Sport, Luxury, Fitness)
+- **Admin Dashboard**: Manage products and orders
 
 ## Tech Stack
 
 ### Frontend (Flutter)
 - Flutter 3.0+
 - Provider for state management
-- HTTP for API calls
+- Supabase Flutter SDK for authentication and database
 - Cached Network Images for image loading
 - Carousel Slider for product galleries
 - Shimmer for loading animations
-- Shared Preferences for local storage
 
-### Backend (PHP)
-- PHP 8.0+ with PDO
-- MySQL database
-- RESTful API endpoints
-- WhatsApp notifications integration
-- CORS enabled for cross-origin requests
+### Backend (Supabase)
+- Supabase Authentication (Email/Password, Google, Facebook OAuth)
+- PostgreSQL Database
+- Row Level Security (RLS) policies
+- Real-time subscriptions
+- Storage for product images
 
-### Database (MySQL)
-- Users table for customer management
-- Products table with categories
-- Orders and order items for order tracking
-- Cart table for temporary storage
+### Database Schema (Supabase)
+- `user_profiles` - User profiles with roles (customer/admin)
+- `products` - Products with categories and featured flags
+- `orders` - Order management
+- `order_items` - Order items with price tracking
 
 ## Project Structure
 
@@ -43,40 +43,35 @@ A complete e-commerce mobile app for MYASS Smart Watches store with Flutter fron
 myass_ecommerce/
 ├── lib/
 │   ├── main.dart
-│   ├── theme/
-│   │   └── app_theme.dart
-│   ├── screens/
-│   │   ├── splash_screen.dart
-│   │   ├── home_screen.dart
-│   │   ├── product_details_screen.dart
-│   │   ├── cart_screen.dart
-│   │   ├── favorites_screen.dart
-│   │   └── profile_screen.dart
+│   ├── core/
+│   │   ├── error/
+│   │   ├── services/
+│   │   ├── usecases/
+│   │   └── utils/
+│   ├── features/
+│   │   ├── auth/
+│   │   ├── products/
+│   │   ├── cart/
+│   │   ├── favorites/
+│   │   ├── profile/
+│   │   ├── admin/
+│   │   └── onboarding/
 │   ├── providers/
-│   │   ├── cart_provider.dart
-│   │   └── favorites_provider.dart
-│   ├── models/
-│   │   └── product.dart
-│   └── services/
-│       └── api_service.dart
-├── backend/
-│   ├── config.php
-│   ├── database.sql
-│   ├── products.php
-│   ├── featured_products.php
-│   └── create_order.php
-└── assets/
-    ├── images/
-    └── icons/
+│   ├── services/
+│   └── theme/
+├── assets/
+│   ├── images/
+│   ├── icons/
+│   └── lottie/
+├── supabase_schema.sql
+└── pubspec.yaml
 ```
 
 ## Installation
 
 ### Prerequisites
 - Flutter SDK 3.0+
-- PHP 8.0+
-- MySQL 8.0+
-- Web server (Apache/Nginx)
+- Supabase account (free tier works)
 
 ### Frontend Setup
 
@@ -91,79 +86,36 @@ cd myass_ecommerce
 flutter pub get
 ```
 
-3. Run the app
+3. Configure Supabase
+- Create a new project in [Supabase](https://supabase.com)
+- Run the SQL from `supabase_schema.sql` in your Supabase SQL Editor
+- Copy your Supabase URL and anon key
+- Create a `.env` file in the project root:
+```
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+4. Run the app
 ```bash
 flutter run
 ```
 
-### Backend Setup
+## Supabase Setup
 
-1. Set up the database
-```bash
-mysql -u root -p < backend/database.sql
-```
+### Database Tables
+Run the SQL script `supabase_schema.sql` in your Supabase SQL Editor to create:
+- `user_profiles` table with RLS policies
+- `products` table with RLS policies
+- `orders` table with RLS policies
+- `order_items` table with RLS policies
+- Triggers for new user registration
+- Helper functions for admin role checking
 
-2. Configure Database and Secrets
-For security reasons, do not hardcode your credentials in `config.php`. Instead, create a new file named `env.php` (make sure it's added to `.gitignore`) in the `backend/` folder:
-
-```php
-<?php
-// backend/env.php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'myass_ecommerce');
-define('DB_USER', 'your_username');
-define('DB_PASS', 'your_password');
-define('WHATSAPP_API_KEY', 'your_api_key_here');
-define('WHATSAPP_PHONE', '1234567890');
-?>
-```
-
-Then update `backend/config.php` to use these constants.
-
-3. Configure App Authentication
-The API requires an authentication token to create orders. 
-You must generate users with an `api_token` in the database. A sample user is already provided with the token: `test_api_token_12345`.
-
-4. Deploy the backend
-Place the `backend/` folder on your web server with PHP support and ensure you configure your domain in the `$allowed_origin` CORS variable inside `config.php`.
-
-## API Endpoints
-
-### GET /products.php
-Returns all products with category information.
-
-### GET /featured_products.php
-Returns featured products (first 3 products).
-
-### POST /create_order.php
-Creates a new order with the following JSON payload:
-
-```json
-{
-  "user_id": 1,
-  "total": 349.99,
-  "phone": "+1234567890",
-  "address": "123 Main St, City, Country",
-  "items": [
-    {
-      "product_id": 1,
-      "quantity": 1,
-      "price": 349.99
-    }
-  ]
-}
-```
-
-## WhatsApp Notifications
-
-The app automatically sends WhatsApp notifications for new orders containing:
-- Order ID
-- Customer information
-- Order total
-- Order status
-- List of ordered items
-
-**Note**: You need to integrate with a WhatsApp API service (Twilio, WhatsApp Business API, etc.) and update the `sendOrderNotification()` method in `config.php`.
+### Storage Setup
+Create a storage bucket named `product-images` in Supabase:
+- Make it public
+- Configure appropriate RLS policies for upload/download
 
 ## Theme Configuration
 
@@ -176,7 +128,7 @@ The app uses a Dark Luxe theme with:
 
 ## Sample Data
 
-The database includes sample products:
+The Supabase schema includes sample products:
 - Apple Watch Series 9
 - Samsung Galaxy Watch 6
 - Garmin Fenix 7
@@ -187,15 +139,23 @@ The database includes sample products:
 ## Development
 
 ### Adding New Products
-1. Add products to the database via SQL or admin panel
-2. Product images should be accessible via URL
-3. Assign appropriate categories
+1. Use the Admin Dashboard (requires admin role)
+2. Or add directly via Supabase dashboard
+3. Upload product images to Supabase Storage
+
+### Setting Admin Role
+To make a user an admin, update their role in Supabase:
+```sql
+UPDATE public.user_profiles 
+SET role = 'admin' 
+WHERE email = 'user@example.com';
+```
 
 ### Customizing Theme
 Edit `lib/theme/app_theme.dart` to modify colors and styles.
 
 ### Adding New Features
-1. Create new screens in `lib/screens/`
+1. Create new screens in `lib/features/`
 2. Add providers for state management if needed
 3. Update navigation in `main.dart`
 
@@ -208,20 +168,19 @@ flutter build apk --release
 flutter build appbundle --release
 ```
 
-### Backend
-1. Configure HTTPS
-2. Set up proper error handling
-3. Implement authentication/authorization
-4. Optimize database with proper indexes
+### Supabase
+1. Enable proper RLS policies for production
+2. Set up authentication providers (Google, Facebook)
+3. Configure storage buckets with proper policies
+4. Enable database backups
 
 ## Security Considerations
 
-- Implement user authentication
-- Add input validation and sanitization
-- Use prepared statements (already implemented)
-- Enable HTTPS in production
-- Implement rate limiting for API endpoints
-- Add CSRF protection
+- Row Level Security (RLS) is enabled on all tables
+- Authentication required for sensitive operations
+- Admin-only operations protected by role checks
+- Environment variables for sensitive data (.env file)
+- Never commit .env file to version control
 
 ## Contributing
 
@@ -243,3 +202,10 @@ For support and questions, please contact the development team or create an issu
 
 **MYASS** - Premium Smart Watches Store
 *Quality smart watches and fitness trackers*
+
+## Recent Changes
+
+- Removed PHP backend - now using Supabase exclusively
+- Fixed order history to fetch real data from Supabase
+- Removed debug code from admin screens
+- Updated documentation for Supabase-only architecture
