@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../providers/favorites_provider.dart';
+import '../../../../providers/cart_provider.dart';
 import '../../../../services/api_service.dart';
 
 class WatchDetailScreen extends StatefulWidget {
@@ -417,22 +418,36 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.primaryColor, width: 2),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.shopping_bag_outlined,
-              color: AppTheme.primaryColor,
-              size: 24,
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, '/cart'),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                border: Border.all(color: AppTheme.primaryColor, width: 2),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                color: AppTheme.primaryColor,
+                size: 24,
+              ),
             ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                final products = await ApiService.getProducts();
+                final product = products.firstWhere(
+                  (p) => p.id == 21,
+                  orElse: () => products.first,
+                );
+                if (mounted) {
+                  final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                  cartProvider.addToCart(product, 1, selectedColor: colors[selectedColorIndex]);
+                  Navigator.pushNamed(context, '/cart');
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,
                 foregroundColor: Colors.white,
