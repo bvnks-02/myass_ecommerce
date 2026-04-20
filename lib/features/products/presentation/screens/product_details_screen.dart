@@ -210,71 +210,50 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Carousel
-            SizedBox(
-              height: 180,
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) =>
-                    setState(() => _currentImageIndex = index),
-                itemCount: _productImages.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: CachedNetworkImage(
-                      imageUrl: _productImages[index],
-                      fit: BoxFit.contain,
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(
-                          color: _accent,
-                          strokeWidth: 2,
+            // Single large image
+            Container(
+              height: 400,
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: _surface,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: _productImages[0].startsWith('assets/')
+                    ? Image.asset(
+                        _productImages[0],
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => const Center(
+                          child: Icon(
+                            Icons.watch_rounded,
+                            color: _accent,
+                            size: 90,
+                          ),
                         ),
-                      ),
-                      errorWidget: (context, url, error) => const Center(
-                        child: Icon(
-                          Icons.watch_rounded,
-                          color: _accent,
-                          size: 90,
+                      )
+                    : CachedNetworkImage(
+                        imageUrl: _productImages[0],
+                        fit: BoxFit.contain,
+                        placeholder: (context, url) => const Center(
+                          child: CircularProgressIndicator(
+                            color: _accent,
+                            strokeWidth: 2,
+                          ),
                         ),
+                        errorWidget: (context, url, error) => const Center(
+                          child: Icon(
+                            Icons.watch_rounded,
+                            color: _accent,
+                            size: 90,
+                          ),
+                        ),
+                        memCacheWidth: 800,
+                        memCacheHeight: 800,
                       ),
-                      memCacheWidth: 600,
-                      memCacheHeight: 600,
-                    ),
-                  );
-                },
               ),
             ),
             const SizedBox(height: 16),
-            // Dots
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                _productImages.length < 4 ? 4 : _productImages.length,
-                (index) => GestureDetector(
-                  onTap: () {
-                    if (index < _productImages.length) {
-                      _pageController.animateToPage(
-                        index,
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    width: _currentImageIndex == index ? 20 : 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: _currentImageIndex == index
-                          ? _accent
-                          : const Color(0xFF444444),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

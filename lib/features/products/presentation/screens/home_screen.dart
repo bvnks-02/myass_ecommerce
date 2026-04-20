@@ -47,10 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
   List<ProductEntity> _filteredProducts(List<ProductEntity> products) {
     if (_selectedCategory == 'All') return products;
     if (_selectedCategory == 'New') {
-      return products.where((p) => p.id <= 5).toList();
+      return products.where((p) => p.category == 'New').toList();
     }
     if (_selectedCategory == 'Popular') {
-      return products.where((p) => p.id > 5).toList();
+      return products.where((p) => p.isFeatured).toList();
     }
     return products.where((p) => p.category == _selectedCategory).toList();
   }
@@ -388,20 +388,30 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned.fill(
                     child: Opacity(
                       opacity: 0.9,
-                      child: CachedNetworkImage(
-                        imageUrl: product.image,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
-                        ),
-                        errorWidget: (context, url, error) => const Icon(
-                          Icons.watch,
-                          color: Colors.white24,
-                          size: 50,
-                        ),
-                        memCacheWidth: 400,
-                        memCacheHeight: 400,
-                      ),
+                      child: product.image.startsWith('assets/')
+                          ? Image.asset(
+                              product.image,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.watch,
+                                color: Colors.white24,
+                                size: 50,
+                              ),
+                            )
+                          : CachedNetworkImage(
+                              imageUrl: product.image,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => const Center(
+                                child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
+                              ),
+                              errorWidget: (context, url, error) => const Icon(
+                                Icons.watch,
+                                color: Colors.white24,
+                                size: 50,
+                              ),
+                              memCacheWidth: 400,
+                              memCacheHeight: 400,
+                            ),
                     ),
                   ),
                   // Dark gradient overlay at the bottom for text readability
@@ -522,12 +532,34 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
       itemBuilder: (context, index) {
         final product = results[index];
         return ListTile(
-          leading: CachedNetworkImage(
-            imageUrl: product.image,
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
+          leading: product.image.startsWith('assets/')
+              ? Image.asset(
+                  product.image,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                )
+              : CachedNetworkImage(
+                  imageUrl: product.image,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                ),
           title: Text(
             product.name,
             style: const TextStyle(color: Colors.white),
@@ -555,12 +587,34 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
       itemBuilder: (context, index) {
         final product = suggestions[index];
         return ListTile(
-          leading: CachedNetworkImage(
-            imageUrl: product.image,
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-          ),
+          leading: product.image.startsWith('assets/')
+              ? Image.asset(
+                  product.image,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                )
+              : CachedNetworkImage(
+                  imageUrl: product.image,
+                  width: 50,
+                  height: 50,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                  errorWidget: (context, url, error) => const Icon(
+                    Icons.watch,
+                    color: Colors.white24,
+                    size: 50,
+                  ),
+                ),
           title: Text(
             product.name,
             style: const TextStyle(color: Colors.white),

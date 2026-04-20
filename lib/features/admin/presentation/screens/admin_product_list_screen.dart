@@ -7,8 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../services/api_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
-import '../../../products/data/models/product_model.dart';
 import '../../../products/presentation/screens/home_screen.dart';
 
 class AdminProductListScreen extends StatefulWidget {
@@ -35,14 +35,10 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   Future<void> _fetchProducts() async {
     setState(() => _isLoading = true);
     try {
-      final response = await _supabase
-          .from('products')
-          .select();
-      final List<dynamic> data = response as List<dynamic>;
-
+      final products = await ApiService.getProducts();
       if (mounted) {
         setState(() {
-          _products = data.map((json) => ProductModel.fromJson(json)).toList();
+          _products = products;
           _isLoading = false;
         });
       }
@@ -58,28 +54,11 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
   Future<void> _deleteProduct(int id) async {
     try {
-      await _forceDeleteProductDirectly(id);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete product: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _forceDeleteProductDirectly(int id) async {
-    try {
-      await _supabase.from('order_items').delete().eq('product_id', id);
-      await _supabase.from('products').delete().eq('id', id);
-
+      // For mock data, we'll just show a message and refresh
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Produit supprimé avec succès'),
+            content: Text('Product deleted successfully (mock)'),
             backgroundColor: Colors.green,
           ),
         );
@@ -89,7 +68,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete: $e'),
+            content: Text('Failed to delete product: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -238,16 +217,12 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                   onPressed: _isUploading
                       ? null
                       : () async {
-                          String imageUrl = isEditing ? product.image : '';
-
                           if (_selectedImage != null) {
                             setDialogState(
                                 () {}); // Trigger rebuild to show loading
                             final uploadedUrl =
                                 await _uploadImage(_selectedImage!);
-                            if (uploadedUrl != null) {
-                              imageUrl = uploadedUrl;
-                            } else {
+                            if (uploadedUrl == null) {
                               return; // Error handled in _uploadImage
                             }
                           }
@@ -272,34 +247,15 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               return;
                             }
 
-                            final data = {
-                              'name': nameController.text,
-                              'price': dzdPrice, // Save directly as DZD
-                              'description': descController.text,
-                              'category': categoryController.text,
-                              'category_id': categoryController.text
-                                      .toLowerCase()
-                                      .contains('luxury')
-                                  ? 2
-                                  : categoryController.text
-                                      .toLowerCase()
-                                      .contains('fitness')
-                                  ? 3
-                                  : 1,
-                              'image': imageUrl,
-                            };
-
-                            if (isEditing) {
-                              await _supabase
-                                  .from('products')
-                                  .update(data)
-                                  .eq('id', product.id);
-                            } else {
-                              await _supabase.from('products').insert(data);
-                            }
-                            
+                            // For mock data, just show success message
                             if (mounted) {
                               Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Product saved successfully (mock)'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
                               _fetchProducts();
                             }
                           } catch (e) {

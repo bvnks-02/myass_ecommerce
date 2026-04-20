@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/products/presentation/screens/home_screen.dart';
+import 'features/products/presentation/screens/watch_detail_screen.dart';
 import 'features/cart/presentation/screens/cart_screen.dart';
 import 'features/favorites/presentation/screens/favorites_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
@@ -134,10 +135,22 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.circular(35),
                     child: BottomNavigationBar(
                       currentIndex: _currentIndex,
-                      onTap: (index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
+                      onTap: (index) async {
+                        if (index == 2) {
+                          // Watch icon - navigate to watch detail screen
+                          if (mounted) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const WatchDetailScreen(),
+                              ),
+                            );
+                          }
+                        } else {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        }
                       },
                       backgroundColor: Colors.transparent,
                       elevation: 0,
