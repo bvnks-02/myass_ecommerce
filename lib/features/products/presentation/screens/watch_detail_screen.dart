@@ -16,11 +16,15 @@ class WatchDetailScreen extends StatefulWidget {
 
 class _WatchDetailScreenState extends State<WatchDetailScreen> {
   int selectedImageIndex = 0;
+  int selectedColorIndex = 0;
   
   final List<String> watchImages = [
     'assets/images/new.jpeg',
     'assets/images/new.jpeg',
   ];
+
+  final List<String> colors = ['Noir', 'Gris'];
+  final List<Color> colorValues = [Colors.black, Colors.grey];
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +235,50 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
                 ),
               ),
             ],
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            'Color',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(
+              colors.length,
+              (index) => GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedColorIndex = index;
+                  });
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(right: 12),
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: colorValues[index],
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: selectedColorIndex == index
+                          ? AppTheme.primaryColor
+                          : Colors.white.withOpacity(0.2),
+                      width: selectedColorIndex == index ? 3 : 1,
+                    ),
+                  ),
+                  child: selectedColorIndex == index
+                      ? const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 24,
+                        )
+                      : null,
+                ),
+              ),
+            ),
           ),
         ],
       ),
