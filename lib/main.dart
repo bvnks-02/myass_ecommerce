@@ -158,8 +158,8 @@ class _MainScreenState extends State<MainScreen> {
                           label: 'Favoris',
                         ),
                         BottomNavigationBarItem(
-                          icon: Icon(Icons.shopping_cart_outlined, size: 26),
-                          activeIcon: Icon(Icons.shopping_cart, size: 26),
+                          icon: Icon(Icons.watch_outlined, size: 26),
+                          activeIcon: Icon(Icons.watch, size: 26),
                           label: 'Panier',
                         ),
                         BottomNavigationBarItem(

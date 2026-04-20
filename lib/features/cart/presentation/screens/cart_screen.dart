@@ -53,7 +53,7 @@ class _CartScreenState extends State<CartScreen> {
                         final product = item['product'] as ProductEntity;
                         final quantity = item['quantity'] as int;
 
-                        return _buildCartItem(product, quantity, cart);
+                        return _buildCartItem(product, quantity, cart, item);
                       },
                     ),
                   ),
@@ -117,7 +117,10 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCartItem(
-      ProductEntity product, int quantity, CartProvider cart) {
+      ProductEntity product, int quantity, CartProvider cart, Map<String, dynamic> item) {
+    final selectedColor = item['selectedColor'] as String?;
+    final selectedSize = item['selectedSize'] as String?;
+    
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
@@ -166,7 +169,16 @@ class _CartScreenState extends State<CartScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 4),
+                if (selectedColor != null || selectedSize != null)
+                  Text(
+                    '${selectedColor != null ? 'Color: $selectedColor' : ''}${selectedColor != null && selectedSize != null ? ' • ' : ''}${selectedSize != null ? 'Size: $selectedSize' : ''}',
+                    style: TextStyle(
+                      color: Colors.grey[400],
+                      fontSize: 12,
+                    ),
+                  ),
+                const SizedBox(height: 4),
                 Text(
                   CurrencyService.formatPrice(product.price),
                   style: const TextStyle(
@@ -193,7 +205,12 @@ class _CartScreenState extends State<CartScreen> {
                           size: 18, color: Colors.white),
                       onPressed: quantity > 1
                           ? () {
-                              cart.updateQuantity(product.id, quantity - 1);
+                              cart.updateQuantity(
+                                product.id, 
+                                quantity - 1,
+                                selectedColor: selectedColor,
+                                selectedSize: selectedSize,
+                              );
                             }
                           : null,
                     ),
@@ -213,7 +230,12 @@ class _CartScreenState extends State<CartScreen> {
                       icon:
                           const Icon(Icons.add, size: 18, color: Colors.white),
                       onPressed: () {
-                        cart.updateQuantity(product.id, quantity + 1);
+                        cart.updateQuantity(
+                          product.id, 
+                          quantity + 1,
+                          selectedColor: selectedColor,
+                          selectedSize: selectedSize,
+                        );
                       },
                     ),
                   ],
@@ -224,7 +246,11 @@ class _CartScreenState extends State<CartScreen> {
                 icon: const Icon(Icons.delete_outline,
                     size: 20, color: Colors.red),
                 onPressed: () {
-                  cart.removeFromCart(product.id);
+                  cart.removeFromCart(
+                    product.id,
+                    selectedColor: selectedColor,
+                    selectedSize: selectedSize,
+                  );
                 },
               ),
             ],

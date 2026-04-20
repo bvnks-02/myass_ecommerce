@@ -19,6 +19,8 @@ class ProductsProvider extends ChangeNotifier {
   String? _error;
   int _retryCount = 0;
   static const int _maxRetries = 3;
+  DateTime? _lastFetchTime;
+  static const Duration _cacheDuration = Duration(minutes: 5);
 
   List<ProductEntity> get products => _products;
   List<ProductEntity> get featuredProducts => _featuredProducts;
@@ -26,9 +28,36 @@ class ProductsProvider extends ChangeNotifier {
   String? get error => _error;
   bool get hasError => _error != null;
   bool get hasProducts => _products.isNotEmpty;
+  bool get isCacheValid {
+    if (_lastFetchTime == null) return false;
+    return DateTime.now().difference(_lastFetchTime!) < _cacheDuration;
+  }
+
+  List<ProductEntity> filterByCategory(String category) {
+    if (category == 'All') return _products;
+    return _products.where((p) => p.category == category).toList();
+  }
+
+  List<ProductEntity> filterByBrand(String brand) {
+    return _products.where((p) => p.brand.toLowerCase() == brand.toLowerCase()).toList();
+  }
+
+  List<ProductEntity> searchProducts(String query) {
+    if (query.isEmpty) return _products;
+    final lowerQuery = query.toLowerCase();
+    return _products.where((p) =>
+      p.name.toLowerCase().contains(lowerQuery) ||
+      p.brand.toLowerCase().contains(lowerQuery) ||
+      p.model.toLowerCase().contains(lowerQuery) ||
+      p.description.toLowerCase().contains(lowerQuery)
+    ).toList();
+  }
 
   Future<void> fetchProducts({bool forceRefresh = false}) async {
-    if (!forceRefresh && _products.isNotEmpty) return;
+    if (!forceRefresh && isCacheValid && _products.isNotEmpty) {
+      debugPrint('Using cached products data');
+      return;
+    }
     
     _isLoading = true;
     _error = null;
@@ -45,7 +74,9 @@ class ProductsProvider extends ChangeNotifier {
         (products) {
           if (_validateProducts(products)) {
             _products = products;
+            _lastFetchTime = DateTime.now();
             _retryCount = 0;
+            debugPrint('Successfully fetched ${products.length} products');
           } else {
             _error = 'Invalid products data received';
             debugPrint('Products validation failed');
@@ -69,7 +100,10 @@ class ProductsProvider extends ChangeNotifier {
   }
 
   Future<void> fetchFeaturedProducts({bool forceRefresh = false}) async {
-    if (!forceRefresh && _featuredProducts.isNotEmpty) return;
+    if (!forceRefresh && isCacheValid && _featuredProducts.isNotEmpty) {
+      debugPrint('Using cached featured products data');
+      return;
+    }
     
     _isLoading = true;
     _error = null;
@@ -86,7 +120,9 @@ class ProductsProvider extends ChangeNotifier {
         (products) {
           if (_validateProducts(products)) {
             _featuredProducts = products;
+            _lastFetchTime = DateTime.now();
             _retryCount = 0;
+            debugPrint('Successfully fetched ${products.length} featured products');
           } else {
             _error = 'Invalid featured products data received';
             debugPrint('Featured products validation failed');
@@ -107,6 +143,13 @@ class ProductsProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> fetchAll({bool forceRefresh = false}) async {
+    await Future.wait([
+      fetchProducts(forceRefresh: forceRefresh),
+      fetchFeaturedProducts(forceRefresh: forceRefresh),
+    ]);
   }
 
   bool _validateProducts(List<ProductEntity> products) {
@@ -132,8 +175,8 @@ class ProductsProvider extends ChangeNotifier {
   }
 
   void refreshData() {
-    fetchProducts(forceRefresh: true);
-    fetchFeaturedProducts(forceRefresh: true);
+    _lastFetchTime = null;
+    fetchAll(forceRefresh: true);
   }
 
   void clearError() {

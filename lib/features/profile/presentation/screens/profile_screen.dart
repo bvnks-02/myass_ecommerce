@@ -26,7 +26,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<AuthProvider>(context, listen: false).refreshRole();
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      authProvider.refreshRole();
+      authProvider.clearError();
       _initData();
       _fetchOrderHistory();
     });
@@ -52,6 +54,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     } catch (e) {
+      debugPrint('Error fetching order history: $e');
       if (mounted) {
         setState(() => _isLoadingOrders = false);
       }
@@ -86,6 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     } catch (e) {
+      debugPrint('Error updating profile: $e');
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
@@ -365,7 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   statusColor,
                 ),
               );
-            }).toList(),
+            }),
         ],
       ),
     );
@@ -467,13 +471,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Icons.admin_panel_settings,
               'Admin Dashboard',
               'Manage products and orders',
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdminDashboardScreen(),
-                  ),
-                );
+              () async {
+                final isAdmin = await authProvider.checkIsAdmin();
+                if (isAdmin && mounted) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminDashboardScreen(),
+                    ),
+                  );
+                }
               },
             ),
           _buildSettingItem(

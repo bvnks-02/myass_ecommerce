@@ -21,7 +21,8 @@ class ProductDetailsScreen extends StatefulWidget {
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   int _quantity = 1;
   int _currentImageIndex = 0;
-  int _selectedColorIndex = 1;
+  int _selectedColorIndex = 0;
+  int _selectedSizeIndex = 0;
   int _selectedTabIndex = 0;
   final PageController _pageController = PageController();
 
@@ -32,17 +33,46 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   static const _divider = Color(0xFF222222);
   static const _accent  = Color(0xFFFF6B00);
 
-  final List<Color> _colors = const [
-    Color(0xFF8B0000),
-    Color(0xFF1A1A1A),
-    Color(0xFF1E3A8A),
-    Color(0xFF8B4513),
-    Color(0xFFD3D3D3),
-  ];
+  List<Color> get _colorValues {
+    return widget.product.colors.map((colorName) {
+      switch (colorName.toLowerCase()) {
+        case 'midnight':
+        case 'black':
+          return const Color(0xFF1A1A1A);
+        case 'starlight':
+        case 'silver':
+        case 'white':
+          return const Color(0xFFD3D3D3);
+        case 'red':
+          return const Color(0xFF8B0000);
+        case 'blue':
+        case 'slate blue':
+          return const Color(0xFF1E3A8A);
+        case 'brown':
+        case 'carbon gray':
+          return const Color(0xFF8B4513);
+        case 'gold':
+          return const Color(0xFFFFD700);
+        case 'rose gold':
+        case 'rose pink':
+          return const Color(0xFFB76E79);
+        case 'grey':
+        case 'gray':
+          return const Color(0xFF808080);
+        case 'waterfall blue':
+          return const Color(0xFF4682B4);
+        default:
+          return const Color(0xFF1A1A1A);
+      }
+    }).toList();
+  }
 
   final List<String> _tabs = const ['Description', 'Specifications', 'Reviews'];
 
   List<String> get _productImages {
+    if (widget.product.images.isNotEmpty) {
+      return widget.product.images;
+    }
     if (widget.product.image.isNotEmpty) {
       return [widget.product.image];
     }
@@ -73,7 +103,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     const SizedBox(height: 16),
                     _buildProductInfo(),
                     _buildDivider(),
-                    _buildColorSection(),
+                    if (widget.product.colors.isNotEmpty) _buildColorSection(),
+                    if (widget.product.sizes.isNotEmpty) _buildSizeSection(),
                     _buildDivider(),
                     _buildTabSection(),
                     const SizedBox(height: 24),
@@ -206,6 +237,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           size: 90,
                         ),
                       ),
+                      memCacheWidth: 600,
+                      memCacheHeight: 600,
                     ),
                   );
                 },
@@ -435,7 +468,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
               Text(
-                '${_colors.length} options',
+                '${widget.product.colors.length} options',
                 style: const TextStyle(
                     color: Color(0xFF555555), fontSize: 12),
               ),
@@ -443,7 +476,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
           const SizedBox(height: 12),
           Row(
-            children: List.generate(_colors.length, (index) {
+            children: List.generate(widget.product.colors.length, (index) {
               final isSelected = _selectedColorIndex == index;
               return GestureDetector(
                 onTap: () =>
@@ -454,7 +487,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   width: 30,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: _colors[index],
+                    color: _colorValues[index],
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: isSelected ? _accent : Colors.transparent,
@@ -469,6 +502,74 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             ),
                           ]
                         : [],
+                  ),
+                ),
+              );
+            }),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.product.colors[_selectedColorIndex],
+            style: const TextStyle(
+              color: Color(0xFF666666),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSizeSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Size',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                '${widget.product.sizes.length} options',
+                style: const TextStyle(
+                    color: Color(0xFF555555), fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: List.generate(widget.product.sizes.length, (index) {
+              final isSelected = _selectedSizeIndex == index;
+              return GestureDetector(
+                onTap: () =>
+                    setState(() => _selectedSizeIndex = index),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.only(right: 10),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? _accent : _surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isSelected ? _accent : const Color(0xFF333333),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Text(
+                    widget.product.sizes[index],
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : const Color(0xFF666666),
+                      fontSize: 13,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
                   ),
                 ),
               );
@@ -744,11 +845,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    cart.addToCart(widget.product, _quantity);
+                    final selectedColor = widget.product.colors.isNotEmpty 
+                        ? widget.product.colors[_selectedColorIndex] 
+                        : null;
+                    final selectedSize = widget.product.sizes.isNotEmpty 
+                        ? widget.product.sizes[_selectedSizeIndex] 
+                        : null;
+                    cart.addToCart(
+                      widget.product, 
+                      _quantity,
+                      selectedColor: selectedColor,
+                      selectedSize: selectedSize,
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          '$_quantity × ${widget.product.name} added to cart',
+                          '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
                         ),
                         backgroundColor: _accent,
                         duration: const Duration(seconds: 2),

@@ -41,14 +41,19 @@ class CartProvider extends ChangeNotifier {
   bool get isEmpty => _cartItems.isEmpty;
   bool get isNotEmpty => _cartItems.isNotEmpty;
 
-  bool addToCart(ProductEntity product, int quantity) {
+  bool addToCart(ProductEntity product, int quantity, {String? selectedColor, String? selectedSize}) {
     if (quantity <= 0) return false;
     
     try {
       final existingIndex = _cartItems.indexWhere(
         (item) {
           final itemProduct = item['product'];
-          return itemProduct is ProductEntity && itemProduct.id == product.id;
+          final itemColor = item['selectedColor'];
+          final itemSize = item['selectedSize'];
+          return itemProduct is ProductEntity && 
+                 itemProduct.id == product.id &&
+                 itemColor == selectedColor &&
+                 itemSize == selectedSize;
         },
       );
 
@@ -59,6 +64,8 @@ class CartProvider extends ChangeNotifier {
         _cartItems.add({
           'product': product,
           'quantity': quantity,
+          'selectedColor': selectedColor ?? (product.colors.isNotEmpty ? product.colors.first : null),
+          'selectedSize': selectedSize ?? (product.sizes.isNotEmpty ? product.sizes.first : null),
           'addedAt': DateTime.now().toIso8601String(),
         });
       }
@@ -70,13 +77,18 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  bool removeFromCart(int productId) {
+  bool removeFromCart(int productId, {String? selectedColor, String? selectedSize}) {
     try {
       final initialLength = _cartItems.length;
       _cartItems.removeWhere(
         (item) {
           final itemProduct = item['product'];
-          return itemProduct is ProductEntity && itemProduct.id == productId;
+          final itemColor = item['selectedColor'];
+          final itemSize = item['selectedSize'];
+          return itemProduct is ProductEntity && 
+                 itemProduct.id == productId &&
+                 itemColor == selectedColor &&
+                 itemSize == selectedSize;
         },
       );
       
@@ -91,14 +103,19 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  bool updateQuantity(int productId, int quantity) {
+  bool updateQuantity(int productId, int quantity, {String? selectedColor, String? selectedSize}) {
     if (quantity < 0) return false;
     
     try {
       final index = _cartItems.indexWhere(
         (item) {
           final itemProduct = item['product'];
-          return itemProduct is ProductEntity && itemProduct.id == productId;
+          final itemColor = item['selectedColor'];
+          final itemSize = item['selectedSize'];
+          return itemProduct is ProductEntity && 
+                 itemProduct.id == productId &&
+                 itemColor == selectedColor &&
+                 itemSize == selectedSize;
         },
       );
       
@@ -118,19 +135,29 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  bool isInCart(int productId) {
+  bool isInCart(int productId, {String? selectedColor, String? selectedSize}) {
     return _cartItems.any((item) {
       final itemProduct = item['product'];
-      return itemProduct is ProductEntity && itemProduct.id == productId;
+      final itemColor = item['selectedColor'];
+      final itemSize = item['selectedSize'];
+      return itemProduct is ProductEntity && 
+             itemProduct.id == productId &&
+             itemColor == selectedColor &&
+             itemSize == selectedSize;
     });
   }
 
-  int? getQuantity(int productId) {
+  int? getQuantity(int productId, {String? selectedColor, String? selectedSize}) {
     try {
       final item = _cartItems.firstWhere(
         (item) {
           final itemProduct = item['product'];
-          return itemProduct is ProductEntity && itemProduct.id == productId;
+          final itemColor = item['selectedColor'];
+          final itemSize = item['selectedSize'];
+          return itemProduct is ProductEntity && 
+                 itemProduct.id == productId &&
+                 itemColor == selectedColor &&
+                 itemSize == selectedSize;
         },
         orElse: () => <String, dynamic>{},
       );
@@ -156,6 +183,8 @@ class CartProvider extends ChangeNotifier {
         'product_id': (item['product'] as ProductEntity).id,
         'quantity': item['quantity'] as int,
         'price': (item['product'] as ProductEntity).price,
+        'selected_color': item['selectedColor'],
+        'selected_size': item['selectedSize'],
       }).toList(),
       'totalAmount': totalAmount,
       'itemCount': itemCount,

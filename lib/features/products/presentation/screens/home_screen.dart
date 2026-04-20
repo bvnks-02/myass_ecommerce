@@ -22,11 +22,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _categories = [
     'All',
-    'Sport',
     'Luxury',
+    'Sport',
+    'Classic',
     'Fitness',
     'New',
-    'Popular'
   ];
   String _selectedCategory = 'All';
 
@@ -141,7 +141,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'What are you looking for?',
+                        'Search luxury watches...',
                         style: TextStyle(
                           color: Colors.grey[500],
                           fontSize: 14,
@@ -361,6 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductCard(ProductEntity product) {
     return Consumer<FavoritesProvider>(
       builder: (context, favorites, child) {
+        final isFavorite = favorites.isFavorite(product.id);
         return GestureDetector(
           onTap: () {
             Navigator.push(
@@ -391,14 +392,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         imageUrl: product.image,
                         fit: BoxFit.cover,
                         placeholder: (context, url) => const Center(
-                          child:
-                              CircularProgressIndicator(color: Colors.white24),
+                          child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
                         ),
                         errorWidget: (context, url, error) => const Icon(
-                          Icons.image,
+                          Icons.watch,
                           color: Colors.white24,
                           size: 50,
                         ),
+                        memCacheWidth: 400,
+                        memCacheHeight: 400,
                       ),
                     ),
                   ),
@@ -454,29 +456,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: Consumer<FavoritesProvider>(
-                      builder: (context, favorites, _) {
-                        final isFavorite = favorites.isFavorite(product.id);
-                        return GestureDetector(
-                          onTap: () {
-                            favorites.toggleFavorite(product);
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.5),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isFavorite ? Colors.white : Colors.white70,
-                              size: 18,
-                            ),
-                          ),
-                        );
+                    child: GestureDetector(
+                      onTap: () {
+                        favorites.toggleFavorite(product);
                       },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.white : Colors.white70,
+                          size: 18,
+                        ),
+                      ),
                     ),
                   ),
                 ],
