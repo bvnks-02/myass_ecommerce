@@ -146,23 +146,23 @@ class _MainScreenState extends State<MainScreen> {
                       unselectedItemColor: Colors.grey[600],
                       showSelectedLabels: false,
                       showUnselectedLabels: false,
-                      items: const [
-                        BottomNavigationBarItem(
+                      items: [
+                        const BottomNavigationBarItem(
                           icon: Icon(Icons.home_outlined, size: 26),
                           activeIcon: Icon(Icons.home, size: 26),
                           label: 'Accueil',
                         ),
-                        BottomNavigationBarItem(
+                        const BottomNavigationBarItem(
                           icon: Icon(Icons.favorite_outline, size: 26),
                           activeIcon: Icon(Icons.favorite, size: 26),
                           label: 'Favoris',
                         ),
                         BottomNavigationBarItem(
-                          icon: Icon(Icons.watch_outlined, size: 26),
-                          activeIcon: Icon(Icons.watch, size: 26),
+                          icon: Image.asset('assets/icons/watch.png', width: 26, height: 26),
+                          activeIcon: Image.asset('assets/icons/watch.png', width: 26, height: 26),
                           label: 'Panier',
                         ),
-                        BottomNavigationBarItem(
+                        const BottomNavigationBarItem(
                           icon: Icon(Icons.person_outline, size: 26),
                           activeIcon: Icon(Icons.person, size: 26),
                           label: 'Profil',
