@@ -8,7 +8,6 @@ import '../../../../core/services/currency_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
 import '../../../../providers/favorites_provider.dart';
 import '../../../../providers/cart_provider.dart';
-import '../../../products/presentation/screens/product_details_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -109,11 +108,10 @@ class FavoritesScreen extends StatelessWidget {
 
         return GestureDetector(
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailsScreen(product: product),
-              ),
+              '/product_details',
+              arguments: product,
             );
           },
           child: Container(

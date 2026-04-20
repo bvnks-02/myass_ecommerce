@@ -2,8 +2,6 @@
 
 import 'package:flutter/material.dart';
 import '../../../../theme/app_theme.dart';
-import 'admin_product_list_screen.dart';
-import 'admin_orders_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -30,11 +28,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 title: 'Manage Products',
                 icon: Icons.inventory_2_outlined,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdminProductListScreen()),
-                  );
+                  Navigator.pushNamed(context, '/admin/products');
                 },
               ),
               const SizedBox(height: 20),
@@ -43,11 +37,7 @@ class AdminDashboardScreen extends StatelessWidget {
                 title: 'Manage Orders',
                 icon: Icons.receipt_long_outlined,
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdminOrdersScreen()),
-                  );
+                  Navigator.pushNamed(context, '/admin/orders');
                 },
               ),
             ],

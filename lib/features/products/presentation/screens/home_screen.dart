@@ -10,7 +10,6 @@ import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/favorites_provider.dart';
-import 'product_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -364,11 +363,10 @@ class _HomeScreenState extends State<HomeScreen> {
         final isFavorite = favorites.isFavorite(product.id);
         return GestureDetector(
           onTap: () {
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => ProductDetailsScreen(product: product),
-              ),
+              '/product_details',
+              arguments: product,
             );
           },
           child: Container(

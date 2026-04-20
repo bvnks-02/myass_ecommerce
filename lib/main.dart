@@ -5,10 +5,14 @@ import 'package:provider/provider.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/products/presentation/screens/home_screen.dart';
+import 'features/products/presentation/screens/product_details_screen.dart';
 import 'features/products/presentation/screens/watch_detail_screen.dart';
+import 'features/products/domain/entities/product_entity.dart';
 import 'features/cart/presentation/screens/cart_screen.dart';
 import 'features/favorites/presentation/screens/favorites_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/admin/presentation/screens/admin_orders_screen.dart';
+import 'features/admin/presentation/screens/admin_product_list_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -69,9 +73,17 @@ class MyApp extends StatelessWidget {
           '/forgot_password': (context) => const ForgotPasswordScreen(),
           '/home': (context) => const MainScreen(),
           '/admin': (context) => const AdminDashboardScreen(),
+          '/admin/orders': (context) => const AdminOrdersScreen(),
+          '/admin/products': (context) => const AdminProductListScreen(),
           '/cart': (context) => const CartScreen(),
           '/favorites': (context) => const FavoritesScreen(),
           '/profile': (context) => const ProfileScreen(),
+          '/product_details': (context) {
+            final product = ModalRoute.of(context)?.settings.arguments as ProductEntity?;
+            if (product == null) return const SizedBox.shrink();
+            return ProductDetailsScreen(product: product);
+          },
+          '/watch_details': (context) => const WatchDetailScreen(),
         },
       ),
     );
@@ -135,22 +147,10 @@ class _MainScreenState extends State<MainScreen> {
                     borderRadius: BorderRadius.circular(35),
                     child: BottomNavigationBar(
                       currentIndex: _currentIndex,
-                      onTap: (index) async {
-                        if (index == 2) {
-                          // Watch icon - navigate to watch detail screen
-                          if (mounted) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const WatchDetailScreen(),
-                              ),
-                            );
-                          }
-                        } else {
-                          setState(() {
-                            _currentIndex = index;
-                          });
-                        }
+                      onTap: (index) {
+                        setState(() {
+                          _currentIndex = index;
+                        });
                       },
                       backgroundColor: Colors.transparent,
                       elevation: 0,

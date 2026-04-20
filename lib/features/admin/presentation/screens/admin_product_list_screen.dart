@@ -9,7 +9,6 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../services/api_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
-import '../../../products/presentation/screens/home_screen.dart';
 
 class AdminProductListScreen extends StatefulWidget {
   const AdminProductListScreen({super.key});
@@ -321,10 +320,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
+            Navigator.pushReplacementNamed(context, '/home');
           },
         ),
         elevation: 0,

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../providers/auth_provider.dart';
-import '../../../admin/presentation/screens/admin_dashboard_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -477,12 +476,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               () async {
                 final isAdmin = await authProvider.checkIsAdmin();
                 if (isAdmin && mounted) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const AdminDashboardScreen(),
-                    ),
-                  );
+                  Navigator.pushNamed(context, '/admin');
                 }
               },
             ),
