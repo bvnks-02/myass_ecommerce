@@ -17,7 +17,7 @@ enum Currency {
 
 class CurrencyService extends ChangeNotifier {
   static const List<Currency> _supportedCurrencies = Currency.values;
-  static Currency _currentCurrency = Currency.dzd; // Default to Algerian Dinar
+  static Currency _currentCurrency = Currency.usd; // Default to US Dollar
   
   static List<Currency> get supportedCurrencies => _supportedCurrencies;
   static Currency get currentCurrency => _currentCurrency;
