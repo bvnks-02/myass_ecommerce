@@ -116,7 +116,7 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
 
   Widget _buildImageSection() {
     return Container(
-      height: 400,
+      height: 500,
       child: Stack(
         children: [
           PageView.builder(
@@ -221,7 +221,7 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
                   children: [
                     Icon(
                       Icons.star,
-                      color: Colors.amber,
+                      color: Colors.yellow,
                       size: 16,
                     ),
                     SizedBox(width: 4),
