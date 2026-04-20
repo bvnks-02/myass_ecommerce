@@ -1,5 +1,29 @@
 import 'package:equatable/equatable.dart';
 
+class ReviewEntity {
+  final int stars;
+  final String text;
+  final String? userName;
+
+  const ReviewEntity({
+    required this.stars,
+    required this.text,
+    this.userName,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'stars': stars,
+        'text': text,
+        'userName': userName,
+      };
+
+  factory ReviewEntity.fromJson(Map<String, dynamic> json) => ReviewEntity(
+        stars: json['stars'] as int,
+        text: json['text'] as String,
+        userName: json['userName'] as String?,
+      );
+}
+
 class ProductEntity extends Equatable {
   final int id;
   final String name;
@@ -15,6 +39,9 @@ class ProductEntity extends Equatable {
   final int categoryId;
   final String category;
   final bool isFeatured;
+  final double rating;
+  final int reviewCount;
+  final List<ReviewEntity> reviews;
 
   const ProductEntity({
     required this.id,
@@ -31,6 +58,9 @@ class ProductEntity extends Equatable {
     required this.categoryId,
     required this.category,
     this.isFeatured = false,
+    this.rating = 4.8,
+    this.reviewCount = 320,
+    this.reviews = const [],
   });
 
   @override
@@ -49,5 +79,8 @@ class ProductEntity extends Equatable {
         categoryId,
         category,
         isFeatured,
+        rating,
+        reviewCount,
+        reviews,
       ];
 }

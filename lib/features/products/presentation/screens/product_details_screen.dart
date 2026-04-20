@@ -32,6 +32,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   static const _card    = Color(0xFF1C1C1E);
   static const _divider = Color(0xFF1C1C1E);
   static const _accent  = Color(0xFFFFFFFF);
+  static const _gold    = Color(0xFFFFD700);
 
   List<Color> get _colorValues {
     return widget.product.colors.map((colorName) {
@@ -203,7 +204,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: const Text(
                 'Best Seller',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -212,7 +213,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             const SizedBox(height: 12),
             // Single large image
             Container(
-              height: 400,
+              height: 500,
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: _surface,
@@ -331,12 +332,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   color: _accent.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.star_rounded, color: _accent, size: 14),
+                    Icon(Icons.star_rounded, color: _gold, size: 14),
                     SizedBox(width: 4),
                     Text(
-                      '4.8',
+                      widget.product.rating.toStringAsFixed(1),
                       style: TextStyle(
                         color: _accent,
                         fontWeight: FontWeight.w500,
@@ -347,8 +348,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text(
-                '320 Reviews',
+              Text(
+                '${widget.product.reviewCount} Reviews',
                 style: TextStyle(color: Color(0xFF555555), fontSize: 12),
               ),
               const Spacer(),
@@ -545,7 +546,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   child: Text(
                     widget.product.sizes[index],
                     style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF666666),
+                      color: isSelected ? Colors.black : const Color(0xFF666666),
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -596,7 +597,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isSelected
-                              ? Colors.white
+                              ? Colors.black
                               : const Color(0xFF555555),
                           fontWeight: isSelected
                               ? FontWeight.w500
@@ -687,7 +688,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       radius: 16,
                       backgroundColor: _accent,
                       child: Icon(Icons.person,
-                          color: Colors.white, size: 16),
+                          color: Colors.black, size: 16),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -696,14 +697,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         children: [
                           Row(
                             children: List.generate(
-                              review['stars'] as int,
-                              (_) => const Icon(Icons.star_rounded,
-                                  color: _accent, size: 13),
+                              review.stars,
+                              (_) => Icon(Icons.star_rounded,
+                                  color: _gold, size: 13),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            review['text'] as String,
+                            review.text,
                             style: const TextStyle(
                               color: Color(0xFF666666),
                               fontSize: 12.5,
@@ -733,11 +734,17 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     'Compatibility: iOS & Android',
   ];
 
-  static const List<Map<String, dynamic>> _reviewRows = [
-    {'stars': 5, 'text': 'Excellent health tracking! Really impressed.'},
-    {'stars': 4, 'text': 'Very comfortable, great battery life.'},
-    {'stars': 5, 'text': 'The best smart watch I\'ve ever had. Worth every penny!'},
-  ];
+  List<ReviewEntity> get _reviewRows {
+    if (widget.product.reviews.isNotEmpty) {
+      return widget.product.reviews;
+    }
+    // Fallback to default reviews if none provided
+    return const [
+      ReviewEntity(stars: 5, text: 'Excellent health tracking! Really impressed.'),
+      ReviewEntity(stars: 4, text: 'Very comfortable, great battery life.'),
+      ReviewEntity(stars: 5, text: 'The best smart watch I\'ve ever had. Worth every penny!'),
+    ];
+  }
 
   // ─────────────────────────────────────────────
   // BARRE DU BAS
@@ -802,7 +809,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         ),
                       ),
                     ),
-                    // Bouton plus — cercle orange
+                    // Bouton plus — cercle blanc
                     GestureDetector(
                       onTap: () => setState(() => _quantity++),
                       child: Container(
@@ -813,7 +820,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.add,
-                            size: 16, color: Colors.white),
+                            size: 16, color: Colors.black),
                       ),
                     ),
                   ],
