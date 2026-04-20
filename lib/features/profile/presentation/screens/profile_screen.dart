@@ -25,9 +25,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.refreshRole();
+      debugPrint('Profile screen: Forcing role refresh...');
+      await authProvider.refreshRole();
+      debugPrint('Profile screen: After refresh, isAdmin: ${authProvider.isAdmin}');
+      debugPrint('Profile screen: userRole: ${authProvider.userRole}');
       authProvider.clearError();
       _initData();
       _fetchOrderHistory();

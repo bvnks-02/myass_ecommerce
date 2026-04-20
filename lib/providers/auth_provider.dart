@@ -39,7 +39,12 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
+      debugPrint('=== SIGN IN START ===');
+      debugPrint('Email: $email');
       final response = await _supabase.auth.signInWithPassword(email: email, password: password);
+      
+      debugPrint('Sign in response user: ${response.user?.email}');
+      debugPrint('Sign in response session: ${response.session != null}');
       
       // Check if email is not confirmed
       if (response.user != null && response.session == null) {
@@ -50,8 +55,13 @@ class AuthProvider extends ChangeNotifier {
       }
       
       // Fetch the role immediately so isAdmin is available before navigation
+      debugPrint('Calling refreshRole after sign in...');
       await refreshRole();
+      debugPrint('After refreshRole, userRole: $_userRole');
+      debugPrint('After refreshRole, isAdmin: $isAdmin');
+      debugPrint('=== SIGN IN END ===');
     } on AuthException catch (e) {
+      debugPrint('AuthException: ${e.message}');
       if (e.message.contains('Email not confirmed')) {
         _errorMessage = 'Please confirm your email address. Check your inbox for the confirmation link.';
       } else if (e.message.contains('Invalid login credentials')) {
@@ -159,24 +169,56 @@ class AuthProvider extends ChangeNotifier {
   Future<void> refreshRole() async {
     if (_user == null) return;
     try {
+      debugPrint('Fetching role for user ID: ${_user!.id}');
+      debugPrint('User email: ${_user!.email}');
+      
       final response = await _supabase
           .from('user_profiles')
-          .select('role')
+          .select('role, email')
           .eq('id', _user!.id)
           .single()
           .timeout(
-            const Duration(seconds: 5),
+            const Duration(seconds: 10),
             onTimeout: () {
               debugPrint('Role fetch timeout, defaulting to customer');
-              return {'role': 'customer'};
+              return {'role': 'customer', 'email': _user!.email};
             },
           );
       
       _userRole = response['role'] ?? 'customer';
+      debugPrint('Fetched role: $_userRole');
+      debugPrint('Profile email: ${response['email']}');
       notifyListeners();
     } catch (e) {
       debugPrint('Error fetching user role: $e');
-      _userRole = 'customer'; // Default to customer on error
+      debugPrint('Trying fallback by email...');
+      
+      // Fallback: try to fetch by email
+      try {
+        if (_user!.email != null) {
+          final fallbackResponse = await _supabase
+              .from('user_profiles')
+              .select('role')
+              .eq('email', _user!.email!)
+              .single()
+              .timeout(
+                const Duration(seconds: 5),
+                onTimeout: () {
+                  debugPrint('Fallback role fetch timeout');
+                  return {'role': 'customer'};
+                },
+              );
+          
+          _userRole = fallbackResponse['role'] ?? 'customer';
+          debugPrint('Fallback fetched role: $_userRole');
+        } else {
+          debugPrint('User email is null, cannot use fallback');
+          _userRole = 'customer';
+        }
+      } catch (fallbackError) {
+        debugPrint('Fallback also failed: $fallbackError');
+        _userRole = 'customer'; // Default to customer on error
+      }
       notifyListeners();
     }
   }
