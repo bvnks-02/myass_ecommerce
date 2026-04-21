@@ -97,8 +97,10 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
+  late AnimationController _animationController;
+  late Animation<double> _scaleAnimation;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -106,6 +108,76 @@ class _MainScreenState extends State<MainScreen> {
     const WatchDetailScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  Widget _buildNavItem({
+    required IconData icon,
+    required IconData activeIcon,
+    required int index,
+    required String label,
+  }) {
+    final isSelected = _currentIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _onItemTapped(index),
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedScale(
+                scale: isSelected ? 1.1 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: Icon(
+                  isSelected ? activeIcon : icon,
+                  color: isSelected ? Colors.white : Colors.grey[600],
+                  size: 26,
+                ),
+              ),
+              if (isSelected) ...[
+                const SizedBox(height: 4),
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  width: 5,
+                  height: 5,
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -117,72 +189,156 @@ class _MainScreenState extends State<MainScreen> {
             child: _screens[_currentIndex],
           ),
 
-          // Floating Bottom Navigation Bar
+          // Floating Bottom Navigation Bar with curved design
           Positioned(
-            bottom: 25,
+            bottom: 35,
             left: 0,
             right: 0,
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 500),
-                child: Container(
-                  height: 65,
-                  margin: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1C1C1E).withValues(alpha: 0.90),
-                    borderRadius: BorderRadius.circular(35),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        blurRadius: 15,
-                        offset: const Offset(0, 5),
+                child: Stack(
+                  alignment: Alignment.center,
+                  clipBehavior: Clip.none,
+                  children: [
+                    // Navigation bar container with custom curve
+                    Container(
+                      height: 70,
+                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      child: CustomPaint(
+                        painter: CurvedBottomBarPainter(),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              // Home
+                              _buildNavItem(
+                                icon: Icons.home_outlined,
+                                activeIcon: Icons.home,
+                                index: 0,
+                                label: 'Accueil',
+                              ),
+                              // Favorites
+                              _buildNavItem(
+                                icon: Icons.favorite_outline,
+                                activeIcon: Icons.favorite,
+                                index: 1,
+                                label: 'Favoris',
+                              ),
+                              // Spacer for elevated cart button
+                              const SizedBox(width: 70),
+                              // Saved
+                              _buildNavItem(
+                                icon: Icons.watch_outlined,
+                                activeIcon: Icons.watch,
+                                index: 2,
+                                label: 'Watch',
+                              ),
+                              // Profile
+                              _buildNavItem(
+                                icon: Icons.person_outline,
+                                activeIcon: Icons.person,
+                                index: 3,
+                                label: 'Profil',
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(35),
-                    child: BottomNavigationBar(
-                      currentIndex: _currentIndex,
-                      onTap: (index) {
-                        setState(() {
-                          _currentIndex = index;
-                        });
-                      },
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      type: BottomNavigationBarType.fixed,
-                      selectedItemColor: Colors.white,
-                      unselectedItemColor: Colors.grey[600],
-                      showSelectedLabels: false,
-                      showUnselectedLabels: false,
-                      items: [
-                        const BottomNavigationBarItem(
-                          icon: Icon(Icons.home_outlined, size: 26),
-                          activeIcon: Icon(Icons.home, size: 26),
-                          label: 'Accueil',
-                        ),
-                        const BottomNavigationBarItem(
-                          icon: Icon(Icons.favorite_outline, size: 26),
-                          activeIcon: Icon(Icons.favorite, size: 26),
-                          label: 'Favoris',
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Image.asset('assets/icons/watch.png', width: 26, height: 26),
-                          activeIcon: Image.asset('assets/icons/watch.png', width: 26, height: 26),
-                          label: 'Panier',
-                        ),
-                        const BottomNavigationBarItem(
-                          icon: Icon(Icons.person_outline, size: 26),
-                          activeIcon: Icon(Icons.person, size: 26),
-                          label: 'Profil',
-                        ),
-                      ],
                     ),
-                  ),
+                    // Elevated cart button in center (always on top)
+                    Positioned(
+                      top: -35,
+                      child: ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: GestureDetector(
+                          onTap: () {
+                            _animationController.forward().then((_) {
+                              _animationController.reverse();
+                            });
+                            Navigator.pushNamed(context, '/cart');
+                          },
+                          child: Container(
+                            width: 70,
+                            height: 70,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  const Color(0xFF2C2C2E),
+                                  const Color(0xFF1C1C1E),
+                                ],
+                              ),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                width: 2,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.6),
+                                  blurRadius: 25,
+                                  offset: const Offset(0, 10),
+                                ),
+                                BoxShadow(
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, -5),
+                                ),
+                              ],
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.shopping_cart,
+                                  color: Colors.white,
+                                  size: 32,
+                                ),
+                                // Cart badge
+                                Positioned(
+                                  top: 8,
+                                  right: 8,
+                                  child: Consumer<CartProvider>(
+                                    builder: (context, cartProvider, child) {
+                                      if (cartProvider.itemCount == 0) {
+                                        return const SizedBox.shrink();
+                                      }
+                                      return Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          gradient: const LinearGradient(
+                                            colors: [Colors.red, Colors.redAccent],
+                                          ),
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.red.withValues(alpha: 0.5),
+                                              blurRadius: 8,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          '${cartProvider.itemCount}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -191,4 +347,80 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
+}
+
+// Custom painter for curved bottom navigation bar
+class CurvedBottomBarPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF1C1C1E).withValues(alpha: 0.95)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+    
+    // Start from bottom left
+    path.moveTo(0, 20);
+    
+    // Top left corner curve
+    path.quadraticBezierTo(0, 0, 20, 0);
+    
+    // Left side to the center curve
+    path.lineTo(size.width * 0.35, 0);
+    
+    // Create the elevated curve for the cart button
+    path.quadraticBezierTo(
+      size.width * 0.40, 0,
+      size.width * 0.42, 5,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.45, 15,
+      size.width * 0.50, 15,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.55, 15,
+      size.width * 0.58, 5,
+    );
+    path.quadraticBezierTo(
+      size.width * 0.60, 0,
+      size.width * 0.65, 0,
+    );
+    
+    // Right side
+    path.lineTo(size.width - 20, 0);
+    
+    // Top right corner curve
+    path.quadraticBezierTo(size.width, 0, size.width, 20);
+    
+    // Bottom right corner
+    path.lineTo(size.width, size.height - 20);
+    path.quadraticBezierTo(
+      size.width, size.height,
+      size.width - 20, size.height,
+    );
+    
+    // Bottom side
+    path.lineTo(20, size.height);
+    
+    // Bottom left corner
+    path.quadraticBezierTo(0, size.height, 0, size.height - 20);
+    
+    path.close();
+
+    // Draw shadow
+    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.5), 15, true);
+    
+    // Draw the bar
+    canvas.drawPath(path, paint);
+
+    // Draw border
+    final borderPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+    canvas.drawPath(path, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
