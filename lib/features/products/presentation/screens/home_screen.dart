@@ -154,39 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(width: 15),
-          // Cart Icon
-          Consumer<CartProvider>(
-            builder: (context, cart, child) {
-              return Stack(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/cart');
-                    },
-                  ),
-                  if (cart.itemCount > 0)
-                    Positioned(
-                      right: 4,
-                      top: 4,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '${cart.itemCount}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
+          // Customer Service Icon
+          IconButton(
+            icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+            onPressed: () {
+              Navigator.pushNamed(context, '/support');
             },
           ),
         ],

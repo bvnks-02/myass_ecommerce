@@ -13,6 +13,8 @@ import 'features/favorites/presentation/screens/favorites_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
 import 'features/admin/presentation/screens/admin_orders_screen.dart';
 import 'features/admin/presentation/screens/admin_product_list_screen.dart';
+import 'features/support/presentation/screens/support_screen.dart';
+import 'features/support/presentation/providers/support_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -54,6 +56,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => SupportProvider()),
         ChangeNotifierProvider(
           create: (_) => ProductsProvider(
             getProductsUseCase: GetProducts(productRepository),
@@ -77,6 +80,7 @@ class MyApp extends StatelessWidget {
           '/admin/products': (context) => const AdminProductListScreen(),
           '/cart': (context) => const CartScreen(),
           '/favorites': (context) => const FavoritesScreen(),
+          '/support': (context) => const SupportScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/product_details': (context) {
             final product = ModalRoute.of(context)?.settings.arguments as ProductEntity?;
