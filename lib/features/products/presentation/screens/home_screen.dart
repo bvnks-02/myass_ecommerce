@@ -435,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Positioned(
                     bottom: 12,
                     left: 12,
-                    right: 12,
+                    right: 50,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -458,6 +458,43 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  // Add to cart button (plus) at bottom right
+                  Positioned(
+                    bottom: 12,
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                        final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
+                        final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
+                        cartProvider.addToCart(
+                          product,
+                          1,
+                          selectedColor: selectedColor,
+                          selectedSize: selectedSize,
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${product.name} added to cart'),
+                            backgroundColor: AppTheme.primaryColor,
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.black,
+                          size: 18,
+                        ),
+                      ),
                     ),
                   ),
                   // Favorite toggle
