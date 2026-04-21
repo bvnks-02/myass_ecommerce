@@ -62,6 +62,7 @@ class ApiService {
 
   static Future<bool> createOrder({
     required double total,
+    required String name,
     required String phone,
     required String address,
     required List<Map<String, dynamic>> items,
@@ -81,6 +82,7 @@ class ApiService {
           .insert({
             'user_id': userId,
             'total_amount': total,
+            'name': name,
             'phone': phone,
             'address': address,
             'status': 'Pending',

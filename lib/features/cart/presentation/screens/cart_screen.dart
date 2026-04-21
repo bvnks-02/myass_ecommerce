@@ -18,6 +18,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
 
@@ -300,20 +301,64 @@ class _CartScreenState extends State<CartScreen> {
           ),
           const SizedBox(height: 20),
           TextField(
+            controller: _nameController,
+            decoration: InputDecoration(
+              hintText: 'Full Name',
+              prefixIcon: const Icon(Icons.person, color: Colors.white),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 15),
+          TextField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Phone Number',
-              prefixIcon: Icon(Icons.phone, color: Colors.white),
+              prefixIcon: const Icon(Icons.phone, color: Colors.white),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              ),
             ),
           ),
           const SizedBox(height: 15),
           TextField(
             controller: _addressController,
             maxLines: 3,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               hintText: 'Delivery Address',
-              prefixIcon: Icon(Icons.location_on, color: Colors.white),
+              prefixIcon: const Icon(Icons.location_on, color: Colors.white),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -347,7 +392,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> _placeOrder(CartProvider cart) async {
-    if (_phoneController.text.isEmpty || _addressController.text.isEmpty) {
+    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _addressController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all fields'),
@@ -389,6 +434,7 @@ class _CartScreenState extends State<CartScreen> {
 
     final success = await ApiService.createOrder(
       total: cart.totalAmount,
+      name: _nameController.text,
       phone: _phoneController.text,
       address: _addressController.text,
       items: orderItems,
