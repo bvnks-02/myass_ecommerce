@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/app_theme.dart';
@@ -441,7 +442,7 @@ class _SupportScreenState extends State<SupportScreen> {
             children: [
               Expanded(
                 child: _buildContactButton(
-                  Icons.message,
+                  FontAwesomeIcons.whatsapp,
                   'WhatsApp',
                   Colors.green,
                   _launchWhatsApp,
@@ -450,9 +451,9 @@ class _SupportScreenState extends State<SupportScreen> {
               const SizedBox(width: 15),
               Expanded(
                 child: _buildContactButton(
-                  Icons.email,
-                  'Email',
-                  Colors.blue,
+                  FontAwesomeIcons.google,
+                  'Gmail',
+                  Colors.red,
                   _launchEmail,
                 ),
               ),
@@ -463,7 +464,7 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  Widget _buildContactButton(IconData icon, String label, Color color, VoidCallback onTap) {
+  Widget _buildContactButton(FaIconData icon, String label, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -475,7 +476,7 @@ class _SupportScreenState extends State<SupportScreen> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: color, size: 28),
+            FaIcon(icon, color: color, size: 28),
             const SizedBox(height: 8),
             Text(
               label,
