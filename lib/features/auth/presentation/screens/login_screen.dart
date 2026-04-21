@@ -118,17 +118,33 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
           SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 450),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const SizedBox(height: 20),
+            child: Stack(
+              children: [
+                // Skip Button
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    },
+                    child: const Text(
+                      'Skip',
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                    ),
+                  ),
+                ),
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 450),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const SizedBox(height: 20),
                         // Logo
                         Center(
                           child: Hero(
@@ -321,6 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+            )],
             ),
           ),
         ],
