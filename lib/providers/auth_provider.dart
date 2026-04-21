@@ -130,21 +130,47 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signInWithGoogle() async {
-    // Note: This requires proper configuration in Google Cloud and Supabase
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
-      await _supabase.auth.signInWithOAuth(OAuthProvider.google);
+      debugPrint('Starting Google sign in...');
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.google,
+        redirectTo: 'com.example.myass_ecommerce://login-callback/',
+      );
+      debugPrint('Google OAuth initiated successfully');
+    } on AuthException catch (e) {
+      debugPrint('Google AuthException: ${e.message}');
+      _errorMessage = 'Google sign in failed: ${e.message}';
     } catch (e) {
+      debugPrint('Google sign in error: $e');
       _errorMessage = 'Google sign in failed. Please try again.';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> signInWithFacebook() async {
-    // Note: This requires proper configuration in Facebook and Supabase
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
     try {
-      await _supabase.auth.signInWithOAuth(OAuthProvider.facebook);
+      debugPrint('Starting Facebook sign in...');
+      await _supabase.auth.signInWithOAuth(
+        OAuthProvider.facebook,
+        redirectTo: 'com.example.myass_ecommerce://login-callback/',
+      );
+      debugPrint('Facebook OAuth initiated successfully');
+    } on AuthException catch (e) {
+      debugPrint('Facebook AuthException: ${e.message}');
+      _errorMessage = 'Facebook sign in failed: ${e.message}';
     } catch (e) {
+      debugPrint('Facebook sign in error: $e');
       _errorMessage = 'Facebook sign in failed. Please try again.';
+    } finally {
+      _isLoading = false;
       notifyListeners();
     }
   }

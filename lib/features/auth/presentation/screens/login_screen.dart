@@ -55,6 +55,36 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleSocialLogin(Future<void> Function() signInMethod) async {
+    setState(() => _isLoading = true);
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await signInMethod();
+      
+      // Wait for auth state to update
+      await Future.delayed(const Duration(seconds: 2));
+      
+      if (mounted && authProvider.isAuthenticated) {
+        await authProvider.refreshRole();
+        if (authProvider.isAdmin) {
+          Navigator.pushReplacementNamed(context, '/admin');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Social login failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -245,16 +275,16 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             _socialButton(
                               label: 'Google',
-                              onTap: () => Provider.of<AuthProvider>(context,
-                                      listen: false)
-                                  .signInWithGoogle(),
+                              onTap: () => _handleSocialLogin(
+                                () => Provider.of<AuthProvider>(context, listen: false).signInWithGoogle(),
+                              ),
                             ),
                             const SizedBox(width: 24),
                             _socialButton(
                               label: 'Facebook',
-                              onTap: () => Provider.of<AuthProvider>(context,
-                                      listen: false)
-                                  .signInWithFacebook(),
+                              onTap: () => _handleSocialLogin(
+                                () => Provider.of<AuthProvider>(context, listen: false).signInWithFacebook(),
+                              ),
                             ),
                           ],
                         ),
