@@ -16,15 +16,12 @@ class FavoritesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.blackColor,
-      appBar: AppBar(
-        backgroundColor: AppTheme.blackColor,
-        elevation: 0,
-        title: const Text(
-          'Favorites',
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
-      body: Consumer<FavoritesProvider>(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: Consumer<FavoritesProvider>(
         builder: (context, favorites, child) {
           if (favorites.favoriteItems.isEmpty) {
             return _buildEmptyFavorites(context);
@@ -47,6 +44,46 @@ class FavoritesScreen extends StatelessWidget {
             ),
           );
         },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          const Text(
+            'Favorites',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(width: 48),
+        ],
       ),
     );
   }

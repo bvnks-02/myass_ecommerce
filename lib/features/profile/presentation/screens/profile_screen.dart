@@ -116,22 +116,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         return Scaffold(
           backgroundColor: AppTheme.blackColor,
-          appBar: AppBar(
-            backgroundColor: AppTheme.blackColor,
-            elevation: 0,
-            title: const Text(
-              'Profile',
-              style: TextStyle(color: Colors.white),
-            ),
-            actions: [
-              IconButton(
-                icon:
-                    const Icon(Icons.refresh, color: Colors.white70, size: 20),
-                onPressed: () => authProvider.refreshRole(),
-              ),
-            ],
-          ),
-          body: authProvider.isLoading
+          body: SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context, authProvider),
+                Expanded(
+                  child: authProvider.isLoading
               ? const Center(
                   child: CircularProgressIndicator(color: Colors.white))
               : SingleChildScrollView(
@@ -149,8 +139,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
+                ),
+              ],
+            ),
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, AuthProvider authProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+          const Text(
+            'Profile',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => authProvider.refreshRole(),
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppTheme.cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.1)),
+              ),
+              child: const Icon(
+                Icons.refresh,
+                color: Colors.white70,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
