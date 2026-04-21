@@ -175,6 +175,8 @@ class _SupportScreenState extends State<SupportScreen> {
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
               ),
               onChanged: (value) {
                 context.read<SupportProvider>().searchFAQs(value);
