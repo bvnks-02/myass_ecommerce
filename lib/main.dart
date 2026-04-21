@@ -103,7 +103,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const FavoritesScreen(),
-    const CartScreen(),
+    const WatchDetailScreen(),
     const ProfileScreen(),
   ];
 
@@ -148,14 +148,9 @@ class _MainScreenState extends State<MainScreen> {
                     child: BottomNavigationBar(
                       currentIndex: _currentIndex,
                       onTap: (index) {
-                        if (index == 2) {
-                          // Watch icon - navigate to watch detail screen
-                          Navigator.pushNamed(context, '/watch_details');
-                        } else {
-                          setState(() {
-                            _currentIndex = index;
-                          });
-                        }
+                        setState(() {
+                          _currentIndex = index;
+                        });
                       },
                       backgroundColor: Colors.transparent,
                       elevation: 0,

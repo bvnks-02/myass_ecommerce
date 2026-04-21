@@ -47,12 +47,13 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
                     _buildFeatures(),
                     const SizedBox(height: 25),
                     _buildDescription(),
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 30),
+                    _buildBottomBar(),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
             ),
-            _buildBottomBar(),
           ],
         ),
       ),
@@ -69,7 +70,7 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
@@ -78,7 +79,7 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
                     border: Border.all(color: Colors.white.withOpacity(0.1)),
                   ),
                   child: const Icon(
-                    Icons.arrow_back_ios_new,
+                    Icons.arrow_back_ios,
                     color: Colors.white,
                     size: 20,
                   ),
