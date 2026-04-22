@@ -414,7 +414,7 @@ class CurvedBottomBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF1C1C1E).withValues(alpha: 0.95)
+      ..color = const Color(0xFF1C1C1E).withValues(alpha: 0.80)
       ..style = PaintingStyle.fill;
 
     final path = Path();
