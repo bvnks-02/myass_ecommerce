@@ -602,56 +602,70 @@ class _CartScreenState extends State<CartScreen> {
       };
     }).toList();
 
-    final success = await ApiService.createOrder(
-      total: cart.totalAmount,
-      name: _nameController.text,
-      phone: _phoneController.text,
-      address: _addressController.text,
-      items: orderItems,
-    );
+    try {
+      final success = await ApiService.createOrder(
+        total: cart.totalAmount,
+        name: _nameController.text,
+        phone: _phoneController.text,
+        address: _addressController.text,
+        items: orderItems,
+      );
 
-    // Pop the loading dialog
-    if (mounted) Navigator.of(context).pop();
+      // Pop the loading dialog
+      if (mounted) Navigator.of(context).pop();
 
-    if (success) {
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppTheme.cardColor,
-            title: const Text(
-              'Order confirmed!',
-              style: TextStyle(color: Colors.white),
-            ),
-            content: const Text(
-              'Your order has been placed successfully.',
-              style: TextStyle(color: Colors.grey),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  cart.clearCart();
-                  Navigator.of(context).pop(); // Close dialog only
-                  // Navigate back to home instead of popping twice
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/home',
-                    (route) => false,
-                  );
-                },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(color: Colors.white),
-                ),
+      if (success) {
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              backgroundColor: AppTheme.cardColor,
+              title: const Text(
+                'Order confirmed!',
+                style: TextStyle(color: Colors.white),
               ),
-            ],
-          ),
-        );
+              content: const Text(
+                'Your order has been placed successfully.',
+                style: TextStyle(color: Colors.grey),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    cart.clearCart();
+                    Navigator.of(context).pop(); // Close dialog only
+                    // Navigate back to home instead of popping twice
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      '/home',
+                      (route) => false,
+                    );
+                  },
+                  child: const Text(
+                    'OK',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Order failed. Check console for details.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
-    } else {
+    } catch (e) {
+      // Pop the loading dialog
+      if (mounted) Navigator.of(context).pop();
+      
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order failed. Please try again.'),
+          SnackBar(
+            content: Text('Order error: $e'),
             backgroundColor: Colors.red,
           ),
         );

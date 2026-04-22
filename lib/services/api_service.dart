@@ -76,6 +76,18 @@ class ApiService {
         return false;
       }
 
+      // If using mock data, simulate order creation
+      if (_useMockData) {
+        AppLogger.info('Using mock order creation', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
+        AppLogger.info('Mock order created successfully', tag: 'ApiService');
+        return true;
+      }
+
+      AppLogger.debug('User ID: $userId', tag: 'ApiService');
+      AppLogger.debug('Order data - Total: $total, Name: $name, Phone: $phone, Address: $address', tag: 'ApiService');
+      AppLogger.debug('Order items: $items', tag: 'ApiService');
+
       // 1. Insert order
       final orderResponse = await _supabase
           .from('orders')
@@ -103,13 +115,16 @@ class ApiService {
         };
       }).toList();
 
+      AppLogger.debug('Inserting order items: $orderItemsList', tag: 'ApiService');
+
       // 3. Insert order items
       await _supabase.from('order_items').insert(orderItemsList);
       
       AppLogger.info('Order and items created successfully', tag: 'ApiService');
       return true;
     } catch (e, stackTrace) {
-      AppLogger.error('Error creating order', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      AppLogger.error('Error creating order: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      debugPrint('Order creation error: $e');
       return false;
     }
   }

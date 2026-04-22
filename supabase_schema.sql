@@ -89,6 +89,7 @@ CREATE TABLE public.orders (
   user_id UUID REFERENCES auth.users(id),
   total_amount DECIMAL(10,2) NOT NULL,
   status TEXT DEFAULT 'Pending',
+  name TEXT,
   phone TEXT,
   address TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
