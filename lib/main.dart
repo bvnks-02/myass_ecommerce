@@ -144,10 +144,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   late Animation<double> _scaleAnimation;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
-    const FavoritesScreen(),
-    const WatchDetailScreen(),
-    const ProfileScreen(),
+    const HomeScreen(key: PageStorageKey('home')),
+    const FavoritesScreen(key: PageStorageKey('favorites')),
+    const WatchDetailScreen(key: PageStorageKey('watch')),
+    const ProfileScreen(key: PageStorageKey('profile')),
   ];
 
   @override
@@ -227,7 +227,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
         children: [
           // The main screen content
           Positioned.fill(
-            child: _screens[_currentIndex],
+            child: IndexedStack(
+              index: _currentIndex,
+              children: _screens,
+            ),
           ),
 
           // Floating Bottom Navigation Bar with curved design
@@ -342,9 +345,10 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                 Positioned(
                                   top: 8,
                                   right: 8,
-                                  child: Consumer<CartProvider>(
-                                    builder: (context, cartProvider, child) {
-                                      if (cartProvider.itemCount == 0) {
+                                  child: Selector<CartProvider, int>(
+                                    selector: (context, cart) => cart.itemCount,
+                                    builder: (context, itemCount, child) {
+                                      if (itemCount == 0) {
                                         return const SizedBox.shrink();
                                       }
                                       return Container(
@@ -362,7 +366,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                           ],
                                         ),
                                         child: Text(
-                                          '${cartProvider.itemCount}',
+                                          '$itemCount',
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 12,

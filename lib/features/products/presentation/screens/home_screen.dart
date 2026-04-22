@@ -330,169 +330,184 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductCard(ProductEntity product) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/product_details',
+          arguments: product,
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
+            children: [
+              // Product Image (Opacity 0.9 for dark vibe)
+              Positioned.fill(
+                child: Opacity(
+                  opacity: 0.9,
+                  child: product.image.startsWith('assets/')
+                      ? Image.asset(
+                          product.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.watch,
+                            color: Colors.white24,
+                            size: 50,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: product.image,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.watch,
+                            color: Colors.white24,
+                            size: 50,
+                          ),
+                          memCacheWidth: 400,
+                          memCacheHeight: 400,
+                        ),
+                ),
+              ),
+              // Dark gradient overlay at the bottom for text readability
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                height: 80,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.black.withOpacity(0.0),
+                        Colors.black.withOpacity(0.8),
+                      ],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ),
+              // Product Info at bottom
+              Positioned(
+                bottom: 12,
+                left: 12,
+                right: 50,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      product.name,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      CurrencyService.formatPrice(product.price),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Add to cart button (plus) at bottom right
+              Positioned(
+                bottom: 12,
+                right: 10,
+                child: GestureDetector(
+                  onTap: () {
+                    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                    final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
+                    final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
+                    cartProvider.addToCart(
+                      product,
+                      1,
+                      selectedColor: selectedColor,
+                      selectedSize: selectedSize,
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${product.name} added to cart'),
+                        backgroundColor: AppTheme.primaryColor,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.black,
+                      size: 18,
+                    ),
+                  ),
+                ),
+              ),
+              // Favorite toggle - extracted to separate widget
+              Positioned(
+                top: 10,
+                right: 10,
+                child: _FavoriteIconButton(productId: product.id, product: product),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteIconButton extends StatelessWidget {
+  final int productId;
+  final ProductEntity product;
+
+  const _FavoriteIconButton({
+    required this.productId,
+    required this.product,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Consumer<FavoritesProvider>(
       builder: (context, favorites, child) {
-        final isFavorite = favorites.isFavorite(product.id);
+        final isFavorite = favorites.isFavorite(productId);
         return GestureDetector(
           onTap: () {
-            Navigator.pushNamed(
-              context,
-              '/product_details',
-              arguments: product,
-            );
+            favorites.toggleFavorite(product);
           },
           child: Container(
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
+              color: Colors.black.withOpacity(0.5),
+              shape: BoxShape.circle,
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Stack(
-                children: [
-                  // Product Image (Opacity 0.9 for dark vibe)
-                  Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.9,
-                      child: product.image.startsWith('assets/')
-                          ? Image.asset(
-                              product.image,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
-                                Icons.watch,
-                                color: Colors.white24,
-                                size: 50,
-                              ),
-                            )
-                          : CachedNetworkImage(
-                              imageUrl: product.image,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(
-                                Icons.watch,
-                                color: Colors.white24,
-                                size: 50,
-                              ),
-                              memCacheWidth: 400,
-                              memCacheHeight: 400,
-                            ),
-                    ),
-                  ),
-                  // Dark gradient overlay at the bottom for text readability
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 80,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withOpacity(0.0),
-                            Colors.black.withOpacity(0.8),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Product Info at bottom
-                  Positioned(
-                    bottom: 12,
-                    left: 12,
-                    right: 50,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          CurrencyService.formatPrice(product.price),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Add to cart button (plus) at bottom right
-                  Positioned(
-                    bottom: 12,
-                    right: 10,
-                    child: GestureDetector(
-                      onTap: () {
-                        final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                        final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
-                        final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
-                        cartProvider.addToCart(
-                          product,
-                          1,
-                          selectedColor: selectedColor,
-                          selectedSize: selectedSize,
-                        );
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${product.name} added to cart'),
-                            backgroundColor: AppTheme.primaryColor,
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.black,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Favorite toggle
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: GestureDetector(
-                      onTap: () {
-                        favorites.toggleFavorite(product);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.white : Colors.white70,
-                          size: 18,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            child: Icon(
+              isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: isFavorite ? Colors.white : Colors.white70,
+              size: 18,
             ),
           ),
         );

@@ -40,18 +40,18 @@ class _CartScreenState extends State<CartScreen> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      body: Consumer<CartProvider>(
-        builder: (context, cart, child) {
-          if (cart.cartItems.isEmpty) {
-            return _buildEmptyCart();
-          }
+      body: Column(
+        children: [
+          Expanded(
+            child: Consumer<CartProvider>(
+              builder: (context, cart, child) {
+                if (cart.cartItems.isEmpty) {
+                  return _buildEmptyCart();
+                }
 
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1000),
-              child: Column(
-                children: [
-                  Expanded(
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1000),
                     child: ListView.builder(
                       padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
                       itemCount: cart.cartItems.length,
@@ -64,12 +64,19 @@ class _CartScreenState extends State<CartScreen> {
                       },
                     ),
                   ),
-                  _buildCheckoutSection(cart),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
+          ),
+          Consumer<CartProvider>(
+            builder: (context, cart, child) {
+              if (cart.cartItems.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return _buildCheckoutSection(cart);
+            },
+          ),
+        ],
       ),
     );
   }
