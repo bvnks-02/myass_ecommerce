@@ -172,14 +172,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 10),
                               // Logo
                               Center(
                                 child: Hero(
                                   tag: 'logo',
                                   child: Container(
-                                    width: 90,
-                                    height: 90,
+                                    width: 70,
+                                    height: 70,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
@@ -193,27 +193,27 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
                               const Text(
                                 'Welcome Back',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 32,
+                                  fontSize: 28,
                                   fontWeight: FontWeight.bold,
                                   letterSpacing: -0.5,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 5),
                               Text(
                                 'Sign in to continue shopping',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.5),
-                                  fontSize: 14,
+                                  fontSize: 13,
                                 ),
                                 textAlign: TextAlign.center,
                               ),
-                              const SizedBox(height: 40),
+                              const SizedBox(height: 25),
 
                               // Glassmorphic Email Field
                               _buildGlassTextField(
@@ -221,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 hintText: 'E-mail',
                                 prefixIcon: Icons.email_outlined,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
 
                               // Glassmorphic Password Field
                               _buildGlassTextField(
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              const SizedBox(height: 15),
 
                               // Premium Login Button
                               ElevatedButton(
@@ -270,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   backgroundColor: Colors.white,
                                   foregroundColor: Colors.black,
                                   elevation: 0,
-                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                   ),
@@ -290,7 +290,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                               ),
 
-                              const SizedBox(height: 40),
+                              const SizedBox(height: 25),
                               Row(
                                 children: [
                                   Expanded(
@@ -311,7 +311,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color: Colors.white.withOpacity(0.1))),
                                 ],
                               ),
-                              const SizedBox(height: 30),
+                              const SizedBox(height: 20),
 
                               // Social Login Buttons
                               Row(
@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
 
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 10),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -409,7 +409,7 @@ class _LoginScreenState extends State<LoginScreen> {
           errorBorder: InputBorder.none,
           disabledBorder: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         ),
       ),
     );
@@ -422,8 +422,8 @@ class _LoginScreenState extends State<LoginScreen> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
-        width: 65,
-        height: 65,
+        width: 55,
+        height: 55,
         decoration: BoxDecoration(
           color: Colors.white.withOpacity(0.9),
           borderRadius: BorderRadius.circular(20),
