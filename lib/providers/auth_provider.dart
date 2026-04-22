@@ -182,7 +182,13 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('Facebook OAuth initiated successfully');
     } on AuthException catch (e) {
       debugPrint('Facebook AuthException: ${e.message}');
-      _errorMessage = 'Facebook sign in failed: ${e.message}';
+      if (e.message.contains('not enabled')) {
+        _errorMessage = 'Facebook login is not configured. Please contact support.';
+      } else if (e.message.contains('redirect')) {
+        _errorMessage = 'Redirect URL not configured. Please check Supabase settings.';
+      } else {
+        _errorMessage = 'Facebook sign in failed: ${e.message}';
+      }
     } catch (e) {
       debugPrint('Facebook sign in error: $e');
       _errorMessage = 'Facebook sign in failed. Please try again.';
