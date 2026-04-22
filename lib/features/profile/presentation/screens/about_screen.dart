@@ -76,15 +76,15 @@ class _AboutScreenState extends State<AboutScreen> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.white.withOpacity(0.1)),
                     ),
-                    child: Icon(
-                      Icons.shopping_bag,
-                      size: ResponsiveUtils.sf(context, 50),
-                      color: Colors.white,
+                    child: Image.asset(
+                      'assets/images/logo.jpeg',
+                      width: ResponsiveUtils.sw(context, 70),
+                      height: ResponsiveUtils.sh(context, 70),
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.sh(context, 20)),
                   Text(
-                    'Myass E-commerce',
+                    'Myazz',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: ResponsiveUtils.sf(context, 24),
@@ -114,7 +114,8 @@ class _AboutScreenState extends State<AboutScreen> {
             SizedBox(height: ResponsiveUtils.sh(context, 20)),
             _buildInfoItem('Version', _version),
             _buildInfoItem('Build', _buildNumber),
-            _buildInfoItem('Platform', 'Android '),
+            _buildInfoItem('Platform', 'Android & iOS'),
+            _buildInfoItem('Developer', 'Belaggoun Amina'),
             SizedBox(height: ResponsiveUtils.sh(context, 30)),
             Text(
               'About Us',
@@ -126,7 +127,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 20)),
             Text(
-              'Myass E-commerce is your one-stop destination for premium watches and accessories. We offer a wide selection of high-quality products with fast delivery and excellent customer service.',
+              'Myazz E-commerce is your one-stop destination for premium watches and accessories. We offer a wide selection of high-quality products with fast delivery and excellent customer service.',
               style: TextStyle(
                 color: Colors.grey[400],
                 fontSize: ResponsiveUtils.sf(context, 14),
@@ -184,7 +185,7 @@ class _AboutScreenState extends State<AboutScreen> {
             SizedBox(height: ResponsiveUtils.sh(context, 30)),
             Center(
               child: Text(
-                '© 2026 Myass E-commerce. All rights reserved.',
+                '© 2026 Myazz E-commerce. All rights reserved.',
                 style: TextStyle(
                   color: Colors.grey[500],
                   fontSize: ResponsiveUtils.sf(context, 12),
