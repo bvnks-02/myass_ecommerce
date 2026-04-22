@@ -60,15 +60,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             // Skip Button
             Align(
-              alignment: Alignment.topRight,
-              child: TextButton(
-                onPressed: _onSkip,
-                child: const Text(
-                  'Skip',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: TextButton(
+                      onPressed: () {
+                        debugPrint('Skip button tapped');
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
 
             // PageView content
             Expanded(

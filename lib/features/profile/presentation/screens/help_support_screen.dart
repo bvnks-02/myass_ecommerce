@@ -189,7 +189,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
   void _launchEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'support@myass.com',
+      path: 'support@myazz.com',
       query: 'subject=Support Request',
     );
     if (await canLaunchUrl(emailUri)) {

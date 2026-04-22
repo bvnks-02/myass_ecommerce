@@ -147,13 +147,13 @@ class _AboutScreenState extends State<AboutScreen> {
             _buildLegalItem(
               'Terms of Service',
               () {
-                _launchUrl('https://myass.com/terms');
+                _launchUrl('https://myazz.com/terms');
               },
             ),
             _buildLegalItem(
               'Privacy Policy',
               () {
-                _launchUrl('https://myass.com/privacy');
+                _launchUrl('https://myazz.com/privacy');
               },
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 30)),
@@ -170,15 +170,15 @@ class _AboutScreenState extends State<AboutScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildSocialIcon(FontAwesomeIcons.facebook, () {
-                  _launchUrl('https://facebook.com/myass');
+                  _launchUrl('https://facebook.com/myazz');
                 }),
                 SizedBox(width: ResponsiveUtils.sw(context, 20)),
                 _buildSocialIcon(FontAwesomeIcons.instagram, () {
-                  _launchUrl('https://instagram.com/myass');
+                  _launchUrl('https://instagram.com/myazz');
                 }),
                 SizedBox(width: ResponsiveUtils.sw(context, 20)),
                 _buildSocialIcon(FontAwesomeIcons.xTwitter, () {
-                  _launchUrl('https://twitter.com/myass');
+                  _launchUrl('https://twitter.com/myazz');
                 }),
               ],
             ),

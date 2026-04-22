@@ -211,7 +211,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileHeader(AuthProvider authProvider) {
-    final name = authProvider.user?.userMetadata?['full_name'] ?? 'Myass User';
+    final name = authProvider.user?.userMetadata?['full_name'] ?? 'Myazz User';
     final role = authProvider.isAdmin ? 'Admin' : 'Client';
 
     return Center(
