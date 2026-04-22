@@ -415,12 +415,7 @@ class _CartScreenState extends State<CartScreen> {
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Location services are disabled. Please enable them.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showLocationDisabledDialog();
       return;
     }
 
@@ -439,12 +434,7 @@ class _CartScreenState extends State<CartScreen> {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Location permissions are permanently denied. Please enable them in settings.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showLocationPermissionDialog();
       return;
     }
 
@@ -460,7 +450,27 @@ class _CartScreenState extends State<CartScreen> {
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        String address = '${place.street}, ${place.locality}, ${place.country}';
+        
+        // Build a clean address string
+        List<String> addressParts = [];
+        
+        if (place.street != null && place.street!.isNotEmpty) {
+          addressParts.add(place.street!);
+        }
+        if (place.subLocality != null && place.subLocality!.isNotEmpty) {
+          addressParts.add(place.subLocality!);
+        }
+        if (place.locality != null && place.locality!.isNotEmpty) {
+          addressParts.add(place.locality!);
+        }
+        if (place.administrativeArea != null && place.administrativeArea!.isNotEmpty) {
+          addressParts.add(place.administrativeArea!);
+        }
+        if (place.country != null && place.country!.isNotEmpty) {
+          addressParts.add(place.country!);
+        }
+        
+        String address = addressParts.join(', ');
         _addressController.text = address;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -477,6 +487,78 @@ class _CartScreenState extends State<CartScreen> {
         ),
       );
     }
+  }
+
+  void _showLocationDisabledDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        title: const Text(
+          'Location Services Disabled',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Please enable location services to detect your current address automatically.',
+          style: TextStyle(color: Colors.grey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Geolocator.openLocationSettings();
+            },
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(color: AppTheme.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLocationPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.cardColor,
+        title: const Text(
+          'Location Permission Denied',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          'Location permissions are permanently denied. Please enable them in app settings.',
+          style: TextStyle(color: Colors.grey),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Geolocator.openAppSettings();
+            },
+            child: const Text(
+              'Open Settings',
+              style: TextStyle(color: AppTheme.primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _placeOrder(CartProvider cart) async {
