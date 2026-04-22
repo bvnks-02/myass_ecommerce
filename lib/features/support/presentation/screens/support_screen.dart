@@ -60,7 +60,7 @@ class _SupportScreenState extends State<SupportScreen> {
     }
   }
 
-  void _submitProblem() {
+  Future<void> _submitProblem() async {
     if (_problemTitleController.text.trim().isEmpty ||
         _problemDescriptionController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -69,14 +69,31 @@ class _SupportScreenState extends State<SupportScreen> {
       return;
     }
 
-    // Store locally (in a real app, this would go to Supabase)
-    // For now, just show a success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Problem reported successfully!')),
+    final title = _problemTitleController.text.trim();
+    final description = _problemDescriptionController.text.trim();
+
+    // Create email with problem details
+    final Uri emailUri = Uri(
+      scheme: 'mailto',
+      path: 'myazzalgérie@gmail.com',
+      query: 'subject=Support Request: $title&body=${Uri.encodeComponent(description)}',
     );
-    _problemTitleController.clear();
-    _problemDescriptionController.clear();
-    Navigator.pop(context);
+
+    if (!await launchUrl(emailUri)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not launch email client')),
+        );
+      }
+    } else {
+      if (mounted) {
+        _problemTitleController.clear();
+        _problemDescriptionController.clear();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Email client opened successfully')),
+        );
+      }
+    }
   }
 
   @override
