@@ -5,6 +5,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/input_validator.dart';
+import '../../../../core/security/rate_limiter.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -21,11 +24,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
 
   Future<void> _register() async {
-    if (_nameController.text.isEmpty ||
-        _emailController.text.isEmpty ||
-        _passwordController.text.isEmpty) {
+    // Sanitize inputs
+    final name = InputSanitizer.sanitizeString(_nameController.text);
+    final email = InputSanitizer.sanitizeEmail(_emailController.text);
+    final password = InputSanitizer.sanitizeString(_passwordController.text);
+    
+    // Validate inputs
+    final nameError = InputValidator.validateFullName(name);
+    if (nameError != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
+        SnackBar(content: Text(nameError)),
+      );
+      return;
+    }
+    
+    if (!InputValidator.isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+    
+    final passwordError = InputValidator.validatePassword(password);
+    if (passwordError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(passwordError)),
+      );
+      return;
+    }
+
+    // Rate limiting check
+    if (!RateLimiters.auth.isAllowed(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Too many registration attempts. Please try again later.')),
       );
       return;
     }
@@ -34,9 +65,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.signUp(
-        _emailController.text,
-        _passwordController.text,
-        fullName: _nameController.text,
+        email,
+        password,
+        fullName: name,
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

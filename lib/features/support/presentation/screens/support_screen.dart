@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/rate_limiter.dart';
 import '../providers/support_provider.dart';
 import '../../domain/entities/faq_model.dart';
 
@@ -62,16 +64,39 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   Future<void> _submitProblem() async {
-    if (_problemTitleController.text.trim().isEmpty ||
-        _problemDescriptionController.text.trim().isEmpty) {
+    // Sanitize inputs
+    final title = InputSanitizer.sanitizeString(_problemTitleController.text.trim(), maxLength: 200);
+    final description = InputSanitizer.sanitizeString(_problemDescriptionController.text.trim(), maxLength: 2000);
+    
+    // Validate inputs
+    if (title.isEmpty || description.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
       return;
     }
 
-    final title = _problemTitleController.text.trim();
-    final description = _problemDescriptionController.text.trim();
+    if (title.length < 5) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Title must be at least 5 characters')),
+      );
+      return;
+    }
+
+    if (description.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Description must be at least 10 characters')),
+      );
+      return;
+    }
+
+    // Rate limiting check
+    if (!RateLimiters.contact.isAllowed('contact_form')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Too many contact form submissions. Please try again later.')),
+      );
+      return;
+    }
 
     // Create email with problem details
     final Uri emailUri = Uri(
@@ -202,7 +227,8 @@ class _SupportScreenState extends State<SupportScreen> {
                 focusedBorder: InputBorder.none,
               ),
               onChanged: (value) {
-                context.read<SupportProvider>().searchFAQs(value);
+                final sanitizedQuery = InputSanitizer.sanitizeSearchQuery(value);
+                context.read<SupportProvider>().searchFAQs(sanitizedQuery);
               },
             ),
           ),

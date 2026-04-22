@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/input_validator.dart';
+import '../../../../core/security/rate_limiter.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -22,9 +25,29 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   Future<void> _login() async {
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+    // Sanitize inputs
+    final email = InputSanitizer.sanitizeEmail(_emailController.text);
+    final password = InputSanitizer.sanitizeString(_passwordController.text);
+    
+    // Validate inputs
+    if (!InputValidator.isValidEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+    
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all fields')),
+      );
+      return;
+    }
+
+    // Rate limiting check
+    if (!RateLimiters.auth.isAllowed(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Too many login attempts. Please try again later.')),
       );
       return;
     }
@@ -32,8 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.signIn(
-          _emailController.text, _passwordController.text);
+      await authProvider.signIn(email, password);
       if (mounted) {
         if (authProvider.isAdmin) {
           Navigator.pushReplacementNamed(context, '/admin');

@@ -7,6 +7,8 @@ import 'package:shimmer/shimmer.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/rate_limiter.dart';
 import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
@@ -535,8 +537,24 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
 
   @override
   Widget buildResults(BuildContext context) {
+    // Sanitize search query
+    final sanitizedQuery = InputSanitizer.sanitizeSearchQuery(query);
+    
+    // Rate limiting check
+    if (!RateLimiters.search.isAllowed('search')) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(
+            'Too many search requests. Please try again later.',
+            style: const TextStyle(color: Colors.white70),
+          ),
+        ),
+      );
+    }
+
     final results = products.where((product) {
-      return product.name.toLowerCase().contains(query.toLowerCase());
+      return product.name.toLowerCase().contains(sanitizedQuery.toLowerCase());
     }).toList();
 
     return ListView.builder(
@@ -590,8 +608,11 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    // Sanitize search query
+    final sanitizedQuery = InputSanitizer.sanitizeSearchQuery(query);
+    
     final suggestions = products.where((product) {
-      return product.name.toLowerCase().contains(query.toLowerCase());
+      return product.name.toLowerCase().contains(sanitizedQuery.toLowerCase());
     }).toList();
 
     return ListView.builder(

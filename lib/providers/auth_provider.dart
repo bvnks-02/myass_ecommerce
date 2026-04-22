@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../core/security/rate_limiter.dart';
 
 class AuthProvider extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -36,6 +37,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signIn(String email, String password) async {
+    // Rate limiting check (backend-side)
+    if (!RateLimiters.auth.isAllowed(email)) {
+      _errorMessage = 'Too many sign-in attempts. Please try again later.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+    
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -82,6 +91,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> signUp(String email, String password, {String? fullName}) async {
+    // Rate limiting check (backend-side)
+    if (!RateLimiters.auth.isAllowed(email)) {
+      _errorMessage = 'Too many registration attempts. Please try again later.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+    
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -177,6 +194,14 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> resetPassword(String email) async {
+    // Rate limiting check (backend-side)
+    if (!RateLimiters.passwordReset.isAllowed(email)) {
+      _errorMessage = 'Too many password reset attempts. Please try again later.';
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
+    
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();

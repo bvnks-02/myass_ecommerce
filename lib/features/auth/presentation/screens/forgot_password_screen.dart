@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/input_validator.dart';
+import '../../../../core/security/rate_limiter.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -17,9 +20,21 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _isLoading = false;
 
   Future<void> _resetPassword() async {
-    if (_emailController.text.isEmpty) {
+    // Sanitize input
+    final email = InputSanitizer.sanitizeEmail(_emailController.text);
+    
+    // Validate input
+    if (!InputValidator.isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter your email')),
+        const SnackBar(content: Text('Please enter a valid email address')),
+      );
+      return;
+    }
+
+    // Rate limiting check
+    if (!RateLimiters.passwordReset.isAllowed(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Too many password reset attempts. Please try again later.')),
       );
       return;
     }
@@ -27,7 +42,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() => _isLoading = true);
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      await authProvider.resetPassword(_emailController.text);
+      await authProvider.resetPassword(email);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
