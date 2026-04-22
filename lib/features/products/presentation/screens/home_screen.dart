@@ -446,7 +446,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                   child: Container(
                     padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryColor,
                       shape: BoxShape.circle,
                     ),
@@ -542,12 +542,12 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
     
     // Rate limiting check
     if (!RateLimiters.search.isAllowed('search')) {
-      return Center(
+      return const Center(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
           child: Text(
             'Too many search requests. Please try again later.',
-            style: const TextStyle(color: Colors.white70),
+            style: TextStyle(color: Colors.white70),
           ),
         ),
       );

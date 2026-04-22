@@ -314,12 +314,12 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                             width: ResponsiveUtils.sw(context, 70),
                             height: ResponsiveUtils.sh(context, 70),
                             decoration: BoxDecoration(
-                              gradient: LinearGradient(
+                              gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
                                 colors: [
-                                  const Color(0xFF2C2C2E),
-                                  const Color(0xFF1C1C1E),
+                                  Color(0xFF2C2C2E),
+                                  Color(0xFF1C1C1E),
                                 ],
                               ),
                               shape: BoxShape.circle,

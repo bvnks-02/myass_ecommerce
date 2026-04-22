@@ -334,11 +334,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.star_rounded, color: _gold, size: 14),
-                    SizedBox(width: 4),
+                    const Icon(Icons.star_rounded, color: _gold, size: 14),
+                    const SizedBox(width: 4),
                     Text(
                       widget.product.rating.toStringAsFixed(1),
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: _accent,
                         fontWeight: FontWeight.w500,
                         fontSize: 12,
@@ -350,7 +350,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               const SizedBox(width: 10),
               Text(
                 '${widget.product.reviewCount} Reviews',
-                style: TextStyle(color: Color(0xFF555555), fontSize: 12),
+                style: const TextStyle(color: Color(0xFF555555), fontSize: 12),
               ),
               const Spacer(),
               Row(
@@ -698,7 +698,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           Row(
                             children: List.generate(
                               review.stars,
-                              (_) => Icon(Icons.star_rounded,
+                              (_) => const Icon(Icons.star_rounded,
                                   color: _gold, size: 13),
                             ),
                           ),

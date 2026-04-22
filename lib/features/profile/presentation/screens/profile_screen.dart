@@ -303,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ? SizedBox(
                       height: ResponsiveUtils.sh(context, 20),
                       width: ResponsiveUtils.sw(context, 20),
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                           color: Colors.black, strokeWidth: 2),
                     )
                   : Text(

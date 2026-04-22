@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
 
   Future<void> _login() async {
+    debugPrint('Login button tapped');
     // Sanitize inputs
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
     final password = InputSanitizer.sanitizeString(_passwordController.text);
@@ -140,226 +141,234 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
           SafeArea(
-            child: Stack(
+            child: Column(
               children: [
-                // Skip Button
-                Positioned(
-                  top: 10,
-                  right: 10,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/home');
-                    },
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                // Skip Button Row
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: TextButton(
+                      onPressed: () {
+                        debugPrint('Skip button tapped');
+                        Navigator.pushReplacementNamed(context, '/home');
+                      },
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
                     ),
                   ),
                 ),
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 450),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: SingleChildScrollView(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(height: 20),
-                        // Logo
-                        Center(
-                          child: Hero(
-                            tag: 'logo',
-                            child: Container(
-                              width: 90,
-                              height: 90,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    color: Colors.white.withOpacity(0.1),
-                                    width: 1),
-                                image: const DecorationImage(
-                                  image: AssetImage('assets/images/logo.jpeg'),
-                                  fit: BoxFit.cover,
+                // Main Content
+                Expanded(
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 450),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 20),
+                              // Logo
+                              Center(
+                                child: Hero(
+                                  tag: 'logo',
+                                  child: Container(
+                                    width: 90,
+                                    height: 90,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white.withOpacity(0.1),
+                                          width: 1),
+                                      image: const DecorationImage(
+                                        image: AssetImage('assets/images/logo.jpeg'),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        const Text(
-                          'Welcome Back',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Sign in to continue shopping',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 40),
-
-                        // Glassmorphic Email Field
-                        _buildGlassTextField(
-                          controller: _emailController,
-                          hintText: 'E-mail',
-                          prefixIcon: Icons.email_outlined,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Glassmorphic Password Field
-                        _buildGlassTextField(
-                          controller: _passwordController,
-                          hintText: 'Password',
-                          prefixIcon: Icons.lock_outline,
-                          obscureText: _obscurePassword,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _obscurePassword
-                                  ? Icons.visibility_off
-                                  : Icons.visibility,
-                              color: Colors.white.withOpacity(0.4),
-                              size: 20,
-                            ),
-                            onPressed: () => setState(
-                                () => _obscurePassword = !_obscurePassword),
-                          ),
-                        ),
-
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        const ForgotPasswordScreen()),
-                              );
-                            },
-                            child: Text(
-                              'Forgot password?',
-                              style: TextStyle(
-                                  color: Colors.white.withOpacity(0.4),
-                                  fontSize: 13),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Premium Login Button
-                        ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 18),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.black, strokeWidth: 2),
-                                )
-                              : const Text(
-                                  'Sign In',
-                                  style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w800),
+                              const SizedBox(height: 30),
+                              const Text(
+                                'Welcome Back',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: -0.5,
                                 ),
-                        ),
-
-                        const SizedBox(height: 40),
-                        Row(
-                          children: [
-                            Expanded(
-                                child: Divider(
-                                    color: Colors.white.withOpacity(0.1))),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                'Or continue with',
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'Sign in to continue shopping',
                                 style: TextStyle(
-                                    color: Colors.white.withOpacity(0.3),
-                                    fontSize: 12),
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontSize: 14,
+                                ),
+                                textAlign: TextAlign.center,
                               ),
-                            ),
-                            Expanded(
-                                child: Divider(
-                                    color: Colors.white.withOpacity(0.1))),
-                          ],
-                        ),
-                        const SizedBox(height: 30),
+                              const SizedBox(height: 40),
 
-                        // Social Login Buttons
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _socialButton(
-                              label: 'Google',
-                              onTap: () => _handleSocialLogin(
-                                () => Provider.of<AuthProvider>(context, listen: false).signInWithGoogle(),
+                              // Glassmorphic Email Field
+                              _buildGlassTextField(
+                                controller: _emailController,
+                                hintText: 'E-mail',
+                                prefixIcon: Icons.email_outlined,
                               ),
-                            ),
-                            const SizedBox(width: 24),
-                            _socialButton(
-                              label: 'Facebook',
-                              onTap: () => _handleSocialLogin(
-                                () => Provider.of<AuthProvider>(context, listen: false).signInWithFacebook(),
-                              ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(height: 16),
 
-                        const SizedBox(height: 30),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "New here? ",
-                              style: TextStyle(
-                                  color: Colors.white.withOpacity(0.5)),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegisterScreen()),
-                                );
-                              },
-                              child: const Text(
-                                'Create an account',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold),
+                              // Glassmorphic Password Field
+                              _buildGlassTextField(
+                                controller: _passwordController,
+                                hintText: 'Password',
+                                prefixIcon: Icons.lock_outline,
+                                obscureText: _obscurePassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: Colors.white.withOpacity(0.4),
+                                    size: 20,
+                                  ),
+                                  onPressed: () => setState(
+                                      () => _obscurePassword = !_obscurePassword),
+                                ),
                               ),
-                            ),
-                          ],
+
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const ForgotPasswordScreen()),
+                                    );
+                                  },
+                                  child: Text(
+                                    'Forgot password?',
+                                    style: TextStyle(
+                                        color: Colors.white.withOpacity(0.4),
+                                        fontSize: 13),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              // Premium Login Button
+                              ElevatedButton(
+                                onPressed: _isLoading ? null : _login,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  elevation: 0,
+                                  padding: const EdgeInsets.symmetric(vertical: 18),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: _isLoading
+                                    ? const SizedBox(
+                                        height: 20,
+                                        width: 20,
+                                        child: CircularProgressIndicator(
+                                            color: Colors.black, strokeWidth: 2),
+                                      )
+                                    : const Text(
+                                        'Sign In',
+                                        style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800),
+                                      ),
+                              ),
+
+                              const SizedBox(height: 40),
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Divider(
+                                          color: Colors.white.withOpacity(0.1))),
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(horizontal: 16),
+                                    child: Text(
+                                      'Or continue with',
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.3),
+                                          fontSize: 12),
+                                    ),
+                                  ),
+                                  Expanded(
+                                      child: Divider(
+                                          color: Colors.white.withOpacity(0.1))),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+
+                              // Social Login Buttons
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _socialButton(
+                                    label: 'Google',
+                                    onTap: () => _handleSocialLogin(
+                                      () => Provider.of<AuthProvider>(context, listen: false).signInWithGoogle(),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 24),
+                                  _socialButton(
+                                    label: 'Facebook',
+                                    onTap: () => _handleSocialLogin(
+                                      () => Provider.of<AuthProvider>(context, listen: false).signInWithFacebook(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              const SizedBox(height: 15),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "New here? ",
+                                    style: TextStyle(
+                                        color: Colors.white.withOpacity(0.5)),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      debugPrint('Sign Up button tapped');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const RegisterScreen()),
+                                      );
+                                    },
+                                    child: const Text(
+                                      'Create an account',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            )],
+              ],
             ),
           ),
         ],
