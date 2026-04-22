@@ -11,6 +11,10 @@ import 'features/products/domain/entities/product_entity.dart';
 import 'features/cart/presentation/screens/cart_screen.dart';
 import 'features/favorites/presentation/screens/favorites_screen.dart';
 import 'features/profile/presentation/screens/profile_screen.dart';
+import 'features/profile/presentation/screens/notifications_screen.dart';
+import 'features/profile/presentation/screens/privacy_security_screen.dart';
+import 'features/profile/presentation/screens/help_support_screen.dart';
+import 'features/profile/presentation/screens/about_screen.dart';
 import 'features/admin/presentation/screens/admin_orders_screen.dart';
 import 'features/admin/presentation/screens/admin_product_list_screen.dart';
 import 'features/support/presentation/screens/support_screen.dart';
@@ -116,6 +120,10 @@ class _MyAppState extends State<MyApp> {
           '/admin': (context) => const AdminDashboardScreen(),
           '/admin/orders': (context) => const AdminOrdersScreen(),
           '/admin/products': (context) => const AdminProductListScreen(),
+          '/notifications': (context) => const NotificationsScreen(),
+          '/privacy_security': (context) => const PrivacySecurityScreen(),
+          '/help_support': (context) => const HelpSupportScreen(),
+          '/about': (context) => const AboutScreen(),
           '/cart': (context) => const CartScreen(),
           '/favorites': (context) => const FavoritesScreen(),
           '/support': (context) => const SupportScreen(),

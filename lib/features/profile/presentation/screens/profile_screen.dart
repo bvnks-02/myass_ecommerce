@@ -547,10 +547,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Notifications',
             'Manage your notifications',
             () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Notifications coming soon!')),
-              );
+              Navigator.pushNamed(context, '/notifications');
             },
           ),
           _buildSettingItem(
@@ -558,10 +555,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Privacy & Security',
             'Manage your privacy settings',
             () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Settings coming soon!')),
-              );
+              Navigator.pushNamed(context, '/privacy_security');
             },
           ),
           _buildSettingItem(
@@ -569,10 +563,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'Help & Support',
             'Get help and support',
             () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Support coming soon!')),
-              );
+              Navigator.pushNamed(context, '/help_support');
             },
           ),
           _buildSettingItem(
@@ -580,9 +571,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             'About',
             'App version 1.0.0',
             () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Myass E-commerce v1.0.0')),
-              );
+              Navigator.pushNamed(context, '/about');
             },
           ),
           _buildSettingItem(
