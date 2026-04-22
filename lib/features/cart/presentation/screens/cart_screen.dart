@@ -348,9 +348,13 @@ class _CartScreenState extends State<CartScreen> {
             maxLines: 3,
             decoration: InputDecoration(
               hintText: 'Delivery Address',
-              prefixIcon: IconButton(
-                icon: const Icon(Icons.location_on, color: Colors.white),
-                onPressed: _getCurrentLocation,
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(bottom: 50.0,right: 5),
+                child: IconButton(
+                  icon: const Icon(Icons.location_on, color: Colors.white),
+                  onPressed: _getCurrentLocation,
+                  padding: const EdgeInsets.all(8.0),
+                ),
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
