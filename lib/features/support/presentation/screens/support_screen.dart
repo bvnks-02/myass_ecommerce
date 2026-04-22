@@ -35,7 +35,7 @@ class _SupportScreenState extends State<SupportScreen> {
   }
 
   Future<void> _launchWhatsApp() async {
-    final Uri whatsappUri = Uri.parse('https://wa.me/1234567890');
+    final Uri whatsappUri = Uri.parse('https://wa.me/213542455634');
     if (!await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -48,7 +48,7 @@ class _SupportScreenState extends State<SupportScreen> {
   Future<void> _launchEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
-      path: 'support@myass.com',
+      path: 'myazzalgérie@gmail.com',
       query: 'subject=Support Request',
     );
     if (!await launchUrl(emailUri)) {
