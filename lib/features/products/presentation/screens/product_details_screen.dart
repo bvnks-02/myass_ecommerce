@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../domain/entities/product_entity.dart';
@@ -143,7 +146,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ),
           Row(
             children: [
-              _iconBtn(Icons.share, () {}),
+              _iconBtn(
+                Icons.share,
+                () => _showShareBottomSheet(),
+              ),
               const SizedBox(width: 8),
               Consumer<FavoritesProvider>(
                 builder: (context, favorites, _) {
@@ -151,7 +157,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   return _iconBtn(
                     isFav ? Icons.favorite : Icons.favorite_border,
                     () => favorites.toggleFavorite(widget.product),
-                    iconColor: isFav ? Colors.red : Colors.white,
+                    iconColor: Colors.white,
                   );
                 },
               ),
@@ -176,6 +182,139 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         child: Icon(icon, size: 18, color: iconColor),
       ),
     );
+  }
+
+  void _showShareBottomSheet() {
+    final shareText = 'Check out this ${widget.product.name}!\n\nPrice: ${CurrencyService.formatPrice(widget.product.price)}\n\n${widget.product.description}';
+    
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: _surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Share via',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _shareOption(
+                  icon: FaIcon(FontAwesomeIcons.whatsapp, size: 28, color: const Color(0xFF25D366)),
+                  label: 'WhatsApp',
+                  color: const Color(0xFF25D366),
+                  onTap: () {
+                    final whatsappUrl = 'https://wa.me/?text=${Uri.encodeComponent(shareText)}';
+                    _launchUrl(whatsappUrl);
+                  },
+                ),
+                _shareOption(
+                  icon: FaIcon(FontAwesomeIcons.facebook, size: 28, color: const Color(0xFF1877F2)),
+                  label: 'Facebook',
+                  color: const Color(0xFF1877F2),
+                  onTap: () {
+                    final facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(shareText)}';
+                    _launchUrl(facebookUrl);
+                  },
+                ),
+                _shareOption(
+                  icon: FaIcon(FontAwesomeIcons.instagram, size: 28, color: const Color(0xFFE4405F)),
+                  label: 'Instagram',
+                  color: const Color(0xFFE4405F),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Instagram requires image sharing'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                ),
+                _shareOption(
+                  icon: FaIcon(FontAwesomeIcons.link, size: 28, color: const Color(0xFF666666)),
+                  label: 'Copy Link',
+                  color: const Color(0xFF666666),
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: shareText));
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Copied to clipboard!'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shareOption({
+    required Widget icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+        onTap();
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Center(child: icon),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Could not launch'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    }
   }
 
   // ─────────────────────────────────────────────
