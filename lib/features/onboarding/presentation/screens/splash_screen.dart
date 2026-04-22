@@ -61,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
             // 1. Stylized M Logo (Appears first, stays longer)
             Center(
               child: Image.asset(
-                'assets/images/logo.jpg',
+                'assets/images/logo.jpeg',
                 width: 150,
                 fit: BoxFit.contain,
               )
@@ -81,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
             if (_showSplashImage)
               Center(
                 child: Image.asset(
-                  'assets/images/splash.jpg',
+                  'assets/images/splash.jpeg',
                   width: 300,
                   fit: BoxFit.contain,
                 )

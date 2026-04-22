@@ -158,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Colors.white.withOpacity(0.1),
                                     width: 1),
                                 image: const DecorationImage(
-                                  image: AssetImage('assets/images/logo.jpg'),
+                                  image: AssetImage('assets/images/logo.jpeg'),
                                   fit: BoxFit.cover,
                                 ),
                               ),

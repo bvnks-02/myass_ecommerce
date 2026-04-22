@@ -1,4 +1,4 @@
-name: myass_ecommerce
+name: myazz
 description: A complete e-commerce mobile app for MYASS Tech/Music/Headphones store
 
 publish_to: 'none'
@@ -30,6 +30,8 @@ dependencies:
   equatable: ^2.0.5
   dartz: ^0.10.1
   font_awesome_flutter: ^11.0.0
+  geolocator: ^10.1.0
+  geocoding: ^2.1.0
 
 dev_dependencies:
   flutter_test:

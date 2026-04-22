@@ -108,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
               borderRadius: BorderRadius.circular(10),
               image: const DecorationImage(
                 image: AssetImage(
-                    'assets/images/logo.jpg'), // using logo as placeholder for the cheetah
+                    'assets/images/logo.jpeg'), // using logo as placeholder for the cheetah
                 fit: BoxFit.cover,
               ),
             ),
@@ -156,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 15),
           // Customer Service Icon
           IconButton(
-            icon: const Icon(Icons.headset_mic_outlined, color: Colors.white),
+            icon: const Icon(Icons.support_agent, color: Colors.white),
             onPressed: () {
               Navigator.pushNamed(context, '/support');
             },
