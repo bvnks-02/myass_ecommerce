@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
@@ -59,6 +60,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  StreamSubscription<AuthState>? _authSubscription;
+
   @override
   void initState() {
     super.initState();
@@ -66,16 +69,23 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handlePasswordReset() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
       final session = data.session;
       if (session != null && data.event == AuthChangeEvent.passwordRecovery) {
         // User clicked password reset link, navigate to reset password screen
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
           Navigator.of(context, rootNavigator: true)
               .pushNamedAndRemoveUntil('/reset_password', (route) => false);
         });
       }
     });
+  }
+
+  @override
+  void dispose() {
+    _authSubscription?.cancel();
+    super.dispose();
   }
 
   @override

@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use, unused_import, unused_field, prefer_final_fields
+// ignore_for_file: deprecated_member_use, unused_import, unused_field, prefer_final_fields, prefer_const_constructors, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
