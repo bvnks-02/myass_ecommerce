@@ -89,11 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
       
       if (mounted && authProvider.isAuthenticated) {
         await authProvider.refreshRole();
-        if (authProvider.isAdmin) {
-          Navigator.pushReplacementNamed(context, '/admin');
-        } else {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
+        // Always navigate to home for social login, even for admin users
+        Navigator.pushReplacementNamed(context, '/home');
       }
     } catch (e) {
       if (mounted) {
