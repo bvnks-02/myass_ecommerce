@@ -24,6 +24,7 @@ import 'theme/app_theme.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/forgot_password_screen.dart';
+import 'features/auth/presentation/screens/reset_password_screen.dart';
 import 'features/products/presentation/providers/products_provider.dart';
 import 'features/products/data/repositories/product_repository_impl.dart';
 import 'features/products/domain/usecases/get_products.dart';
@@ -45,8 +46,32 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _handlePasswordReset();
+  }
+
+  void _handlePasswordReset() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final session = data.session;
+      if (session != null && data.event == AuthChangeEvent.passwordRecovery) {
+        // User clicked password reset link, navigate to reset password screen
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context, rootNavigator: true)
+              .pushNamedAndRemoveUntil('/reset_password', (route) => false);
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,11 +94,23 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         home: const SplashScreen(),
+        initialRoute: '/',
+        onGenerateRoute: (settings) {
+          // Handle web hash routing for password reset
+          if (settings.name == '/reset_password' || 
+              settings.name?.contains('reset_password') == true) {
+            return MaterialPageRoute(
+              builder: (context) => const ResetPasswordScreen(),
+            );
+          }
+          return null;
+        },
         routes: {
           '/onboarding': (context) => const OnboardingScreen(),
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/forgot_password': (context) => const ForgotPasswordScreen(),
+          '/reset_password': (context) => const ResetPasswordScreen(),
           '/home': (context) => const MainScreen(),
           '/admin': (context) => const AdminDashboardScreen(),
           '/admin/orders': (context) => const AdminOrdersScreen(),

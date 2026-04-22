@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -137,7 +138,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('Starting Google sign in...');
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'com.example.myass_ecommerce://login-callback/',
+        redirectTo: 'com.example.myazz://login-callback/',
       );
       debugPrint('Google OAuth initiated successfully');
     } on AuthException catch (e) {
@@ -160,7 +161,7 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('Starting Facebook sign in...');
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.facebook,
-        redirectTo: 'com.example.myass_ecommerce://login-callback/',
+        redirectTo: 'com.example.myazz://login-callback/',
       );
       debugPrint('Facebook OAuth initiated successfully');
     } on AuthException catch (e) {
@@ -180,12 +181,39 @@ class AuthProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
     try {
-      await _supabase.auth.resetPasswordForEmail(email);
+      // Use web URL for web, deep link for mobile
+      final redirectUrl = kIsWeb
+          ? 'http://localhost:3000/#/reset_password'
+          : 'com.example.myazz://reset_password/';
+      
+      await _supabase.auth.resetPasswordForEmail(
+        email,
+        redirectTo: redirectUrl,
+      );
       _errorMessage = null;
     } on AuthException catch (e) {
       _errorMessage = e.message;
     } catch (e) {
       _errorMessage = 'Failed to send reset email. Please try again.';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updatePassword(String newPassword) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+    try {
+      await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      _errorMessage = null;
+    } on AuthException catch (e) {
+      _errorMessage = e.message;
+    } catch (e) {
+      _errorMessage = 'Failed to update password. Please try again.';
     } finally {
       _isLoading = false;
       notifyListeners();
