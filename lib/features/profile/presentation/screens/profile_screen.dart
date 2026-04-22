@@ -42,7 +42,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       final supabase = Supabase.instance.client;
       final user = supabase.auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        if (mounted) {
+          setState(() => _isLoadingOrders = false);
+        }
+        return;
+      }
 
       final response = await supabase
           .from('orders')
