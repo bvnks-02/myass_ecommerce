@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
@@ -97,13 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTopBar(List<ProductEntity> allProducts) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.padding(context)),
       child: Row(
         children: [
           // Logo / Avatar
           Container(
-            width: 45,
-            height: 45,
+            width: ResponsiveUtils.sw(context, 45),
+            height: ResponsiveUtils.sh(context, 45),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               image: const DecorationImage(
@@ -113,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 15),
+          SizedBox(width: ResponsiveUtils.sw(context, 15)),
           // Search Bar
           Expanded(
             child: GestureDetector(
@@ -124,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               child: Container(
-                height: 45,
+                height: ResponsiveUtils.sh(context, 45),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(25),
@@ -135,15 +136,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 child: Row(
                   children: [
-                    const SizedBox(width: 15),
-                    Icon(Icons.search, color: Colors.grey[400], size: 20),
-                    const SizedBox(width: 10),
+                    SizedBox(width: ResponsiveUtils.sw(context, 15)),
+                    Icon(Icons.search, color: Colors.grey[400], size: ResponsiveUtils.sf(context, 20)),
+                    SizedBox(width: ResponsiveUtils.sw(context, 10)),
                     Expanded(
                       child: Text(
                         'Search luxury watches...',
                         style: TextStyle(
                           color: Colors.grey[500],
-                          fontSize: 14,
+                          fontSize: ResponsiveUtils.sf(context, 14),
                           fontFamily: 'Inter',
                         ),
                       ),
@@ -153,7 +154,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 15),
+          SizedBox(width: ResponsiveUtils.sw(context, 15)),
           // Customer Service Icon
           IconButton(
             icon: const Icon(Icons.support_agent, color: Colors.white),
@@ -240,12 +241,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategories() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.padding(context)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: 30,
+            height: ResponsiveUtils.sh(context, 30),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _categories.length,
@@ -260,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     });
                   },
                   child: Container(
-                    margin: const EdgeInsets.only(right: 25),
+                    margin: EdgeInsets.only(right: ResponsiveUtils.sw(context, 25)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
@@ -271,15 +272,15 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: isSelected ? Colors.white : Colors.grey[500],
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
-                            fontSize: 15,
+                            fontSize: ResponsiveUtils.sf(context, 15),
                             fontFamily: 'Inter',
                           ),
                         ),
-                        const SizedBox(height: 5),
+                        SizedBox(height: ResponsiveUtils.sh(context, 5)),
                         if (isSelected)
                           Container(
-                            height: 2,
-                            width: 25,
+                            height: ResponsiveUtils.sh(context, 2),
+                            width: ResponsiveUtils.sw(context, 25),
                             color: Colors.white,
                           ),
                       ],
@@ -289,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: ResponsiveUtils.sh(context, 10)),
           Divider(
               color: Colors.white.withOpacity(0.2), height: 1, thickness: 1),
         ],
@@ -298,34 +299,23 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProductGrid(List<ProductEntity> products) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        int crossAxisCount = 2;
-        if (constraints.maxWidth > 900) {
-          crossAxisCount = 4;
-        } else if (constraints.maxWidth > 600) {
-          crossAxisCount = 3;
-        }
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: 0.65,
-              crossAxisSpacing: 15,
-              mainAxisSpacing: 15,
-            ),
-            itemCount: products.length,
-            itemBuilder: (context, index) {
-              final product = products[index];
-              return _buildProductCard(product);
-            },
-          ),
-        );
-      },
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.padding(context)),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: ResponsiveUtils.gridAspectRatio(context),
+          crossAxisSpacing: ResponsiveUtils.sw(context, 15),
+          mainAxisSpacing: ResponsiveUtils.sh(context, 15),
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return _buildProductCard(product);
+        },
+      ),
     );
   }
 
@@ -402,28 +392,28 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               // Product Info at bottom
               Positioned(
-                bottom: 12,
-                left: 12,
-                right: 50,
+                bottom: ResponsiveUtils.sh(context, 12),
+                left: ResponsiveUtils.sw(context, 12),
+                right: ResponsiveUtils.sw(context, 50),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       product.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: ResponsiveUtils.sf(context, 13),
                         fontWeight: FontWeight.w600,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: ResponsiveUtils.sh(context, 2)),
                     Text(
                       CurrencyService.formatPrice(product.price),
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
-                        fontSize: 12,
+                        fontSize: ResponsiveUtils.sf(context, 12),
                       ),
                     ),
                   ],
@@ -431,8 +421,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               // Add to cart button (plus) at bottom right
               Positioned(
-                bottom: 12,
-                right: 10,
+                bottom: ResponsiveUtils.sh(context, 12),
+                right: ResponsiveUtils.sw(context, 10),
                 child: GestureDetector(
                   onTap: () {
                     final cartProvider = Provider.of<CartProvider>(context, listen: false);
@@ -453,23 +443,23 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                   child: Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryColor,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add,
                       color: Colors.black,
-                      size: 18,
+                      size: ResponsiveUtils.sf(context, 18),
                     ),
                   ),
                 ),
               ),
               // Favorite toggle - extracted to separate widget
               Positioned(
-                top: 10,
-                right: 10,
+                top: ResponsiveUtils.sh(context, 10),
+                right: ResponsiveUtils.sw(context, 10),
                 child: _FavoriteIconButton(productId: product.id, product: product),
               ),
             ],
@@ -499,7 +489,7 @@ class _FavoriteIconButton extends StatelessWidget {
             favorites.toggleFavorite(product);
           },
           child: Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.5),
               shape: BoxShape.circle,
@@ -507,7 +497,7 @@ class _FavoriteIconButton extends StatelessWidget {
             child: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
               color: isFavorite ? Colors.white : Colors.white70,
-              size: 18,
+              size: ResponsiveUtils.sf(context, 18),
             ),
           ),
         );
@@ -557,29 +547,29 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
           leading: product.image.startsWith('assets/')
               ? Image.asset(
                   product.image,
-                  width: 50,
-                  height: 50,
+                  width: ResponsiveUtils.sw(context, 50),
+                  height: ResponsiveUtils.sh(context, 50),
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
+                  errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
                 )
               : CachedNetworkImage(
                   imageUrl: product.image,
-                  width: 50,
-                  height: 50,
+                  width: ResponsiveUtils.sw(context, 50),
+                  height: ResponsiveUtils.sh(context, 50),
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => const Icon(
+                  placeholder: (context, url) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
-                  errorWidget: (context, url, error) => const Icon(
+                  errorWidget: (context, url, error) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
                 ),
           title: Text(
@@ -612,29 +602,29 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
           leading: product.image.startsWith('assets/')
               ? Image.asset(
                   product.image,
-                  width: 50,
-                  height: 50,
+                  width: ResponsiveUtils.sw(context, 50),
+                  height: ResponsiveUtils.sh(context, 50),
                   fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
+                  errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
                 )
               : CachedNetworkImage(
                   imageUrl: product.image,
-                  width: 50,
-                  height: 50,
+                  width: ResponsiveUtils.sw(context, 50),
+                  height: ResponsiveUtils.sh(context, 50),
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => const Icon(
+                  placeholder: (context, url) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
-                  errorWidget: (context, url, error) => const Icon(
+                  errorWidget: (context, url, error) => Icon(
                     Icons.watch,
                     color: Colors.white24,
-                    size: 50,
+                    size: ResponsiveUtils.sf(context, 50),
                   ),
                 ),
           title: Text(

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../products/domain/entities/product_entity.dart';
 import '../../../../providers/favorites_provider.dart';
 import '../../../../providers/cart_provider.dart';
@@ -28,13 +29,18 @@ class FavoritesScreen extends StatelessWidget {
           }
 
           return Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
+            padding: EdgeInsets.only(
+              left: ResponsiveUtils.padding(context),
+              right: ResponsiveUtils.padding(context),
+              top: ResponsiveUtils.sh(context, 16),
+              bottom: ResponsiveUtils.sh(context, 100)
+            ),
             child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15,
+                childAspectRatio: ResponsiveUtils.gridAspectRatio(context),
+                crossAxisSpacing: ResponsiveUtils.sw(context, 15),
+                mainAxisSpacing: ResponsiveUtils.sh(context, 15),
               ),
               itemCount: favorites.favoriteItems.length,
               itemBuilder: (context, index) {
@@ -54,35 +60,35 @@ class FavoritesScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(ResponsiveUtils.sw(context, 12)),
               decoration: BoxDecoration(
                 color: AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios,
                 color: Colors.white,
-                size: 20,
+                size: ResponsiveUtils.sf(context, 20),
               ),
             ),
           ),
-          const Text(
+          Text(
             'Favorites',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: ResponsiveUtils.sf(context, 20),
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 48),
+          SizedBox(width: ResponsiveUtils.sw(context, 48)),
         ],
       ),
     );
@@ -95,27 +101,27 @@ class FavoritesScreen extends StatelessWidget {
         children: [
           Icon(
             Icons.favorite_border,
-            size: 100,
+            size: ResponsiveUtils.sf(context, 100),
             color: Colors.grey[600],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Text(
             'No favorites yet',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: ResponsiveUtils.sf(context, 20),
               color: Colors.grey[400],
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: ResponsiveUtils.sh(context, 10)),
           Text(
             'Start adding products to your favorites',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: ResponsiveUtils.sf(context, 14),
               color: Colors.grey[500],
             ),
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: ResponsiveUtils.sh(context, 30)),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -204,28 +210,28 @@ class FavoritesScreen extends StatelessWidget {
                   ),
                   // Product Info at bottom
                   Positioned(
-                    bottom: 12,
-                    left: 12,
-                    right: 12,
+                    bottom: ResponsiveUtils.sh(context, 12),
+                    left: ResponsiveUtils.sw(context, 12),
+                    right: ResponsiveUtils.sw(context, 12),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           product.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 13,
+                            fontSize: ResponsiveUtils.sf(context, 13),
                             fontWeight: FontWeight.w600,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: ResponsiveUtils.sh(context, 2)),
                         Text(
                           CurrencyService.formatPrice(product.price),
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
-                            fontSize: 12,
+                            fontSize: ResponsiveUtils.sf(context, 12),
                           ),
                         ),
                       ],
@@ -233,14 +239,14 @@ class FavoritesScreen extends StatelessWidget {
                   ),
                   // Favorite toggle
                   Positioned(
-                    top: 10,
-                    right: 10,
+                    top: ResponsiveUtils.sh(context, 10),
+                    right: ResponsiveUtils.sw(context, 10),
                     child: GestureDetector(
                       onTap: () {
                         favorites.toggleFavorite(product);
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.5),
                           shape: BoxShape.circle,
@@ -248,7 +254,7 @@ class FavoritesScreen extends StatelessWidget {
                         child: Icon(
                           isFavorite ? Icons.favorite : Icons.favorite_border,
                           color: isFavorite ? Colors.white : Colors.white70,
-                          size: 18,
+                          size: ResponsiveUtils.sf(context, 18),
                         ),
                       ),
                     ),

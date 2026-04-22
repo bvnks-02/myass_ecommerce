@@ -11,6 +11,7 @@ import '../../../products/domain/entities/product_entity.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../services/api_service.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/utils/responsive_utils.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -88,27 +89,27 @@ class _CartScreenState extends State<CartScreen> {
         children: [
           Icon(
             Icons.shopping_cart_outlined,
-            size: 100,
+            size: ResponsiveUtils.sf(context, 100),
             color: Colors.grey[600],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Text(
             'Your cart is empty',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: ResponsiveUtils.sf(context, 20),
               color: Colors.grey[400],
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: ResponsiveUtils.sh(context, 10)),
           Text(
             'Add products to get started',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: ResponsiveUtils.sf(context, 14),
               color: Colors.grey[500],
             ),
           ),
-          const SizedBox(height: 30),
+          SizedBox(height: ResponsiveUtils.sh(context, 30)),
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pushNamedAndRemoveUntil(
@@ -149,8 +150,8 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: ResponsiveUtils.sw(context, 80),
+            height: ResponsiveUtils.sh(context, 80),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Colors.white.withOpacity(0.05),
@@ -161,43 +162,43 @@ class _CartScreenState extends State<CartScreen> {
               placeholder: (context, url) => const Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
-              errorWidget: (context, url, error) => const Icon(
+              errorWidget: (context, url, error) => Icon(
                 Icons.watch,
                 color: Colors.white,
-                size: 40,
+                size: ResponsiveUtils.sf(context, 40),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: ResponsiveUtils.sw(context, 16)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   product.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: ResponsiveUtils.sf(context, 16),
                     fontWeight: FontWeight.w600,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: ResponsiveUtils.sh(context, 4)),
                 if (selectedColor != null || selectedSize != null)
                   Text(
                     '${selectedColor != null ? 'Color: $selectedColor' : ''}${selectedColor != null && selectedSize != null ? ' • ' : ''}${selectedSize != null ? 'Size: $selectedSize' : ''}',
                     style: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 12,
+                      fontSize: ResponsiveUtils.sf(context, 12),
                     ),
                   ),
-                const SizedBox(height: 4),
+                SizedBox(height: ResponsiveUtils.sh(context, 4)),
                 Text(
                   CurrencyService.formatPrice(product.price),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: ResponsiveUtils.sf(context, 16),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -215,8 +216,8 @@ class _CartScreenState extends State<CartScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.remove,
-                          size: 18, color: Colors.white),
+                      icon: Icon(Icons.remove,
+                          size: ResponsiveUtils.sf(context, 18), color: Colors.white),
                       onPressed: quantity > 1
                           ? () {
                               cart.updateQuantity(
@@ -229,20 +230,20 @@ class _CartScreenState extends State<CartScreen> {
                           : null,
                     ),
                     Container(
-                      width: 30,
+                      width: ResponsiveUtils.sw(context, 30),
                       alignment: Alignment.center,
                       child: Text(
                         '$quantity',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 14,
+                          fontSize: ResponsiveUtils.sf(context, 14),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
                     IconButton(
                       icon:
-                          const Icon(Icons.add, size: 18, color: Colors.white),
+                          Icon(Icons.add, size: ResponsiveUtils.sf(context, 18), color: Colors.white),
                       onPressed: () {
                         cart.updateQuantity(
                           product.id, 
@@ -255,10 +256,10 @@ class _CartScreenState extends State<CartScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: ResponsiveUtils.sh(context, 8)),
               IconButton(
-                icon: const Icon(Icons.delete_outline,
-                    size: 20, color: Colors.red),
+                icon: Icon(Icons.delete_outline,
+                    size: ResponsiveUtils.sf(context, 20), color: Colors.red),
                 onPressed: () {
                   cart.removeFromCart(
                     product.id,
@@ -276,9 +277,9 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildCheckoutSection(CartProvider cart) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       margin:
-          const EdgeInsets.only(bottom: 100), // padding for floating bottom bar
+          EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 100)), // padding for floating bottom bar
       decoration: BoxDecoration(
         color: AppTheme.blackColor,
         border: Border(
@@ -290,25 +291,25 @@ class _CartScreenState extends State<CartScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Total',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 CurrencyService.formatPrice(cart.totalAmount),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: ResponsiveUtils.sf(context, 24),
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           TextField(
             controller: _nameController,
             decoration: InputDecoration(
@@ -328,7 +329,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           TextField(
             controller: _phoneController,
             keyboardType: TextInputType.phone,
@@ -349,7 +350,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           TextField(
             controller: _addressController,
             maxLines: 3,
@@ -377,10 +378,10 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           SizedBox(
             width: double.infinity,
-            height: 50,
+            height: ResponsiveUtils.sh(context, 50),
             child: ElevatedButton(
               onPressed: () {
                 _placeOrder(cart);
@@ -393,10 +394,10 @@ class _CartScreenState extends State<CartScreen> {
                   borderRadius: BorderRadius.circular(25),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Place Order',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: ResponsiveUtils.sf(context, 16),
                   fontWeight: FontWeight.w600,
                 ),
               ),

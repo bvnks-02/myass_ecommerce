@@ -21,6 +21,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
 import 'theme/app_theme.dart';
+import 'core/utils/responsive_utils.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
 import 'features/auth/presentation/screens/forgot_password_screen.dart';
@@ -174,7 +175,9 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
     });
   }
 
-  Widget _buildNavItem({
+  Widget _buildNavItem(
+    BuildContext context,
+    {
     required IconData icon,
     required IconData activeIcon,
     required int index,
@@ -198,15 +201,15 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                 child: Icon(
                   isSelected ? activeIcon : icon,
                   color: isSelected ? Colors.white : Colors.grey[600],
-                  size: 26,
+                  size: ResponsiveUtils.sf(context, 26),
                 ),
               ),
               if (isSelected) ...[
-                const SizedBox(height: 4),
+                SizedBox(height: ResponsiveUtils.sh(context, 4)),
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
-                  width: 5,
-                  height: 5,
+                  width: ResponsiveUtils.sw(context, 5),
+                  height: ResponsiveUtils.sh(context, 5),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     shape: BoxShape.circle,
@@ -235,7 +238,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
 
           // Floating Bottom Navigation Bar with curved design
           Positioned(
-            bottom: 35,
+            bottom: ResponsiveUtils.sh(context, 35),
             left: 0,
             right: 0,
             child: Center(
@@ -247,17 +250,18 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                   children: [
                     // Navigation bar container with custom curve
                     Container(
-                      height: 70,
-                      margin: const EdgeInsets.symmetric(horizontal: 20),
+                      height: ResponsiveUtils.sh(context, 70),
+                      margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.sw(context, 20)),
                       child: CustomPaint(
                         painter: CurvedBottomBarPainter(),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.sw(context, 10)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               // Home
                               _buildNavItem(
+                                context,
                                 icon: Icons.home_outlined,
                                 activeIcon: Icons.home,
                                 index: 0,
@@ -265,15 +269,17 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                               ),
                               // Favorites
                               _buildNavItem(
+                                context,
                                 icon: Icons.favorite_outline,
                                 activeIcon: Icons.favorite,
                                 index: 1,
                                 label: 'Favoris',
                               ),
                               // Spacer for elevated cart button
-                              const SizedBox(width: 70),
+                              SizedBox(width: ResponsiveUtils.sw(context, 70)),
                               // Saved
                               _buildNavItem(
+                                context,
                                 icon: Icons.watch_outlined,
                                 activeIcon: Icons.watch,
                                 index: 2,
@@ -281,6 +287,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                               ),
                               // Profile
                               _buildNavItem(
+                                context,
                                 icon: Icons.person_outline,
                                 activeIcon: Icons.person,
                                 index: 3,
@@ -293,7 +300,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     ),
                     // Elevated cart button in center (always on top)
                     Positioned(
-                      top: -35,
+                      top: -ResponsiveUtils.sh(context, 35),
                       child: ScaleTransition(
                         scale: _scaleAnimation,
                         child: GestureDetector(
@@ -304,8 +311,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                             Navigator.pushNamed(context, '/cart');
                           },
                           child: Container(
-                            width: 70,
-                            height: 70,
+                            width: ResponsiveUtils.sw(context, 70),
+                            height: ResponsiveUtils.sh(context, 70),
                             decoration: BoxDecoration(
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
@@ -336,15 +343,15 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.shopping_cart,
                                   color: Colors.white,
-                                  size: 32,
+                                  size: ResponsiveUtils.sf(context, 32),
                                 ),
                                 // Cart badge
                                 Positioned(
-                                  top: 8,
-                                  right: 8,
+                                  top: ResponsiveUtils.sh(context, 8),
+                                  right: ResponsiveUtils.sw(context, 8),
                                   child: Selector<CartProvider, int>(
                                     selector: (context, cart) => cart.itemCount,
                                     builder: (context, itemCount, child) {
@@ -352,7 +359,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                         return const SizedBox.shrink();
                                       }
                                       return Container(
-                                        padding: const EdgeInsets.all(6),
+                                        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
                                         decoration: BoxDecoration(
                                           gradient: const LinearGradient(
                                             colors: [Colors.red, Colors.redAccent],
@@ -367,9 +374,9 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                         ),
                                         child: Text(
                                           '$itemCount',
-                                          style: const TextStyle(
+                                          style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: 12,
+                                            fontSize: ResponsiveUtils.sf(context, 12),
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),

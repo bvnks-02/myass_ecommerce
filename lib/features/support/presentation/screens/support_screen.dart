@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../providers/support_provider.dart';
 import '../../domain/entities/faq_model.dart';
 
@@ -106,18 +107,23 @@ class _SupportScreenState extends State<SupportScreen> {
             _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: 100),
+                padding: EdgeInsets.only(
+                  left: ResponsiveUtils.padding(context),
+                  right: ResponsiveUtils.padding(context),
+                  top: ResponsiveUtils.sh(context, 20),
+                  bottom: ResponsiveUtils.sh(context, 100)
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildSearchBar(),
-                    const SizedBox(height: 25),
+                    SizedBox(height: ResponsiveUtils.sh(context, 25)),
                     _buildFAQSection(),
-                    const SizedBox(height: 25),
+                    SizedBox(height: ResponsiveUtils.sh(context, 25)),
                     _buildOrdersHelpSection(),
-                    const SizedBox(height: 25),
+                    SizedBox(height: ResponsiveUtils.sh(context, 25)),
                     _buildContactSupportSection(),
-                    const SizedBox(height: 25),
+                    SizedBox(height: ResponsiveUtils.sh(context, 25)),
                     _buildReportProblemSection(),
                   ],
                 ),
@@ -131,35 +137,35 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(ResponsiveUtils.sw(context, 12)),
               decoration: BoxDecoration(
                 color: AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios,
                 color: Colors.white,
-                size: 20,
+                size: ResponsiveUtils.sf(context, 20),
               ),
             ),
           ),
-          const Text(
+          Text(
             'Service Client',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: ResponsiveUtils.sf(context, 20),
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 48),
+          SizedBox(width: ResponsiveUtils.sw(context, 48)),
         ],
       ),
     );
@@ -167,7 +173,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      height: 50,
+      height: ResponsiveUtils.sh(context, 50),
       decoration: BoxDecoration(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(25),
@@ -178,9 +184,9 @@ class _SupportScreenState extends State<SupportScreen> {
       ),
       child: Row(
         children: [
-          const SizedBox(width: 15),
-          Icon(Icons.search, color: Colors.grey[400], size: 20),
-          const SizedBox(width: 10),
+          SizedBox(width: ResponsiveUtils.sw(context, 15)),
+          Icon(Icons.search, color: Colors.grey[400], size: ResponsiveUtils.sf(context, 20)),
+          SizedBox(width: ResponsiveUtils.sw(context, 10)),
           Expanded(
             child: TextField(
               controller: _searchController,
@@ -189,7 +195,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 hintText: 'Search for help...',
                 hintStyle: TextStyle(
                   color: Colors.grey[500],
-                  fontSize: 14,
+                  fontSize: ResponsiveUtils.sf(context, 14),
                 ),
                 border: InputBorder.none,
                 enabledBorder: InputBorder.none,
@@ -202,7 +208,7 @@ class _SupportScreenState extends State<SupportScreen> {
           ),
           if (_searchController.text.isNotEmpty)
             IconButton(
-              icon: Icon(Icons.clear, color: Colors.grey[400], size: 20),
+              icon: Icon(Icons.clear, color: Colors.grey[400], size: ResponsiveUtils.sf(context, 20)),
               onPressed: () {
                 _searchController.clear();
                 context.read<SupportProvider>().clearSearch();
@@ -215,7 +221,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildFAQSection() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -226,19 +232,19 @@ class _SupportScreenState extends State<SupportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.help_outline, color: Colors.white, size: 24),
-              const SizedBox(width: 10),
-              const Text(
+              Icon(Icons.help_outline, color: Colors.white, size: ResponsiveUtils.sf(context, 24)),
+              SizedBox(width: ResponsiveUtils.sw(context, 10)),
+              Text(
                 'FAQ',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Consumer<SupportProvider>(
             builder: (context, supportProvider, _) {
               final faqs = supportProvider.faqs;
@@ -283,9 +289,9 @@ class _SupportScreenState extends State<SupportScreen> {
         collapsedIconColor: Colors.grey[400],
         title: Text(
           faq.question,
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: ResponsiveUtils.sf(context, 14),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -303,17 +309,17 @@ class _SupportScreenState extends State<SupportScreen> {
                   faq.category,
                   style: TextStyle(
                     color: Colors.grey[400],
-                    fontSize: 11,
+                    fontSize: ResponsiveUtils.sf(context, 11),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: ResponsiveUtils.sh(context, 10)),
               Text(
                 faq.answer,
                 style: TextStyle(
                   color: Colors.grey[300],
-                  fontSize: 13,
+                  fontSize: ResponsiveUtils.sf(context, 13),
                   height: 1.4,
                 ),
               ),
@@ -326,7 +332,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildOrdersHelpSection() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -337,19 +343,19 @@ class _SupportScreenState extends State<SupportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.receipt_long, color: Colors.white, size: 24),
-              const SizedBox(width: 10),
-              const Text(
+              Icon(Icons.receipt_long, color: Colors.white, size: ResponsiveUtils.sf(context, 24)),
+              SizedBox(width: ResponsiveUtils.sw(context, 10)),
+              Text(
                 'Orders Help',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           _buildOrderHelpItem(
             Icons.local_shipping,
             'Track Order',
@@ -385,7 +391,7 @@ class _SupportScreenState extends State<SupportScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(15),
+        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 15)),
         decoration: BoxDecoration(
           color: AppTheme.cardColorSecondary,
           borderRadius: BorderRadius.circular(15),
@@ -407,24 +413,24 @@ class _SupportScreenState extends State<SupportScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: ResponsiveUtils.sf(context, 14),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  SizedBox(height: ResponsiveUtils.sh(context, 3)),
                   Text(
                     subtitle,
                     style: TextStyle(
                       color: Colors.grey[400],
-                      fontSize: 12,
+                      fontSize: ResponsiveUtils.sf(context, 12),
                     ),
                   ),
                 ],
               ),
             ),
-            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+            Icon(Icons.arrow_forward_ios, color: Colors.grey, size: ResponsiveUtils.sf(context, 16)),
           ],
         ),
       ),
@@ -433,7 +439,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildContactSupportSection() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -444,19 +450,19 @@ class _SupportScreenState extends State<SupportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.support_agent, color: Colors.white, size: 24),
-              const SizedBox(width: 10),
-              const Text(
+              Icon(Icons.support_agent, color: Colors.white, size: ResponsiveUtils.sf(context, 24)),
+              SizedBox(width: ResponsiveUtils.sw(context, 10)),
+              Text(
                 'Contact Support',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Row(
             children: [
               Expanded(
@@ -467,7 +473,7 @@ class _SupportScreenState extends State<SupportScreen> {
                   _launchWhatsApp,
                 ),
               ),
-              const SizedBox(width: 15),
+              SizedBox(width: ResponsiveUtils.sw(context, 15)),
               Expanded(
                 child: _buildContactButton(
                   FontAwesomeIcons.google,
@@ -487,7 +493,7 @@ class _SupportScreenState extends State<SupportScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 15),
+        padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.sh(context, 15)),
         decoration: BoxDecoration(
           color: color.withOpacity(0.2),
           borderRadius: BorderRadius.circular(15),
@@ -495,13 +501,13 @@ class _SupportScreenState extends State<SupportScreen> {
         ),
         child: Column(
           children: [
-            FaIcon(icon, color: color, size: 28),
-            const SizedBox(height: 8),
+            FaIcon(icon, color: color, size: ResponsiveUtils.sf(context, 28)),
+            SizedBox(height: ResponsiveUtils.sh(context, 8)),
             Text(
               label,
               style: TextStyle(
                 color: color,
-                fontSize: 14,
+                fontSize: ResponsiveUtils.sf(context, 14),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -513,7 +519,7 @@ class _SupportScreenState extends State<SupportScreen> {
 
   Widget _buildReportProblemSection() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -524,19 +530,19 @@ class _SupportScreenState extends State<SupportScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.report_problem, color: Colors.white, size: 24),
-              const SizedBox(width: 10),
-              const Text(
+              Icon(Icons.report_problem, color: Colors.white, size: ResponsiveUtils.sf(context, 24)),
+              SizedBox(width: ResponsiveUtils.sw(context, 10)),
+              Text(
                 'Report a Problem',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           TextField(
             controller: _problemTitleController,
             style: const TextStyle(color: Colors.white),
@@ -558,7 +564,7 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           TextField(
             controller: _problemDescriptionController,
             style: const TextStyle(color: Colors.white),
@@ -581,7 +587,7 @@ class _SupportScreenState extends State<SupportScreen> {
               ),
             ),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -589,15 +595,15 @@ class _SupportScreenState extends State<SupportScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.sh(context, 15)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 'Submit',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: ResponsiveUtils.sf(context, 14),
                   fontWeight: FontWeight.bold,
                 ),
               ),

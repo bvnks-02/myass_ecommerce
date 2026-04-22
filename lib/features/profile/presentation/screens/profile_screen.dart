@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../core/utils/responsive_utils.dart';
 import '../../../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -125,7 +126,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ? const Center(
                   child: CircularProgressIndicator(color: Colors.white))
               : SingleChildScrollView(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 20.0, bottom: 100),
+                  padding: EdgeInsets.only(
+                    left: ResponsiveUtils.padding(context),
+                    right: ResponsiveUtils.padding(context),
+                    top: ResponsiveUtils.sh(context, 20),
+                    bottom: ResponsiveUtils.sh(context, 100)
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -150,47 +156,47 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildHeader(BuildContext context, AuthProvider authProvider) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: () => Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(ResponsiveUtils.sw(context, 12)),
               decoration: BoxDecoration(
                 color: AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_back_ios,
                 color: Colors.white,
-                size: 20,
+                size: ResponsiveUtils.sf(context, 20),
               ),
             ),
           ),
-          const Text(
+          Text(
             'Profile',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 20,
+              fontSize: ResponsiveUtils.sf(context, 20),
               fontWeight: FontWeight.bold,
             ),
           ),
           GestureDetector(
             onTap: () => authProvider.refreshRole(),
             child: Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(ResponsiveUtils.sw(context, 12)),
               decoration: BoxDecoration(
                 color: AppTheme.cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.white.withOpacity(0.1)),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.refresh,
                 color: Colors.white70,
-                size: 20,
+                size: ResponsiveUtils.sf(context, 20),
               ),
             ),
           ),
@@ -207,31 +213,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         children: [
           Container(
-            width: 80,
-            height: 80,
+            width: ResponsiveUtils.sw(context, 80),
+            height: ResponsiveUtils.sh(context, 80),
             decoration: BoxDecoration(
               color: Colors.white.withOpacity(0.05),
               borderRadius: BorderRadius.circular(40),
               border: Border.all(color: Colors.white.withOpacity(0.1)),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.person,
-              size: 40,
+              size: ResponsiveUtils.sf(context, 40),
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: ResponsiveUtils.sh(context, 12)),
           Text(
             name,
-            style: const TextStyle(
-              fontSize: 20,
+            style: TextStyle(
+              fontSize: ResponsiveUtils.sf(context, 20),
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 5),
+          SizedBox(height: ResponsiveUtils.sh(context, 5)),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveUtils.sw(context, 12),
+              vertical: ResponsiveUtils.sh(context, 4)
+            ),
             decoration: BoxDecoration(
               color: authProvider.isAdmin
                   ? Colors.blue.withOpacity(0.2)
@@ -241,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Text(
               role,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: ResponsiveUtils.sf(context, 12),
                 color: authProvider.isAdmin ? Colors.blue : Colors.white70,
                 fontWeight: FontWeight.w600,
               ),
@@ -254,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildUserInfo() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -263,21 +272,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Personal Information',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: ResponsiveUtils.sf(context, 18),
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: ResponsiveUtils.sh(context, 20)),
           _buildInfoField(Icons.person, 'Full Name', _nameController),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           _buildInfoField(Icons.email, 'E-mail', _emailController, readOnly: true),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           _buildInfoField(Icons.phone, 'Phone', _phoneController),
-          const SizedBox(height: 25),
+          SizedBox(height: ResponsiveUtils.sh(context, 25)),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -285,22 +294,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                padding: EdgeInsets.symmetric(vertical: ResponsiveUtils.sh(context, 15)),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
               ),
               child: _isSaving
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                  ? SizedBox(
+                      height: ResponsiveUtils.sh(context, 20),
+                      width: ResponsiveUtils.sw(context, 20),
                       child: CircularProgressIndicator(
                           color: Colors.black, strokeWidth: 2),
                     )
-                  : const Text(
+                  : Text(
                       'Update Profile',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: ResponsiveUtils.sf(context, 14),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -336,7 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildOrderHistory() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -348,22 +357,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Order History',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
               ),
               if (!_isLoadingOrders)
                 IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white70, size: 20),
+                  icon: Icon(Icons.refresh, color: Colors.white70, size: ResponsiveUtils.sf(context, 20)),
                   onPressed: _refreshOrders,
                 ),
             ],
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           if (_isLoadingOrders)
             const Center(
               child: CircularProgressIndicator(color: Colors.white),
@@ -372,8 +381,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Center(
               child: Column(
                 children: [
-                  Icon(Icons.receipt_long, color: Colors.grey[600], size: 50),
-                  const SizedBox(height: 10),
+                  Icon(Icons.receipt_long, color: Colors.grey[600], size: ResponsiveUtils.sf(context, 50)),
+                  SizedBox(height: ResponsiveUtils.sh(context, 10)),
                   Text(
                     'No orders yet',
                     style: TextStyle(color: Colors.grey[400]),
@@ -407,7 +416,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               }
 
               return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
+                padding: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 10)),
                 child: _buildOrderItem(
                   'Order $orderId',
                   productName,
@@ -430,7 +439,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Color statusColor,
   ) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: EdgeInsets.all(ResponsiveUtils.sw(context, 15)),
       decoration: BoxDecoration(
         color: AppTheme.cardColorSecondary,
         borderRadius: BorderRadius.circular(15),
@@ -454,7 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   productName,
                   style: TextStyle(
                     color: Colors.grey[400],
-                    fontSize: 12,
+                    fontSize: ResponsiveUtils.sf(context, 12),
                   ),
                 ),
               ],
@@ -470,9 +479,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 5),
+              SizedBox(height: ResponsiveUtils.sh(context, 5)),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: EdgeInsets.symmetric(
+                  horizontal: ResponsiveUtils.sw(context, 8),
+                  vertical: ResponsiveUtils.sh(context, 4)
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(10),
@@ -481,7 +493,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   status,
                   style: TextStyle(
                     color: statusColor,
-                    fontSize: 10,
+                    fontSize: ResponsiveUtils.sf(context, 10),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -495,7 +507,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _buildSettings(AuthProvider authProvider) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
       decoration: BoxDecoration(
         color: AppTheme.cardColor,
         borderRadius: BorderRadius.circular(20),
@@ -504,15 +516,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Settings',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: ResponsiveUtils.sf(context, 18),
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
-          const SizedBox(height: 15),
+          SizedBox(height: ResponsiveUtils.sh(context, 15)),
           if (authProvider.isAdmin)
             _buildSettingItem(
               Icons.admin_panel_settings,
@@ -598,7 +610,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         style: TextStyle(color: Colors.grey[400]),
       ),
       trailing:
-          const Icon(Icons.arrow_forward_ios, color: Colors.grey, size: 16),
+          Icon(Icons.arrow_forward_ios, color: Colors.grey, size: ResponsiveUtils.sf(context, 16)),
       onTap: onTap,
     );
   }
