@@ -5,10 +5,8 @@ class InputValidator {
   static bool isValidEmail(String email) {
     if (email.isEmpty) return false;
     
-    // RFC 5322 compliant email regex
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$',
-    );
+    // Simplified email validation
+    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     
     return emailRegex.hasMatch(email) && email.length <= 254;
   }
@@ -65,8 +63,9 @@ class InputValidator {
       return 'Name is too long (max 100 characters)';
     }
     
-    // Only allow letters, spaces, hyphens, and apostrophes
-    if (!RegExp(r'^[a-zA-Z\s\-\'\.]+$').hasMatch(name)) {
+    // Only allow letters and spaces
+    final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
+    if (!nameRegex.hasMatch(name)) {
       return 'Name contains invalid characters';
     }
     
@@ -121,9 +120,7 @@ class InputValidator {
     }
     
     // Check for valid URL format
-    final urlRegex = RegExp(
-      r'^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$',
-    );
+    final urlRegex = RegExp(r'^https?:\/\/[^\s/$.?#].[^\s]*$');
     
     if (!urlRegex.hasMatch(url)) {
       return 'Invalid URL format';
@@ -189,7 +186,7 @@ class InputValidator {
       return 'This field is required';
     }
     
-    if (text.length > 0 && text.length < minLength) {
+    if (text.isNotEmpty && text.length < minLength) {
       return 'Must be at least $minLength characters';
     }
     

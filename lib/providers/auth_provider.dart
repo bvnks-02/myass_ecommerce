@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/security/rate_limiter.dart';
 
@@ -208,7 +207,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       // Use web URL for web, deep link for mobile
       final redirectUrl = kIsWeb
-          ? 'http://localhost:3000/#/reset_password'
+          ? const String.fromEnvironment('RESET_PASSWORD_URL', defaultValue: 'http://localhost:3000/#/reset_password')
           : 'com.example.myazz://reset_password/';
       
       await _supabase.auth.resetPasswordForEmail(

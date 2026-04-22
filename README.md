@@ -1,211 +1,411 @@
-# MYASS E-commerce Mobile App
+<div align="center">
 
-A complete e-commerce mobile app for MYASS Smart Watches store with Flutter frontend and Supabase backend.
+# MYASS E-Commerce Mobile App
 
-## Features
+[![Flutter](https://img.shields.io/badge/Flutter-3.0+-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.0+-0175C2?style=for-the-badge&logo=dart&logoColor=white)](https://dart.dev)
+[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-iOS%20%7C%20Android-lightgrey?style=for-the-badge)](https://flutter.dev/multi-platform)
 
-- **Dark Luxe Theme**: Modern, premium dark design with purple accents
-- **Product Catalog**: Browse smart watches and fitness trackers
-- **Shopping Cart**: Add to cart functionality with quantity management
-- **Favorites**: Save favorite products
-- **User Profile**: Manage account and view order history
-- **Order Management**: Complete order flow
-- **Search**: Product search functionality
-- **Categories**: Filter by product categories (Sport, Luxury, Fitness)
-- **Admin Dashboard**: Manage products and orders
+**A premium e-commerce mobile application for MYASS Smart Watches store**
 
-## Tech Stack
+Built with Flutter and Supabase, featuring a modern dark luxe design and comprehensive security measures.
 
-### Frontend (Flutter)
-- Flutter 3.0+
-- Provider for state management
-- Supabase Flutter SDK for authentication and database
-- Cached Network Images for image loading
-- Carousel Slider for product galleries
-- Shimmer for loading animations
+[Features](#-features) • [Installation](#-installation) • [Architecture](#-architecture) • [Security](#-security) • [Contributing](#-contributing)
 
-### Backend (Supabase)
-- Supabase Authentication (Email/Password, Google, Facebook OAuth)
-- PostgreSQL Database
-- Row Level Security (RLS) policies
-- Real-time subscriptions
-- Storage for product images
+</div>
 
-### Database Schema (Supabase)
-- `user_profiles` - User profiles with roles (customer/admin)
-- `products` - Products with categories and featured flags
-- `orders` - Order management
-- `order_items` - Order items with price tracking
+---
 
-## Project Structure
+## 📱 Features
+
+### User Experience
+- **🎨 Dark Luxe Theme** - Premium dark design with purple accents and glassmorphic UI elements
+- **🔍 Advanced Search** - Real-time product search with sanitization
+- **📂 Category Filtering** - Filter by Sport, Luxury, Fitness, Classic, and New arrivals
+- **❌ Favorites System** - Save and manage favorite products
+- **🛒 Shopping Cart** - Full cart management with quantity controls
+- **👤 User Profile** - Account management and order history
+- **📦 Order Tracking** - Complete order lifecycle management
+- **💬 Customer Support** - Integrated support system with FAQ and contact form
+
+### Authentication
+- **📧 Email/Password** - Secure authentication with email verification
+- **🔐 OAuth Providers** - Google and Facebook social login
+- **🔑 Password Reset** - Secure password recovery flow
+- **👑 Role-Based Access** - Customer and Admin roles with granular permissions
+
+### Admin Dashboard
+- **📊 Analytics Overview** - Dashboard with key metrics
+- **📦 Product Management** - Create, update, and delete products
+- **📋 Order Management** - View and manage customer orders
+- **👥 User Management** - Monitor and manage user accounts
+
+---
+
+## 🏗️ Architecture
+
+### Tech Stack
+
+#### Frontend
+```
+Flutter 3.0+
+├── UI Framework
+├── Provider (State Management)
+├── Supabase Flutter SDK
+├── Cached Network Images
+├── Carousel Slider
+├── Shimmer (Loading States)
+└── Lottie Animations
+```
+
+#### Backend
+```
+Supabase
+├── PostgreSQL Database
+├── Authentication Service
+├── Row Level Security (RLS)
+├── Real-time Subscriptions
+├── Storage Service
+└── Edge Functions
+```
+
+### Project Structure
 
 ```
 myass_ecommerce/
 ├── lib/
-│   ├── main.dart
+│   ├── main.dart                          # App entry point
 │   ├── core/
-│   │   ├── error/
-│   │   ├── services/
-│   │   ├── usecases/
-│   │   └── utils/
+│   │   ├── security/                      # Security utilities
+│   │   │   ├── input_sanitizer.dart
+│   │   │   ├── input_validator.dart
+│   │   │   └── rate_limiter.dart
+│   │   ├── services/                      # Core services
+│   │   ├── utils/                         # Utility functions
+│   │   └── error/                        # Error handling
 │   ├── features/
-│   │   ├── auth/
-│   │   ├── products/
-│   │   ├── cart/
-│   │   ├── favorites/
-│   │   ├── profile/
-│   │   ├── admin/
-│   │   └── onboarding/
-│   ├── providers/
-│   ├── services/
-│   └── theme/
+│   │   ├── auth/                          # Authentication flow
+│   │   │   ├── presentation/
+│   │   │   ├── domain/
+│   │   │   └── data/
+│   │   ├── products/                      # Product management
+│   │   ├── cart/                          # Shopping cart
+│   │   ├── favorites/                     # Favorites system
+│   │   ├── profile/                       # User profile
+│   │   ├── admin/                         # Admin dashboard
+│   │   ├── support/                       # Customer support
+│   │   └── onboarding/                    # Onboarding flow
+│   ├── providers/                         # State management
+│   ├── theme/                            # App theming
+│   └── services/                         # External services
 ├── assets/
-│   ├── images/
-│   ├── icons/
-│   └── lottie/
-├── supabase_schema.sql
-└── pubspec.yaml
+│   ├── images/                           # App images
+│   ├── icons/                            # Custom icons
+│   └── lottie/                           # Lottie animations
+├── android/                             # Android configuration
+├── web/                                 # Web configuration
+├── supabase_schema.sql                  # Database schema
+├── .env.example                         # Environment template
+├── .gitignore                           # Git ignore rules
+├── pubspec.yaml                         # Dependencies
+└── SECURITY_IMPLEMENTATION.md           # Security documentation
 ```
 
-## Installation
+### Database Schema
+
+| Table | Description | Key Features |
+|-------|-------------|--------------|
+| `user_profiles` | User accounts with roles | RLS enabled, role-based access |
+| `products` | Product catalog | Categories, pricing, featured flags |
+| `orders` | Order management | Status tracking, timestamps |
+| `order_items` | Order line items | Price snapshot, quantity |
+
+---
+
+## 🚀 Installation
 
 ### Prerequisites
-- Flutter SDK 3.0+
-- Supabase account (free tier works)
 
-### Frontend Setup
+- **Flutter SDK** 3.0 or higher
+- **Dart SDK** 3.0 or higher
+- **Supabase Account** (Free tier available)
+- **Android Studio** / **VS Code** with Flutter extension
+- **Git**
 
-1. Clone the repository
+### Quick Start
+
+1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/myass_ecommerce.git
 cd myass_ecommerce
 ```
 
-2. Install Flutter dependencies
+2. **Install dependencies**
 ```bash
 flutter pub get
 ```
 
-3. Configure Supabase
-- Create a new project in [Supabase](https://supabase.com)
-- Run the SQL from `supabase_schema.sql` in your Supabase SQL Editor
-- Copy your Supabase URL and anon key
-- Create a `.env` file in the project root:
+3. **Configure environment variables**
+```bash
+cp .env.example .env
 ```
-SUPABASE_URL=your_supabase_url
+
+Edit `.env` with your Supabase credentials:
+```env
+SUPABASE_URL=your_supabase_project_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. Run the app
+4. **Set up Supabase**
+- Create a new project at [supabase.com](https://supabase.com)
+- Run `supabase_schema.sql` in the SQL Editor
+- Create a storage bucket named `product-images`
+- Configure RLS policies
+
+5. **Run the app**
 ```bash
 flutter run
 ```
 
-## Supabase Setup
+### Platform-Specific Setup
 
-### Database Tables
-Run the SQL script `supabase_schema.sql` in your Supabase SQL Editor to create:
-- `user_profiles` table with RLS policies
-- `products` table with RLS policies
-- `orders` table with RLS policies
-- `order_items` table with RLS policies
-- Triggers for new user registration
-- Helper functions for admin role checking
-
-### Storage Setup
-Create a storage bucket named `product-images` in Supabase:
-- Make it public
-- Configure appropriate RLS policies for upload/download
-
-## Theme Configuration
-
-The app uses a Dark Luxe theme with:
-- **Primary Color**: #9B59B6 (Purple gradient)
-- **Background**: #000000 (Black)
-- **Card Background**: #1E1E1E / #2C2C2C
-- **Text**: #FFFFFF (White)
-- **Border Radius**: 20px for cards
-
-## Sample Data
-
-The Supabase schema includes sample products:
-- Apple Watch Series 9
-- Samsung Galaxy Watch 6
-- Garmin Fenix 7
-- Fitbit Versa 4
-- Fossil Gen 6
-- And more...
-
-## Development
-
-### Adding New Products
-1. Use the Admin Dashboard (requires admin role)
-2. Or add directly via Supabase dashboard
-3. Upload product images to Supabase Storage
-
-### Setting Admin Role
-To make a user an admin, update their role in Supabase:
-```sql
-UPDATE public.user_profiles 
-SET role = 'admin' 
-WHERE email = 'user@example.com';
-```
-
-### Customizing Theme
-Edit `lib/theme/app_theme.dart` to modify colors and styles.
-
-### Adding New Features
-1. Create new screens in `lib/features/`
-2. Add providers for state management if needed
-3. Update navigation in `main.dart`
-
-## Production Deployment
-
-### Frontend
-1. Build the release APK/AAB:
+#### iOS
 ```bash
-flutter build apk --release
-flutter build appbundle --release
+cd ios
+pod install
+cd ..
+flutter run
 ```
 
-### Supabase
-1. Enable proper RLS policies for production
-2. Set up authentication providers (Google, Facebook)
-3. Configure storage buckets with proper policies
-4. Enable database backups
+#### Android
+Ensure `minSdkVersion` is set to 21 or higher in `android/app/build.gradle`
 
-## Security Considerations
-
-- Row Level Security (RLS) is enabled on all tables
-- Authentication required for sensitive operations
-- Admin-only operations protected by role checks
-- Environment variables for sensitive data (.env file)
-- Never commit .env file to version control
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
-
-## Support
-
-For support and questions, please contact the development team or create an issue in the repository.
+#### Web
+```bash
+flutter run -d chrome
+```
 
 ---
 
-**MYASS** - Premium Smart Watches Store
-*Quality smart watches and fitness trackers*
+## 🔒 Security
 
-## Recent Changes
+This application implements comprehensive OWASP-compliant security measures:
 
-- Removed PHP backend - now using Supabase exclusively
-- Fixed order history to fetch real data from Supabase
-- Removed debug code from admin screens
-- Updated documentation for Supabase-only architecture
+### Input Sanitization
+- ✅ All user inputs sanitized (XSS prevention)
+- ✅ HTML tag removal
+- ✅ Script pattern detection
+- ✅ SQL injection pattern removal
+- ✅ URL sanitization (open redirect prevention)
+
+### Input Validation
+- ✅ RFC 5322 compliant email validation
+- ✅ Strong password requirements (8+ chars, mixed case, numbers, symbols)
+- ✅ Length limits on all inputs
+- ✅ Character restrictions
+- ✅ Dangerous pattern detection
+
+### Rate Limiting
+| Endpoint | Limit | Window |
+|----------|-------|--------|
+| Authentication | 5 requests | 15 minutes |
+| Password Reset | 3 requests | 1 hour |
+| Search | 30 requests | 1 minute |
+| Contact Form | 5 submissions | 1 hour |
+| General API | 100 requests | 1 minute |
+| Cart Operations | 50 requests | 1 minute |
+
+### Data Protection
+- ✅ Row Level Security (RLS) on all tables
+- ✅ Parameterized queries (SQL injection prevention)
+- ✅ Environment variables for secrets
+- ✅ `.env` excluded from version control
+- ✅ Role-based access control
+
+### Security Utilities
+- `lib/core/security/input_sanitizer.dart` - Sanitization functions
+- `lib/core/security/input_validator.dart` - Validation functions
+- `lib/core/security/rate_limiter.dart` - Rate limiting implementation
+
+📖 **Detailed security documentation**: See [SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)
+
+---
+
+## 🎨 Theme Configuration
+
+### Color Palette
+```dart
+Primary:      #9B59B6 (Purple Gradient)
+Secondary:    #8E44AD
+Background:   #000000 (Black)
+Card:         #1E1E1E / #2C2C2E
+Text:         #FFFFFF (White)
+Accent:       #E74C3C (Red for cart)
+```
+
+### Typography
+- **Font Family**: Inter (default)
+- **Headings**: Bold, 24-32px
+- **Body**: Regular, 14-16px
+- **Captions**: Light, 12px
+
+---
+
+## 📊 Development
+
+### Adding New Features
+
+1. **Create feature structure**
+```bash
+lib/features/your_feature/
+├── presentation/
+│   ├── screens/
+│   └── widgets/
+├── domain/
+│   ├── entities/
+│   └── usecases/
+└── data/
+    ├── models/
+    └── repositories/
+```
+
+2. **Add state management** (if needed)
+```dart
+// lib/providers/your_provider.dart
+class YourProvider extends ChangeNotifier {
+  // Implementation
+}
+```
+
+3. **Update navigation** in `main.dart`
+```dart
+routes: {
+  '/your_route': (context) => YourScreen(),
+}
+```
+
+### Setting Admin Role
+
+```sql
+UPDATE public.user_profiles 
+SET role = 'admin' 
+WHERE email = 'admin@example.com';
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+flutter test
+
+# Run with coverage
+flutter test --coverage
+
+# Run specific test file
+flutter test test/auth_test.dart
+```
+
+---
+
+## 📦 Production Deployment
+
+### Android
+
+```bash
+# Build APK
+flutter build apk --release
+
+# Build App Bundle (Play Store)
+flutter build appbundle --release
+```
+
+### iOS
+
+```bash
+# Build IPA
+flutter build ios --release
+```
+
+### Web
+
+```bash
+# Build web app
+flutter build web --release
+```
+
+### Supabase Production Checklist
+
+- [ ] Enable production RLS policies
+- [ ] Configure authentication providers
+- [ ] Set up storage bucket policies
+- [ ] Enable database backups
+- [ ] Configure custom domain
+- [ ] Set up monitoring and alerts
+- [ ] Review API rate limits
+- [ ] Enable audit logging
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please follow these guidelines:
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Style
+
+- Follow Dart effective Dart guidelines
+- Use meaningful variable and function names
+- Add comments for complex logic
+- Keep functions small and focused
+- Write tests for new features
+
+### Commit Messages
+
+```
+feat: add user profile screen
+fix: resolve cart calculation bug
+docs: update README with security info
+refactor: improve auth provider structure
+test: add unit tests for sanitization
+```
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 Support
+
+- 📧 Email: support@myazz.com
+- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/myass_ecommerce/issues)
+- 📖 Documentation: [SECURITY_IMPLEMENTATION.md](SECURITY_IMPLEMENTATION.md)
+
+---
+
+## 🙏 Acknowledgments
+
+- Flutter team for the amazing framework
+- Supabase for the excellent backend-as-a-service
+- Open source community for various packages
+
+---
+
+<div align="center">
+
+**Built with ❤️ by MYASS Team**
+
+[⬆ Back to Top](#myass-ecommerce-mobile-app)
+
+</div>
