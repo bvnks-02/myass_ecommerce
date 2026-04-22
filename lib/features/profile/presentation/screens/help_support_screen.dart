@@ -68,32 +68,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 30)),
             Text(
-              'FAQ',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: ResponsiveUtils.sf(context, 18),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: ResponsiveUtils.sh(context, 20)),
-            _buildFaqItem(
-              'How do I place an order?',
-              'Browse products, add to cart, and checkout. You can pay online or cash on delivery.',
-            ),
-            _buildFaqItem(
-              'How can I track my order?',
-              'Go to Profile > Order History to track your order status in real-time.',
-            ),
-            _buildFaqItem(
-              'What is your return policy?',
-              'You can return products within 14 days of delivery. Contact support for assistance.',
-            ),
-            _buildFaqItem(
-              'How do I change my password?',
-              'Go to Profile > Settings > Privacy & Security > Change Password.',
-            ),
-            SizedBox(height: ResponsiveUtils.sh(context, 30)),
-            Text(
               'Contact Information',
               style: TextStyle(
                 color: Colors.white,
@@ -169,39 +143,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     );
   }
 
-  Widget _buildFaqItem(String question, String answer) {
-    return Container(
-      margin: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 15)),
-      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
-      decoration: BoxDecoration(
-        color: AppTheme.cardColor,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            question,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: ResponsiveUtils.sf(context, 14),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.sh(context, 8)),
-          Text(
-            answer,
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: ResponsiveUtils.sf(context, 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  
   Widget _buildContactItem(IconData icon, String title, String value) {
     return Container(
       margin: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 15)),

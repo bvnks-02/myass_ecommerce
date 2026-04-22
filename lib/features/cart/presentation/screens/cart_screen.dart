@@ -277,133 +277,134 @@ class _CartScreenState extends State<CartScreen> {
 
   Widget _buildCheckoutSection(CartProvider cart) {
     return Container(
-      padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
-      margin:
-          EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 100)), // padding for floating bottom bar
       decoration: BoxDecoration(
         color: AppTheme.blackColor,
         border: Border(
             top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Total',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: ResponsiveUtils.sf(context, 18),
-                  fontWeight: FontWeight.w600,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: ResponsiveUtils.sf(context, 18),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              Text(
-                CurrencyService.formatPrice(cart.totalAmount),
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: ResponsiveUtils.sf(context, 24),
-                  fontWeight: FontWeight.bold,
+                Text(
+                  CurrencyService.formatPrice(cart.totalAmount),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: ResponsiveUtils.sf(context, 24),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: ResponsiveUtils.sh(context, 20)),
-          TextField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              hintText: 'Full Name',
-              prefixIcon: const Icon(Icons.person, color: Colors.white),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
-              ),
+              ],
             ),
-          ),
-          SizedBox(height: ResponsiveUtils.sh(context, 15)),
-          TextField(
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              hintText: 'Phone Number',
-              prefixIcon: const Icon(Icons.phone, color: Colors.white),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
-              ),
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.sh(context, 15)),
-          TextField(
-            controller: _addressController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Delivery Address',
-              prefixIcon: Padding(
-                padding: const EdgeInsets.only(bottom: 50.0,right: 5),
-                child: IconButton(
-                  icon: const Icon(Icons.location_on, color: Colors.white),
-                  onPressed: _getCurrentLocation,
-                  padding: const EdgeInsets.all(8.0),
+            SizedBox(height: ResponsiveUtils.sh(context, 20)),
+            TextField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                hintText: 'Full Name',
+                prefixIcon: const Icon(Icons.person, color: Colors.white),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                 ),
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
-              ),
-            ),
-          ),
-          SizedBox(height: ResponsiveUtils.sh(context, 20)),
-          SizedBox(
-            width: double.infinity,
-            height: ResponsiveUtils.sh(context, 50),
-            child: ElevatedButton(
-              onPressed: () {
-                _placeOrder(cart);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
                 ),
-              ),
-              child: Text(
-                'Place Order',
-                style: TextStyle(
-                  fontSize: ResponsiveUtils.sf(context, 16),
-                  fontWeight: FontWeight.w600,
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
                 ),
               ),
             ),
-          ),
-        ],
+            SizedBox(height: ResponsiveUtils.sh(context, 15)),
+            TextField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: 'Phone Number',
+                prefixIcon: const Icon(Icons.phone, color: Colors.white),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+                ),
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 15)),
+            TextField(
+              controller: _addressController,
+              maxLines: 2,
+              decoration: InputDecoration(
+                hintText: 'Delivery Address',
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0, right: 5),
+                  child: IconButton(
+                    icon: const Icon(Icons.location_on, color: Colors.white),
+                    onPressed: _getCurrentLocation,
+                    padding: const EdgeInsets.all(8.0),
+                  ),
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+                ),
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 20)),
+            SizedBox(
+              width: double.infinity,
+              height: ResponsiveUtils.sh(context, 50),
+              child: ElevatedButton(
+                onPressed: () {
+                  _placeOrder(cart);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: Text(
+                  'Place Order',
+                  style: TextStyle(
+                    fontSize: ResponsiveUtils.sf(context, 16),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 20)),
+          ],
+        ),
       ),
     );
   }
