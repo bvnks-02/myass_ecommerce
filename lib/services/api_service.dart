@@ -146,7 +146,7 @@ class ApiService {
         sizes: ['41mm', '45mm'],
         features: {'battery': '18h', 'waterproof': 'IPX8', 'bluetooth': '5.3', 'gps': true},
         categoryId: 1,
-        category: 'Sport',
+        category: 'Smart watch',
         isFeatured: true,
       ),
       const ProductModel(
@@ -162,7 +162,7 @@ class ApiService {
         sizes: ['44mm', '40mm'],
         features: {'battery': '40h', 'waterproof': '5ATM', 'bluetooth': '5.3', 'gps': true},
         categoryId: 1,
-        category: 'Sport',
+        category: 'Smart watch',
         isFeatured: true,
       ),
       const ProductModel(
@@ -178,7 +178,7 @@ class ApiService {
         sizes: ['47mm', '42mm'],
         features: {'battery': '18 days', 'waterproof': '10ATM', 'bluetooth': '5.0', 'gps': true, 'solar': true},
         categoryId: 1,
-        category: 'Sport',
+        category: 'Smart watch',
         isFeatured: true,
       ),
       const ProductModel(
@@ -194,7 +194,7 @@ class ApiService {
         sizes: ['44mm', '42mm'],
         features: {'battery': '24h', 'waterproof': '3ATM', 'bluetooth': '5.0', 'gps': true},
         categoryId: 2,
-        category: 'Luxury',
+        category: 'Buds',
       ),
       const ProductModel(
         id: 5,
@@ -209,7 +209,7 @@ class ApiService {
         sizes: ['40mm'],
         features: {'battery': '6 days', 'waterproof': '5ATM', 'bluetooth': '5.0', 'gps': true},
         categoryId: 3,
-        category: 'Fitness',
+        category: 'Buds plus',
       ),
       const ProductModel(
         id: 6,
@@ -223,8 +223,8 @@ class ApiService {
         colors: ['Black', 'White', 'Blue'],
         sizes: ['46mm'],
         features: {'battery': '2 years', 'waterproof': '20ATM', 'bluetooth': '5.0', 'gps': false},
-        categoryId: 1,
-        category: 'Sport',
+        categoryId: 6,
+        category: 'Watch strap',
       ),
       const ProductModel(
         id: 7,
@@ -239,7 +239,7 @@ class ApiService {
         sizes: ['46mm', '42mm'],
         features: {'battery': '14 days', 'waterproof': '5ATM', 'bluetooth': '5.2', 'gps': true},
         categoryId: 1,
-        category: 'Sport',
+        category: 'Smart watch',
       ),
       const ProductModel(
         id: 8,
@@ -254,7 +254,7 @@ class ApiService {
         sizes: ['42mm'],
         features: {'battery': '8 days', 'waterproof': '5ATM', 'bluetooth': '5.0', 'gps': true},
         categoryId: 3,
-        category: 'Fitness',
+        category: 'Buds plus',
       ),
       const ProductModel(
         id: 9,
@@ -269,7 +269,7 @@ class ApiService {
         sizes: ['41mm', '40mm'],
         features: {'battery': 'Automatic', 'waterproof': '300m', 'bluetooth': false, 'gps': false},
         categoryId: 2,
-        category: 'Luxury',
+        category: 'Buds',
         isFeatured: true,
       ),
       const ProductModel(
@@ -285,7 +285,7 @@ class ApiService {
         sizes: ['42mm', '40mm'],
         features: {'battery': 'Automatic', 'waterproof': '300m', 'bluetooth': false, 'gps': false},
         categoryId: 2,
-        category: 'Luxury',
+        category: 'Buds',
       ),
       const ProductModel(
         id: 11,
@@ -300,7 +300,7 @@ class ApiService {
         sizes: ['31mm', '35mm'],
         features: {'battery': 'Automatic', 'waterproof': '30m', 'bluetooth': false, 'gps': false},
         categoryId: 2,
-        category: 'Luxury',
+        category: 'Buds',
       ),
       const ProductModel(
         id: 12,
@@ -315,7 +315,7 @@ class ApiService {
         sizes: ['44mm', '41mm'],
         features: {'battery': 'Automatic', 'waterproof': '100m', 'bluetooth': false, 'gps': false},
         categoryId: 2,
-        category: 'Luxury',
+        category: 'Buds',
       ),
       const ProductModel(
         id: 13,
@@ -330,7 +330,7 @@ class ApiService {
         sizes: ['42mm', '38mm'],
         features: {'battery': 'Automatic', 'waterproof': '100m', 'bluetooth': false, 'gps': false},
         categoryId: 4,
-        category: 'Classic',
+        category: 'SPEAKERS',
       ),
       const ProductModel(
         id: 14,
@@ -345,7 +345,7 @@ class ApiService {
         sizes: ['40mm', '38mm'],
         features: {'battery': 'Automatic', 'waterproof': '50m', 'bluetooth': false, 'gps': false},
         categoryId: 4,
-        category: 'Classic',
+        category: 'SPEAKERS',
       ),
       const ProductModel(
         id: 15,
@@ -360,7 +360,7 @@ class ApiService {
         sizes: ['40mm', '35mm'],
         features: {'battery': 'Quartz', 'waterproof': '100m', 'bluetooth': false, 'gps': false},
         categoryId: 4,
-        category: 'Classic',
+        category: 'SPEAKERS',
       ),
       const ProductModel(
         id: 16,
@@ -375,7 +375,7 @@ class ApiService {
         sizes: ['40mm', '36mm'],
         features: {'battery': 'Solar', 'waterproof': '50m', 'bluetooth': false, 'gps': false},
         categoryId: 4,
-        category: 'Classic',
+        category: 'SPEAKERS',
       ),
       const ProductModel(
         id: 17,
@@ -390,7 +390,7 @@ class ApiService {
         sizes: ['46mm', '42mm'],
         features: {'battery': '13 days', 'waterproof': '5ATM', 'bluetooth': '5.3', 'gps': true},
         categoryId: 3,
-        category: 'Fitness',
+        category: 'Buds plus',
       ),
       const ProductModel(
         id: 18,
@@ -404,8 +404,8 @@ class ApiService {
         colors: ['Black', 'Grey', 'White'],
         sizes: ['47mm', '43mm'],
         features: {'battery': '8 days', 'waterproof': '100m', 'bluetooth': '5.3', 'gps': true},
-        categoryId: 3,
-        category: 'Fitness',
+        categoryId: 6,
+        category: 'Watch strap',
       ),
       const ProductModel(
         id: 19,
@@ -419,8 +419,8 @@ class ApiService {
         colors: ['Black', 'White', 'Slate'],
         sizes: ['49mm', '44mm'],
         features: {'battery': '26 days', 'waterproof': '100m', 'bluetooth': '5.3', 'gps': true},
-        categoryId: 3,
-        category: 'Fitness',
+        categoryId: 6,
+        category: 'Watch strap',
       ),
       const ProductModel(
         id: 20,
@@ -435,7 +435,7 @@ class ApiService {
         sizes: ['42mm', '38mm'],
         features: {'battery': '17 days', 'waterproof': '50m', 'bluetooth': '5.0', 'gps': true},
         categoryId: 3,
-        category: 'Fitness',
+        category: 'Buds plus',
       ),
       const ProductModel(
         id: 21,
@@ -450,7 +450,7 @@ class ApiService {
         sizes: ['44mm', '40mm'],
         features: {'battery': '7 days', 'waterproof': '5ATM', 'bluetooth': '5.3', 'gps': true},
         categoryId: 1,
-        category: 'New',
+        category: 'Air tag',
         isFeatured: true,
       ),
     ];

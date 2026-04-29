@@ -24,11 +24,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final List<String> _categories = [
     'All',
-    'Luxury',
-    'Sport',
-    'Classic',
-    'Fitness',
-    'New',
+    'Smart watch',
+    'Buds',
+    'Buds plus',
+    'SPEAKERS',
+    'Air tag',
+    'Watch strap',
   ];
   String _selectedCategory = 'All';
 
@@ -48,9 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<ProductEntity> _filteredProducts(List<ProductEntity> products) {
     if (_selectedCategory == 'All') return products;
-    if (_selectedCategory == 'New') {
-      return products.where((p) => p.category == 'New').toList();
-    }
     if (_selectedCategory == 'Popular') {
       return products.where((p) => p.isFeatured).toList();
     }
