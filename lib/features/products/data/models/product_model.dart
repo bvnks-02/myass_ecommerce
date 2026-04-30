@@ -16,6 +16,7 @@ class ProductModel extends ProductEntity {
     required super.categoryId,
     required super.category,
     super.isFeatured = false,
+    super.isAvailable = true,
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +47,7 @@ class ProductModel extends ProductEntity {
           : int.parse((json['category_id'] ?? 0).toString()),
       category: json['category_name'] ?? json['category'] ?? json['product_category'] ?? '',
       isFeatured: json['is_featured'] ?? json['featured'] ?? false,
+      isAvailable: json['is_available'] ?? true,
     );
   }
 

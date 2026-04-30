@@ -164,6 +164,7 @@ class ApiService {
         categoryId: 1,
         category: 'Smart watch',
         isFeatured: true,
+        isAvailable: false,
       ),
       const ProductModel(
         id: 3,

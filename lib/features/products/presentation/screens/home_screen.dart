@@ -456,6 +456,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
+              // Availability indicator
+              Positioned(
+                top: ResponsiveUtils.sh(context, 10),
+                left: ResponsiveUtils.sw(context, 10),
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: ResponsiveUtils.sw(context, 8),
+                    vertical: ResponsiveUtils.sh(context, 4),
+                  ),
+                  decoration: BoxDecoration(
+                    color: product.isAvailable ? Colors.green : Colors.red,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        product.isAvailable ? Icons.check_circle : Icons.cancel,
+                        color: Colors.white,
+                        size: ResponsiveUtils.sf(context, 12),
+                      ),
+                      SizedBox(width: ResponsiveUtils.sw(context, 4)),
+                      Text(
+                        product.isAvailable ? 'Available' : 'Unavailable',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: ResponsiveUtils.sf(context, 10),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               // Favorite toggle - extracted to separate widget
               Positioned(
                 top: ResponsiveUtils.sh(context, 10),

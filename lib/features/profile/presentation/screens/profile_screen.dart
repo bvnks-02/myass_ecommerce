@@ -192,7 +192,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           GestureDetector(
-            onTap: () => authProvider.refreshRole(),
+            onTap: () async {
+              await authProvider.refreshRole();
+              if (mounted) setState(() {});
+            },
             child: Container(
               padding: EdgeInsets.all(ResponsiveUtils.sw(context, 12)),
               decoration: BoxDecoration(

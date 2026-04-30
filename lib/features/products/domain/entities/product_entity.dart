@@ -42,6 +42,7 @@ class ProductEntity extends Equatable {
   final double rating;
   final int reviewCount;
   final List<ReviewEntity> reviews;
+  final bool isAvailable;
 
   const ProductEntity({
     required this.id,
@@ -61,6 +62,7 @@ class ProductEntity extends Equatable {
     this.rating = 4.8,
     this.reviewCount = 320,
     this.reviews = const [],
+    this.isAvailable = true,
   });
 
   @override
@@ -82,5 +84,6 @@ class ProductEntity extends Equatable {
         rating,
         reviewCount,
         reviews,
+        isAvailable,
       ];
 }
