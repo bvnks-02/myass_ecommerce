@@ -137,19 +137,18 @@ class InputSanitizer {
     
     // Remove common SQL injection patterns
     final sqlPatterns = [
-      r"' OR '1'='1",
-      r'" OR "1"="1',
-      r"1'='1'",
-      r'1="1"',
-      r"DROP TABLE",
-      r"DELETE FROM",
-      r"INSERT INTO",
-      r"UPDATE",
-      r"UNION SELECT",
+      r"'\s*OR\s*'1'\s*=\s*'1",
+      r'"\s*OR\s*"1"\s*=\s*"1',
+      r"1\s*=\s*1",
+      r"DROP\s+TABLE",
+      r"DELETE\s+FROM",
+      r"INSERT\s+INTO",
+      r"UPDATE\s+",
+      r"UNION\s+SELECT",
       r"--",
       r";",
       r"xp_",
-      r"exec(",
+      r"exec\s*\(",
     ];
     
     for (final pattern in sqlPatterns) {

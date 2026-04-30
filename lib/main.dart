@@ -60,23 +60,50 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   StreamSubscription<AuthState>? _authSubscription;
+  bool _isFirstAuthEvent = true;
 
   @override
   void initState() {
     super.initState();
-    _handlePasswordReset();
+    _handleAuthStateChanges();
   }
 
-  void _handlePasswordReset() {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+  void _handleAuthStateChanges() {
+    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+      // Skip the initial session restoration on app startup to avoid unwanted navigation
+      if (_isFirstAuthEvent) {
+        _isFirstAuthEvent = false;
+        return;
+      }
+
       final session = data.session;
+
+      // Handle OAuth sign-in: navigate away from auth screens when login completes
+      if (session != null && data.event == AuthChangeEvent.signedIn) {
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) return;
+          final navigator = _navigatorKey.currentState;
+          if (navigator == null) return;
+
+          final authProvider = Provider.of<AuthProvider>(navigator.context, listen: false);
+          await authProvider.refreshRole();
+
+          final targetRoute = authProvider.isAdmin ? '/admin' : '/home';
+          // Only navigate if currently on an auth screen
+          final currentRoute = ModalRoute.of(navigator.context)?.settings.name;
+          if (currentRoute == '/login' || currentRoute == '/register' || currentRoute == '/onboarding') {
+            navigator.pushReplacementNamed(targetRoute);
+          }
+        });
+      }
+
       if (session != null && data.event == AuthChangeEvent.passwordRecovery) {
         // User clicked password reset link, navigate to reset password screen
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          Navigator.of(context, rootNavigator: true)
-              .pushNamedAndRemoveUntil('/reset_password', (route) => false);
+          _navigatorKey.currentState?.pushNamedAndRemoveUntil('/reset_password', (route) => false);
         });
       }
     });
@@ -105,6 +132,7 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: MaterialApp(
+        navigatorKey: _navigatorKey,
         title: 'Myazz',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,

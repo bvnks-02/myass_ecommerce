@@ -1,8 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -93,6 +95,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _handleSocialLogin(Future<void> Function() signInMethod) async {
+    setState(() => _isLoading = true);
+    StreamSubscription<AuthState>? sub;
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      await signInMethod();
+
+      // If the provider has an immediate error (e.g. provider not enabled), stop here
+      if (authProvider.hasError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authProvider.errorMessage!)),
+        );
+        return;
+      }
+
+      // Wait for the OAuth callback to fire a signedIn event
+      final completer = Completer<AuthState>();
+      sub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+        if (data.event == AuthChangeEvent.signedIn && data.session != null) {
+          if (!completer.isCompleted) completer.complete(data);
+        }
+      });
+      await completer.future.timeout(const Duration(minutes: 2));
+
+      if (mounted) {
+        await authProvider.refreshRole();
+        if (authProvider.isAdmin) {
+          Navigator.pushReplacementNamed(context, '/admin');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
+    } on TimeoutException catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login timed out. Please try again.')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Social login failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      sub?.cancel();
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -258,18 +312,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               children: [
                                 _socialButton(
                                   label: 'Google',
-                                  onTap: () => Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false)
-                                      .signInWithGoogle(),
+                                  onTap: () => _handleSocialLogin(
+                                    () => Provider.of<AuthProvider>(
+                                            context,
+                                            listen: false)
+                                        .signInWithGoogle(),
+                                  ),
                                 ),
                                 const SizedBox(width: 24),
                                 _socialButton(
                                   label: 'Facebook',
-                                  onTap: () => Provider.of<AuthProvider>(
-                                          context,
-                                          listen: false)
-                                      .signInWithFacebook(),
+                                  onTap: () => _handleSocialLogin(
+                                    () => Provider.of<AuthProvider>(
+                                            context,
+                                            listen: false)
+                                        .signInWithFacebook(),
+                                  ),
                                 ),
                               ],
                             ),

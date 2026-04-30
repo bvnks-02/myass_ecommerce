@@ -34,6 +34,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       authProvider.clearError();
       _initData();
       _fetchOrderHistory();
+      // Force rebuild after role is refreshed
+      if (mounted) setState(() {});
     });
   }
 

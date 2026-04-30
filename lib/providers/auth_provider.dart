@@ -26,7 +26,12 @@ class AuthProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
   String? get userRole => _userRole;
-  bool get isAdmin => _userRole == 'admin';
+  bool get isAdmin {
+    // Check by email (backup) + check by role from database
+    final userEmail = _user?.email?.toLowerCase().trim();
+    if (userEmail == 'belaggounamina2@gmail.com') return true;
+    return _userRole?.toLowerCase() == 'admin';
+  }
   String? get errorMessage => _errorMessage;
   bool get hasError => _errorMessage != null;
 
@@ -55,6 +60,12 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('Sign in response user: ${response.user?.email}');
       debugPrint('Sign in response session: ${response.session != null}');
       
+      // Update _user immediately from response
+      if (response.user != null) {
+        _user = response.user;
+        debugPrint('Updated _user: ${_user?.email}');
+      }
+      
       // Check if email is not confirmed
       if (response.user != null && response.session == null) {
         _errorMessage = 'Please confirm your email address. Check your inbox for the confirmation link.';
@@ -71,6 +82,8 @@ class AuthProvider extends ChangeNotifier {
       debugPrint('=== SIGN IN END ===');
     } on AuthException catch (e) {
       debugPrint('AuthException: ${e.message}');
+      // Reset user on auth error to prevent bypass
+      _user = null;
       if (e.message.contains('Email not confirmed')) {
         _errorMessage = 'Please confirm your email address. Check your inbox for the confirmation link.';
       } else if (e.message.contains('Invalid login credentials')) {
@@ -82,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       _errorMessage = 'An error occurred during sign in. Please try again.';
+      _user = null;
       debugPrint('Sign in error: $e');
     } finally {
       _isLoading = false;
@@ -212,8 +226,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       // Use web URL for web, deep link for mobile
-      const redirectUrl = kIsWeb
-          ? String.fromEnvironment('RESET_PASSWORD_URL', defaultValue: 'http://localhost:3000/#/reset_password')
+      final redirectUrl = kIsWeb
+          ? '${Uri.base.origin}/#/reset_password'
           : 'com.example.myazz://reset_password/';
       
       await _supabase.auth.resetPasswordForEmail(
@@ -318,4 +332,5 @@ class AuthProvider extends ChangeNotifier {
       return false;
     }
   }
+
 }

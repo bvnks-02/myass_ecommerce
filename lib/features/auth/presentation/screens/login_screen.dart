@@ -1,8 +1,10 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -26,6 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     debugPrint('Login button tapped');
+    // Unfocus to dismiss keyboard on mobile - this prevents tap blocking
+    FocusScope.of(context).unfocus();
+    // Small delay to ensure keyboard is dismissed before proceeding
+    await Future.delayed(const Duration(milliseconds: 100));
     // Sanitize inputs
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
     final password = InputSanitizer.sanitizeString(_passwordController.text);
@@ -57,10 +63,31 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.signIn(email, password);
+      
+      // Check if login actually succeeded
+      if (!authProvider.isAuthenticated) {
+        debugPrint('Login failed - not authenticated');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Invalid email or password')),
+          );
+        }
+        return;
+      }
+      
+      // Force refresh role and wait for it
+      debugPrint('Login completed, refreshing role...');
+      await authProvider.refreshRole();
+      
+      debugPrint('After signIn - userRole: ${authProvider.userRole}');
+      debugPrint('After signIn - isAdmin: ${authProvider.isAdmin}');
+      
       if (mounted) {
         if (authProvider.isAdmin) {
+          debugPrint('Navigating to /admin');
           Navigator.pushReplacementNamed(context, '/admin');
         } else {
+          debugPrint('Navigating to /home');
           Navigator.pushReplacementNamed(context, '/home');
         }
       }
@@ -80,17 +107,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _handleSocialLogin(Future<void> Function() signInMethod) async {
     setState(() => _isLoading = true);
+    StreamSubscription<AuthState>? sub;
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await signInMethod();
-      
-      // Wait for auth state to update
-      await Future.delayed(const Duration(seconds: 2));
-      
-      if (mounted && authProvider.isAuthenticated) {
+
+      // If the provider has an immediate error (e.g. provider not enabled), stop here
+      if (authProvider.hasError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authProvider.errorMessage!)),
+        );
+        return;
+      }
+
+      // Wait for the OAuth callback to fire a signedIn event
+      final completer = Completer<AuthState>();
+      sub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+        if (data.event == AuthChangeEvent.signedIn && data.session != null) {
+          if (!completer.isCompleted) completer.complete(data);
+        }
+      });
+      await completer.future.timeout(const Duration(minutes: 2));
+
+      if (mounted) {
         await authProvider.refreshRole();
-        // Always navigate to home for social login, even for admin users
-        Navigator.pushReplacementNamed(context, '/home');
+        if (authProvider.isAdmin) {
+          Navigator.pushReplacementNamed(context, '/admin');
+        } else {
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      }
+    } on TimeoutException catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login timed out. Please try again.')),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -99,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } finally {
+      sub?.cancel();
       if (mounted) {
         setState(() => _isLoading = false);
       }
@@ -261,30 +313,37 @@ class _LoginScreenState extends State<LoginScreen> {
                               const SizedBox(height: 15),
 
                               // Premium Login Button
-                              ElevatedButton(
-                                onPressed: _isLoading ? null : _login,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor: Colors.black,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: _isLoading ? null : _login,
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    decoration: BoxDecoration(
+                                      color: _isLoading ? Colors.white.withOpacity(0.7) : Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: _isLoading
+                                        ? const SizedBox(
+                                            height: 20,
+                                            width: 20,
+                                            child: Center(
+                                              child: CircularProgressIndicator(
+                                                  color: Colors.black, strokeWidth: 2),
+                                            ),
+                                          )
+                                        : const Text(
+                                            'Sign In',
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w800,
+                                                color: Colors.black),
+                                          ),
                                   ),
                                 ),
-                                child: _isLoading
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                            color: Colors.black, strokeWidth: 2),
-                                      )
-                                    : const Text(
-                                        'Sign In',
-                                        style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w800),
-                                      ),
                               ),
 
                               const SizedBox(height: 25),
