@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MyAzz</string> 
+    <string name="facebook_app_id">978852477914592</string>
+    <string name="fb_login_protocol_scheme">fb978852477914592</string>
+    <string name="facebook_client_token">c099855d025a0a7fac2b52e1179ea017</string>
+</resources>
