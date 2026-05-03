@@ -3,13 +3,21 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../features/products/domain/entities/product_entity.dart';
 import '../features/products/data/models/product_model.dart';
 import '../core/utils/logger.dart';
+import '../core/security/rate_limiter.dart';
+import '../core/security/input_sanitizer.dart';
 
 class ApiService {
   static final SupabaseClient _supabase = Supabase.instance.client;
-  static const bool _useMockData = true; // Set to true for development without DB
+  static const bool _useMockData = false; // Set to true for development without DB
 
   static Future<List<ProductEntity>> getProducts() async {
     try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('get_products')) {
+        AppLogger.warning('Rate limit exceeded for getProducts', tag: 'ApiService');
+        throw Exception('Too many requests. Please try again later.');
+      }
+      
       if (_useMockData) {
         AppLogger.info('Using mock products data', tag: 'ApiService');
         return _getMockProducts();
@@ -36,6 +44,12 @@ class ApiService {
 
   static Future<List<ProductEntity>> getFeaturedProducts() async {
     try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('get_featured_products')) {
+        AppLogger.warning('Rate limit exceeded for getFeaturedProducts', tag: 'ApiService');
+        throw Exception('Too many requests. Please try again later.');
+      }
+      
       if (_useMockData) {
         AppLogger.info('Using mock featured products data', tag: 'ApiService');
         return _getMockProducts().take(3).toList();
@@ -68,6 +82,17 @@ class ApiService {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('create_order')) {
+        AppLogger.warning('Rate limit exceeded for createOrder', tag: 'ApiService');
+        return false;
+      }
+      
+      // Sanitize inputs (double-check)
+      final sanitizedName = InputSanitizer.sanitizeString(name.trim(), maxLength: 100);
+      final sanitizedPhone = InputSanitizer.sanitizeNumeric(phone.trim());
+      final sanitizedAddress = InputSanitizer.sanitizeString(address.trim(), maxLength: 500);
+      
       AppLogger.debug('Creating new order', tag: 'ApiService');
       
       final userId = _supabase.auth.currentUser?.id;
@@ -88,15 +113,15 @@ class ApiService {
       AppLogger.debug('Order data - Total: $total, Name: $name, Phone: $phone, Address: $address', tag: 'ApiService');
       AppLogger.debug('Order items: $items', tag: 'ApiService');
 
-      // 1. Insert order
+      // 1. Insert order with sanitized data
       final orderResponse = await _supabase
           .from('orders')
           .insert({
             'user_id': userId,
             'total_amount': total,
-            'name': name,
-            'phone': phone,
-            'address': address,
+            'name': sanitizedName,
+            'phone': sanitizedPhone,
+            'address': sanitizedAddress,
             'status': 'Pending',
           })
           .select()

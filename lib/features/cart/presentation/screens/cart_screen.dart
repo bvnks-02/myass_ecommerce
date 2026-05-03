@@ -12,6 +12,9 @@ import '../../../../theme/app_theme.dart';
 import '../../../../services/api_service.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/input_validator.dart';
+import '../../../../core/security/rate_limiter.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -562,11 +565,54 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<void> _placeOrder(CartProvider cart) async {
-    if (_nameController.text.isEmpty || _phoneController.text.isEmpty || _addressController.text.isEmpty) {
+    // Sanitize inputs
+    final name = InputSanitizer.sanitizeString(_nameController.text.trim(), maxLength: 100);
+    final phone = InputSanitizer.sanitizeNumeric(_phoneController.text.trim());
+    final address = InputSanitizer.sanitizeString(_addressController.text.trim(), maxLength: 500);
+    
+    // Validate inputs
+    if (name.isEmpty || phone.isEmpty || address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all fields'),
           backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    final nameError = InputValidator.validateFullName(name);
+    if (nameError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(nameError), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    
+    final phoneError = InputValidator.validatePhoneNumber(phone);
+    if (phoneError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
+      );
+      return;
+    }
+    
+    if (address.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Address must be at least 10 characters'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    
+    // Rate limiting check for order placement
+    if (!RateLimiters.cart.isAllowed('place_order')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Too many order attempts. Please try again later.'),
+          backgroundColor: Colors.orange,
         ),
       );
       return;
@@ -605,9 +651,9 @@ class _CartScreenState extends State<CartScreen> {
     try {
       final success = await ApiService.createOrder(
         total: cart.totalAmount,
-        name: _nameController.text,
-        phone: _phoneController.text,
-        address: _addressController.text,
+        name: name,
+        phone: phone,
+        address: address,
         items: orderItems,
       );
 

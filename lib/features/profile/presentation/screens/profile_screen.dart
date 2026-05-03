@@ -5,6 +5,9 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/input_validator.dart';
+import '../../../../core/security/rate_limiter.dart';
 import '../../../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -81,14 +84,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _updateProfile() async {
+    // Sanitize inputs
+    final name = InputSanitizer.sanitizeString(_nameController.text.trim(), maxLength: 100);
+    final phone = InputSanitizer.sanitizeNumeric(_phoneController.text.trim());
+    
+    // Validate inputs
+    final nameError = InputValidator.validateFullName(name);
+    if (nameError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(nameError)),
+      );
+      return;
+    }
+    
+    final phoneError = InputValidator.validatePhoneNumber(phone);
+    if (phoneError != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(phoneError)),
+      );
+      return;
+    }
+    
+    // Rate limiting check
+    if (!RateLimiters.api.isAllowed('profile_update')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Too many update attempts. Please try again later.')),
+      );
+      return;
+    }
+    
     setState(() => _isSaving = true);
     try {
       final supabase = Supabase.instance.client;
       await supabase.auth.updateUser(
         UserAttributes(
           data: {
-            'full_name': _nameController.text,
-            'phone': _phoneController.text,
+            'full_name': name,
+            'phone': phone,
           },
         ),
       );

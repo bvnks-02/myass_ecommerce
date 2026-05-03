@@ -7,6 +7,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/security/input_sanitizer.dart';
+import '../../../../core/security/rate_limiter.dart';
 import '../../../../services/api_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
 
@@ -227,19 +229,69 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                           }
 
                           try {
+                            // Sanitize inputs
+                            final sanitizedName = InputSanitizer.sanitizeString(nameController.text.trim(), maxLength: 200);
+                            final sanitizedDescription = InputSanitizer.sanitizeString(descController.text.trim(), maxLength: 2000);
+                            final sanitizedCategory = InputSanitizer.sanitizeString(categoryController.text.trim(), maxLength: 100);
+                            
+                            // Sanitized values are ready for use when implementing actual product save
+                            debugPrint('Product data sanitized - Name: $sanitizedName, Description length: ${sanitizedDescription.length}, Category: $sanitizedCategory');
+                            
+                            // Validate inputs
+                            if (sanitizedName.isEmpty || sanitizedName.length < 2) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Product name must be at least 2 characters'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                            
+                            if (sanitizedCategory.isEmpty) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Category is required'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                            
                             // Validate price first
                             double dzdPrice;
                             try {
-                              dzdPrice = double.parse(priceController.text);
+                              final sanitizedPrice = InputSanitizer.sanitizeNumeric(priceController.text.trim());
+                              dzdPrice = double.parse(sanitizedPrice);
                               if (dzdPrice <= 0) {
                                 throw Exception('Price must be greater than 0');
+                              }
+                              if (dzdPrice > 999999999) {
+                                throw Exception('Price is too high');
                               }
                             } catch (priceError) {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(priceError.toString()),
+                                    content: Text('Invalid price: ${priceError.toString()}'),
                                     backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                              return;
+                            }
+                            
+                            // Rate limiting check for admin operations
+                            if (!RateLimiters.api.isAllowed('admin_product_save')) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Too many product operations. Please try again later.'),
+                                    backgroundColor: Colors.orange,
                                   ),
                                 );
                               }
