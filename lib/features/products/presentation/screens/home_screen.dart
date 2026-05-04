@@ -466,7 +466,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: ResponsiveUtils.sh(context, 2)),
                     Text(
-                      CurrencyService.formatPrice(product.price),
+                      '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
                         fontSize: ResponsiveUtils.sf(context, 12),
@@ -695,7 +695,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
             style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
-            CurrencyService.formatPrice(product.price),
+            '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
             style: const TextStyle(color: AppTheme.primaryColor),
           ),
           onTap: () {
@@ -753,7 +753,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
             style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
-            CurrencyService.formatPrice(product.price),
+            '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
             style: const TextStyle(color: AppTheme.primaryColor),
           ),
           onTap: () {
