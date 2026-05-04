@@ -398,30 +398,33 @@ class _HomeScreenState extends State<HomeScreen> {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.9,
-                  child: product.image.startsWith('assets/')
-                      ? Image.asset(
-                          product.image,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.watch,
-                            color: Colors.white24,
-                            size: 50,
+                  child: Container(
+                    color: const Color(0xFF1C1C1E),
+                    child: product.image.startsWith('assets/')
+                        ? Image.asset(
+                            product.image,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            errorBuilder: (context, error, stackTrace) => const Icon(
+                              Icons.watch,
+                              color: Colors.white24,
+                              size: 50,
+                            ),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: product.image,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
+                            ),
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.watch,
+                              color: Colors.white24,
+                              size: 50,
+                            ),
                           ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: product.image,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
-                          ),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.watch,
-                            color: Colors.white24,
-                            size: 50,
-                          ),
-                          memCacheWidth: 400,
-                          memCacheHeight: 400,
-                        ),
+                  ),
                 ),
               ),
               // Dark gradient overlay at the bottom for text readability
