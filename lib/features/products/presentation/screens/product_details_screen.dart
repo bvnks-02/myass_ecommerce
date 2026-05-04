@@ -497,16 +497,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF22C55E),
+                    decoration: BoxDecoration(
+                      color: widget.product.isAvailable
+                          ? const Color(0xFF22C55E)
+                          : Colors.red,
                       shape: BoxShape.circle,
                     ),
                   ),
                   const SizedBox(width: 5),
-                  const Text(
-                    'In Stock',
+                  Text(
+                    widget.product.isAvailable ? 'In Stock' : 'Unavailable',
                     style: TextStyle(
-                        color: Color(0xFF22C55E), fontSize: 12),
+                      color: widget.product.isAvailable
+                          ? const Color(0xFF22C55E)
+                          : Colors.red,
+                      fontSize: 12,
+                    ),
                   ),
                 ],
               ),
@@ -969,40 +975,54 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               // Ajouter au panier
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    final selectedColor = widget.product.colors.isNotEmpty 
-                        ? widget.product.colors[_selectedColorIndex] 
-                        : null;
-                    final selectedSize = widget.product.sizes.isNotEmpty 
-                        ? widget.product.sizes[_selectedSizeIndex] 
-                        : null;
-                    cart.addToCart(
-                      widget.product, 
-                      _quantity,
-                      selectedColor: selectedColor,
-                      selectedSize: selectedSize,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
-                        ),
-                        backgroundColor: _accent,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onTap: widget.product.isAvailable
+                      ? () {
+                          final selectedColor = widget.product.colors.isNotEmpty
+                              ? widget.product.colors[_selectedColorIndex]
+                              : null;
+                          final selectedSize = widget.product.sizes.isNotEmpty
+                              ? widget.product.sizes[_selectedSizeIndex]
+                              : null;
+                          final added = cart.addToCart(
+                            widget.product,
+                            _quantity,
+                            selectedColor: selectedColor,
+                            selectedSize: selectedSize,
+                          );
+                          if (added) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
+                                ),
+                                backgroundColor: _accent,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('This product is currently unavailable'),
+                                backgroundColor: Colors.red,
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        }
+                      : null,
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF111111),
+                      color: widget.product.isAvailable
+                          ? const Color(0xFF111111)
+                          : Colors.grey,
                       borderRadius: BorderRadius.circular(32),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Add to Cart',
-                        style: TextStyle(
+                        widget.product.isAvailable ? 'Add to Cart' : 'Unavailable',
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,

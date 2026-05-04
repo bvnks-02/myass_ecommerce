@@ -160,6 +160,7 @@ class ApiService {
     required double price,
     required String category,
     required String image,
+    bool isAvailable = true,
   }) async {
     try {
       // Rate limiting check
@@ -167,7 +168,7 @@ class ApiService {
         AppLogger.warning('Rate limit exceeded for saveProduct', tag: 'ApiService');
         return false;
       }
-      
+
       // If using mock data, simulate product creation
       if (_useMockData) {
         AppLogger.info('Using mock product creation', tag: 'ApiService');
@@ -181,7 +182,7 @@ class ApiService {
       final sanitizedCategory = InputSanitizer.sanitizeString(category.trim(), maxLength: 100);
 
       AppLogger.debug('Saving product to Supabase', tag: 'ApiService');
-      
+
       final productData = {
         'name': sanitizedName,
         'description': sanitizedDescription,
@@ -189,15 +190,82 @@ class ApiService {
         'category': sanitizedCategory,
         'image': image,
         'is_featured': false,
+        'is_available': isAvailable,
       };
 
       await _supabase.from('products').insert(productData);
-      
+
       AppLogger.info('Product saved successfully', tag: 'ApiService');
       return true;
     } catch (e, stackTrace) {
       AppLogger.error('Error saving product: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
       debugPrint('Product save error: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> updateProduct({
+    required int id,
+    String? name,
+    String? description,
+    double? price,
+    String? category,
+    String? image,
+    bool? isFeatured,
+    bool? isAvailable,
+  }) async {
+    try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('update_product')) {
+        AppLogger.warning('Rate limit exceeded for updateProduct', tag: 'ApiService');
+        return false;
+      }
+
+      // If using mock data, simulate product update
+      if (_useMockData) {
+        AppLogger.info('Using mock product update', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+      }
+
+      AppLogger.debug('Updating product $id in Supabase', tag: 'ApiService');
+
+      final updateData = <String, dynamic>{};
+
+      if (name != null) {
+        updateData['name'] = InputSanitizer.sanitizeString(name.trim(), maxLength: 200);
+      }
+      if (description != null) {
+        updateData['description'] = InputSanitizer.sanitizeString(description.trim(), maxLength: 2000);
+      }
+      if (price != null) {
+        updateData['price'] = price;
+      }
+      if (category != null) {
+        updateData['category'] = InputSanitizer.sanitizeString(category.trim(), maxLength: 100);
+      }
+      if (image != null) {
+        updateData['image'] = image;
+      }
+      if (isFeatured != null) {
+        updateData['is_featured'] = isFeatured;
+      }
+      if (isAvailable != null) {
+        updateData['is_available'] = isAvailable;
+      }
+
+      if (updateData.isEmpty) {
+        AppLogger.warning('No data to update for product $id', tag: 'ApiService');
+        return true;
+      }
+
+      await _supabase.from('products').update(updateData).eq('id', id);
+
+      AppLogger.info('Product $id updated successfully', tag: 'ApiService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error updating product: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      debugPrint('Product update error: $e');
       return false;
     }
   }

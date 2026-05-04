@@ -477,33 +477,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 bottom: ResponsiveUtils.sh(context, 12),
                 right: ResponsiveUtils.sw(context, 10),
                 child: GestureDetector(
-                  onTap: () {
-                    final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                    final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
-                    final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
-                    cartProvider.addToCart(
-                      product,
-                      1,
-                      selectedColor: selectedColor,
-                      selectedSize: selectedSize,
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${product.name} added to cart'),
-                        backgroundColor: AppTheme.primaryColor,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  },
+                  onTap: product.isAvailable
+                      ? () {
+                          final cartProvider = Provider.of<CartProvider>(context, listen: false);
+                          final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
+                          final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
+                          final added = cartProvider.addToCart(
+                            product,
+                            1,
+                            selectedColor: selectedColor,
+                            selectedSize: selectedSize,
+                          );
+                          if (added) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${product.name} added to cart'),
+                                backgroundColor: AppTheme.primaryColor,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
+                        }
+                      : () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('This product is currently unavailable'),
+                              backgroundColor: Colors.red,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
                   child: Container(
                     padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
-                    decoration: const BoxDecoration(
-                      color: AppTheme.primaryColor,
+                    decoration: BoxDecoration(
+                      color: product.isAvailable ? AppTheme.primaryColor : Colors.grey,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      Icons.add,
-                      color: Colors.black,
+                      product.isAvailable ? Icons.add : Icons.block,
+                      color: product.isAvailable ? Colors.black : Colors.white,
                       size: ResponsiveUtils.sf(context, 18),
                     ),
                   ),

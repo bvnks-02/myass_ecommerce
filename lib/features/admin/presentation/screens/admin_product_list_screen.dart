@@ -143,18 +143,20 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
   void _showAddEditProductDialog({ProductEntity? product}) {
     final isEditing = product != null;
+    final productId = product?.id;
     _selectedImage = null; // Reset selection
     final nameController = TextEditingController(text: product?.name ?? '');
-    
+
     // Display price as DZD directly without conversion
-    final displayPrice = product != null 
+    final displayPrice = product != null
         ? CurrencyService.convertFromUSD(product.price).round().toString()
         : '';
     final priceController = TextEditingController(text: displayPrice);
-    
+
     final descController =
         TextEditingController(text: product?.description ?? '');
     String? _selectedCategory = product?.category;
+    bool _isAvailable = product?.isAvailable ?? true;
 
     showDialog(
       context: context,
@@ -184,6 +186,47 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                         _selectedCategory = value;
                       });
                     }),
+                    const SizedBox(height: 15),
+                    // Availability Toggle
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                _isAvailable ? Icons.check_circle : Icons.cancel,
+                                color: _isAvailable ? Colors.green : Colors.red,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Available',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.9),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Switch(
+                            value: _isAvailable,
+                            onChanged: (value) {
+                              setDialogState(() {
+                                _isAvailable = value;
+                              });
+                            },
+                            activeColor: Colors.green,
+                            inactiveThumbColor: Colors.red,
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 15),
                     Column(
                       children: [
@@ -330,21 +373,35 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
                             // Convert DZD price to USD for storage
                             final usdPrice = CurrencyService.convertToUSD(dzdPrice);
-                            
+
                             // Prepare image URL
                             String imageUrl = product?.image ?? '';
                             if (_selectedImage != null && uploadedUrl != null) {
                               imageUrl = uploadedUrl;
                             }
-                            
-                            // Save product to Supabase
-                            final success = await ApiService.saveProduct(
-                              name: sanitizedName,
-                              description: sanitizedDescription,
-                              price: usdPrice,
-                              category: _selectedCategory!,
-                              image: imageUrl,
-                            );
+
+                            // Save or update product to Supabase
+                            final bool success;
+                            if (isEditing && productId != null) {
+                              success = await ApiService.updateProduct(
+                                id: productId,
+                                name: sanitizedName,
+                                description: sanitizedDescription,
+                                price: usdPrice,
+                                category: _selectedCategory!,
+                                image: imageUrl.isNotEmpty ? imageUrl : null,
+                                isAvailable: _isAvailable,
+                              );
+                            } else {
+                              success = await ApiService.saveProduct(
+                                name: sanitizedName,
+                                description: sanitizedDescription,
+                                price: usdPrice,
+                                category: _selectedCategory!,
+                                image: imageUrl,
+                                isAvailable: _isAvailable,
+                              );
+                            }
                             
                             if (mounted) {
                               if (success) {

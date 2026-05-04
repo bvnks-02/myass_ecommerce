@@ -67,6 +67,7 @@ class ProductModel extends ProductEntity {
       'category_id': categoryId,
       'category_name': category,
       'is_featured': isFeatured,
+      'is_available': isAvailable,
     };
   }
 }

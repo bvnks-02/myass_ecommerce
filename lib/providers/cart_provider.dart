@@ -43,7 +43,13 @@ class CartProvider extends ChangeNotifier {
 
   bool addToCart(ProductEntity product, int quantity, {String? selectedColor, String? selectedSize}) {
     if (quantity <= 0) return false;
-    
+
+    // Check if product is available
+    if (!product.isAvailable) {
+      debugPrint('Cannot add unavailable product to cart: ${product.name}');
+      return false;
+    }
+
     try {
       final existingIndex = _cartItems.indexWhere(
         (item) {
