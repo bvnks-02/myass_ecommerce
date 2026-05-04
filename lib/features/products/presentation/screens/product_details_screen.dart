@@ -318,7 +318,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   // ─────────────────────────────────────────────
-  // IMAGE ZONE  (rounded container + badge + dots)
+  // IMAGE ZONE  (rounded container + badge + gallery)
   // ─────────────────────────────────────────────
   Widget _buildImageZone() {
     return Padding(
@@ -350,50 +350,140 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // Single large image
+            // Image Gallery with PageView
             Container(
-              height: 500,
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              height: 320,
+              margin: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(
                 color: _surface,
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: _productImages[0].startsWith('assets/')
-                    ? Image.asset(
-                        _productImages[0],
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(
-                            Icons.watch_rounded,
-                            color: _accent,
-                            size: 90,
-                          ),
-                        ),
-                      )
-                    : CachedNetworkImage(
-                        imageUrl: _productImages[0],
-                        fit: BoxFit.contain,
-                        placeholder: (context, url) => const Center(
-                          child: CircularProgressIndicator(
-                            color: _accent,
-                            strokeWidth: 2,
-                          ),
-                        ),
-                        errorWidget: (context, url, error) => const Center(
-                          child: Icon(
-                            Icons.watch_rounded,
-                            color: _accent,
-                            size: 90,
-                          ),
-                        ),
-                        memCacheWidth: 800,
-                        memCacheHeight: 800,
-                      ),
+                borderRadius: BorderRadius.circular(16),
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _productImages.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentImageIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final imageUrl = _productImages[index];
+                    return imageUrl.startsWith('assets/')
+                        ? Image.asset(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Center(
+                              child: Icon(
+                                Icons.watch_rounded,
+                                color: _accent,
+                                size: 90,
+                              ),
+                            ),
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                color: _accent,
+                                strokeWidth: 2,
+                              ),
+                            ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(
+                                Icons.watch_rounded,
+                                color: _accent,
+                                size: 90,
+                              ),
+                            ),
+                            memCacheWidth: 800,
+                            memCacheHeight: 800,
+                          );
+                  },
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            // Image indicators (dots)
+            if (_productImages.length > 1)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(_productImages.length, (index) {
+                  return Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentImageIndex == index
+                          ? _accent
+                          : _accent.withOpacity(0.3),
+                    ),
+                  );
+                }),
+              ),
+            const SizedBox(height: 12),
+            // Thumbnail gallery (show all images as thumbnails)
+            if (_productImages.length > 1)
+              SizedBox(
+                height: 70,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _productImages.length,
+                  itemBuilder: (context, index) {
+                    final imageUrl = _productImages[index];
+                    final isSelected = _currentImageIndex == index;
+                    return GestureDetector(
+                      onTap: () {
+                        _pageController.animateToPage(
+                          index,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        margin: const EdgeInsets.only(right: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? _accent : Colors.transparent,
+                            width: 2,
+                          ),
+                          color: _card,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: imageUrl.startsWith('assets/')
+                              ? Image.asset(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.image, color: Colors.white54, size: 30),
+                                )
+                              : CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  fit: BoxFit.cover,
+                                  placeholder: (context, url) => const Center(
+                                    child: CircularProgressIndicator(
+                                      color: _accent,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      const Icon(Icons.image, color: Colors.white54, size: 30),
+                                  memCacheWidth: 200,
+                                  memCacheHeight: 200,
+                                ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
       ),

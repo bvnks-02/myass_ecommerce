@@ -160,6 +160,7 @@ class ApiService {
     required double price,
     required String category,
     required String image,
+    List<String>? images,
     bool isAvailable = true,
   }) async {
     try {
@@ -183,7 +184,7 @@ class ApiService {
 
       AppLogger.debug('Saving product to Supabase', tag: 'ApiService');
 
-      final productData = {
+      final productData = <String, dynamic>{
         'name': sanitizedName,
         'description': sanitizedDescription,
         'price': price,
@@ -192,6 +193,11 @@ class ApiService {
         'is_featured': false,
         'is_available': isAvailable,
       };
+
+      // Add images array if provided
+      if (images != null && images.isNotEmpty) {
+        productData['images'] = images;
+      }
 
       await _supabase.from('products').insert(productData);
 
@@ -211,6 +217,7 @@ class ApiService {
     double? price,
     String? category,
     String? image,
+    List<String>? images,
     bool? isFeatured,
     bool? isAvailable,
   }) async {
@@ -246,6 +253,9 @@ class ApiService {
       }
       if (image != null) {
         updateData['image'] = image;
+      }
+      if (images != null) {
+        updateData['images'] = images;
       }
       if (isFeatured != null) {
         updateData['is_featured'] = isFeatured;

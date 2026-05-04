@@ -1,7 +1,6 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
-import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -24,8 +23,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   bool _isLoading = true;
   List<ProductEntity> _products = [];
   bool _isUploading = false;
-  XFile? _selectedImage;
+  List<XFile> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
+  static const int maxImages = 4;
   List<String> _categories = [];
   bool _isLoadingCategories = true;
 
@@ -117,7 +117,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   }
 
   Future<String?> _uploadImage(XFile image) async {
-    setState(() => _isUploading = true);
     try {
       final fileName = '${DateTime.now().millisecondsSinceEpoch}_${image.name}';
       final path = 'products/$fileName';
@@ -141,6 +140,69 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         );
       }
       return null;
+    }
+  }
+
+  // Helper to build image widget for selected images (works on all platforms)
+  Widget _buildSelectedImage(XFile image, int index) {
+    debugPrint('Building image widget for index $index, path: ${image.path}');
+    return FutureBuilder<Uint8List>(
+      future: image.readAsBytes().catchError((error) {
+        debugPrint('Error reading image bytes at index $index: $error');
+        return Uint8List(0);
+      }),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          debugPrint('Image $index: Loading bytes...');
+          return const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white54),
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          debugPrint('Image $index: Error loading - ${snapshot.error}');
+          return const Center(
+            child: Icon(Icons.broken_image, color: Colors.red, size: 30),
+          );
+        }
+        if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
+          debugPrint('Image $index: Loaded ${snapshot.data!.length} bytes');
+          return Image.memory(
+            snapshot.data!,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              debugPrint('Image $index: Error displaying - $error');
+              return const Center(child: Icon(Icons.image, color: Colors.white54));
+            },
+          );
+        }
+        debugPrint('Image $index: No data available');
+        return const Center(child: Icon(Icons.image, color: Colors.white54));
+      },
+    );
+  }
+
+  Future<List<String>> _uploadImages(List<XFile> images) async {
+    setState(() => _isUploading = true);
+    final List<String> urls = [];
+    try {
+      for (final image in images) {
+        final url = await _uploadImage(image);
+        if (url != null) {
+          urls.add(url);
+        }
+      }
+      return urls;
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error uploading images: $e')),
+        );
+      }
+      return urls;
     } finally {
       if (mounted) {
         setState(() => _isUploading = false);
@@ -151,7 +213,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   void _showAddEditProductDialog({ProductEntity? product}) {
     final isEditing = product != null;
     final productId = product?.id;
-    _selectedImage = null; // Reset selection
+    _selectedImages = []; // Reset selection
     final nameController = TextEditingController(text: product?.name ?? '');
 
     // Display price as DZD directly without conversion
@@ -176,10 +238,16 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
               title: Text(
                   isEditing ? 'Edit Product' : 'Add Product',
                   style: const TextStyle(color: Colors.white)),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              content: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.7,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                     _buildTextField(nameController, 'Name'),
                     const SizedBox(height: 10),
                     _buildTextField(priceController, 'Price (DA)',
@@ -235,62 +303,171 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    Column(
-                      children: [
-                        if (_selectedImage != null ||
-                            (isEditing && product.image.isNotEmpty))
-                          Container(
-                            height: 150,
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(bottom: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.white.withOpacity(0.05),
-                              image: _selectedImage != null
-                                  ? DecorationImage(
-                                      image: kIsWeb
-                                          ? NetworkImage(_selectedImage!.path)
-                                          : FileImage(
-                                                  File(_selectedImage!.path))
-                                              as ImageProvider,
-                                      fit: BoxFit.contain,
-                                    )
-                                  : DecorationImage(
-                                      image: NetworkImage(product!.image),
-                                      fit: BoxFit.contain,
-                                    ),
-                            ),
-                          ),
-                        OutlinedButton.icon(
-                          onPressed: _isUploading
-                              ? null
-                              : () async {
-                                  final XFile? image = await _picker.pickImage(
-                                      source: ImageSource.gallery);
-                                  if (image != null) {
+                    // Image Gallery Section
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  'Images (${_selectedImages.length + (isEditing && product.image.isNotEmpty ? 1 : 0)}/$maxImages)',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              if (_selectedImages.isNotEmpty)
+                                TextButton(
+                                  onPressed: () {
                                     setDialogState(() {
-                                      _selectedImage = image;
+                                      _selectedImages.clear();
                                     });
-                                  }
+                                  },
+                                  child: const Text('Clear', style: TextStyle(color: Colors.red, fontSize: 12)),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          // Show existing image when editing
+                          if (isEditing && product.image.isNotEmpty && _selectedImages.isEmpty)
+                            Container(
+                              height: 100,
+                              width: double.infinity,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white.withOpacity(0.05),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  product.image,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Center(child: Icon(Icons.image, color: Colors.white54, size: 40)),
+                                ),
+                              ),
+                            ),
+                          // Selected Images Grid
+                          if (_selectedImages.isNotEmpty)
+                            Container(
+                              height: 100,
+                              margin: const EdgeInsets.only(bottom: 8),
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _selectedImages.length,
+                                itemBuilder: (context, index) {
+                                  final image = _selectedImages[index];
+                                  return Stack(
+                                    children: [
+                                      Container(
+                                        width: 100,
+                                        height: 100,
+                                        margin: const EdgeInsets.only(right: 10),
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(12),
+                                          color: Colors.white.withOpacity(0.1),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: _buildSelectedImage(image, index),
+                                        ),
+                                      ),
+                                      Positioned(
+                                        top: 2,
+                                        right: 14,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            setDialogState(() {
+                                              _selectedImages.removeAt(index);
+                                            });
+                                          },
+                                          child: Container(
+                                            padding: const EdgeInsets.all(4),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: const Icon(Icons.close, size: 14, color: Colors.white),
+                                          ),
+                                        ),
+                                      ),
+                                      // Show image number badge
+                                      Positioned(
+                                        bottom: 2,
+                                        left: 2,
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withOpacity(0.6),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            '${index + 1}',
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 10,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
                                 },
-                          icon: const Icon(Icons.image, color: Colors.white),
-                          label: Text(
-                            _selectedImage != null
-                                ? 'Change Image'
-                                : 'Select Image',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                                color: Colors.white.withOpacity(0.3)),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 12, horizontal: 16),
-                          ),
-                        ),
-                      ],
+                              ),
+                            ),
+                          const SizedBox(height: 12),
+                          // Add Image Button
+                          if (_selectedImages.length < maxImages)
+                            OutlinedButton.icon(
+                              onPressed: _isUploading
+                                  ? null
+                                  : () async {
+                                      debugPrint('Picking images... Current count: ${_selectedImages.length}');
+                                      try {
+                                        final List<XFile>? images = await _picker.pickMultiImage();
+                                        debugPrint('Picked ${images?.length ?? 0} images');
+                                        if (images != null && images.isNotEmpty) {
+                                          setDialogState(() {
+                                            // Add images up to the max limit
+                                            final int slotsAvailable = maxImages - _selectedImages.length;
+                                            final int imagesToAdd = images.length > slotsAvailable ? slotsAvailable : images.length;
+                                            _selectedImages.addAll(images.sublist(0, imagesToAdd));
+                                            debugPrint('Total images now: ${_selectedImages.length}');
+                                          });
+                                        }
+                                      } catch (e) {
+                                        debugPrint('Error picking images: $e');
+                                      }
+                                    },
+                              icon: const Icon(Icons.add_photo_alternate, color: Colors.white),
+                              label: Text(
+                                _selectedImages.isEmpty ? 'Select Images (up to $maxImages)' : 'Add More Images',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: BorderSide(color: Colors.white.withOpacity(0.3)),
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
+              ),
               ),
               actions: [
                 TextButton(
@@ -302,14 +479,11 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                   onPressed: _isUploading
                       ? null
                       : () async {
-                          String? uploadedUrl;
-                          if (_selectedImage != null) {
-                            setDialogState(
-                                () {}); // Trigger rebuild to show loading
-                            uploadedUrl = await _uploadImage(_selectedImage!);
-                            if (uploadedUrl == null) {
-                              return; // Error handled in _uploadImage
-                            }
+                          // Upload new images if any selected
+                          List<String> uploadedUrls = [];
+                          if (_selectedImages.isNotEmpty) {
+                            setDialogState(() {}); // Trigger rebuild to show loading
+                            uploadedUrls = await _uploadImages(_selectedImages);
                           }
 
                           try {
@@ -381,11 +555,16 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             // Convert DZD price to USD for storage
                             final usdPrice = CurrencyService.convertToUSD(dzdPrice);
 
-                            // Prepare image URL
-                            String imageUrl = product?.image ?? '';
-                            if (_selectedImage != null && uploadedUrl != null) {
-                              imageUrl = uploadedUrl;
+                            // Prepare image URLs - combine existing with new uploads
+                            List<String> allImages = [];
+                            if (uploadedUrls.isNotEmpty) {
+                              allImages = uploadedUrls;
+                            } else if (isEditing && product.image.isNotEmpty) {
+                              allImages = [product.image];
                             }
+
+                            // Use first image as main image
+                            String mainImageUrl = allImages.isNotEmpty ? allImages.first : '';
 
                             // Save or update product to Supabase
                             final bool success;
@@ -396,7 +575,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                                 description: sanitizedDescription,
                                 price: usdPrice,
                                 category: _selectedCategory!,
-                                image: imageUrl.isNotEmpty ? imageUrl : null,
+                                image: mainImageUrl.isNotEmpty ? mainImageUrl : null,
+                                images: allImages.isNotEmpty ? allImages : null,
                                 isAvailable: _isAvailable,
                               );
                             } else {
@@ -405,7 +585,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                                 description: sanitizedDescription,
                                 price: usdPrice,
                                 category: _selectedCategory!,
-                                image: imageUrl,
+                                image: mainImageUrl,
+                                images: allImages,
                                 isAvailable: _isAvailable,
                               );
                             }
@@ -579,10 +760,20 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                         height: 50,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: NetworkImage(product.image),
-                            fit: BoxFit.cover,
-                          ),
+                          color: Colors.white.withOpacity(0.1),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: product.image.isNotEmpty
+                              ? Image.network(
+                                  product.image,
+                                  fit: BoxFit.cover,
+                                  width: 50,
+                                  height: 50,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.image, color: Colors.white54, size: 24),
+                                )
+                              : const Icon(Icons.image, color: Colors.white54, size: 24),
                         ),
                       ),
                       const SizedBox(width: 16),
