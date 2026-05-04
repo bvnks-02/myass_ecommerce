@@ -154,6 +154,125 @@ class ApiService {
     }
   }
 
+  static Future<bool> saveProduct({
+    required String name,
+    required String description,
+    required double price,
+    required String category,
+    required String image,
+  }) async {
+    try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('save_product')) {
+        AppLogger.warning('Rate limit exceeded for saveProduct', tag: 'ApiService');
+        return false;
+      }
+      
+      // If using mock data, simulate product creation
+      if (_useMockData) {
+        AppLogger.info('Using mock product creation', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+      }
+
+      // Sanitize inputs
+      final sanitizedName = InputSanitizer.sanitizeString(name.trim(), maxLength: 200);
+      final sanitizedDescription = InputSanitizer.sanitizeString(description.trim(), maxLength: 2000);
+      final sanitizedCategory = InputSanitizer.sanitizeString(category.trim(), maxLength: 100);
+
+      AppLogger.debug('Saving product to Supabase', tag: 'ApiService');
+      
+      final productData = {
+        'name': sanitizedName,
+        'description': sanitizedDescription,
+        'price': price,
+        'category': sanitizedCategory,
+        'image': image,
+        'is_featured': false,
+      };
+
+      await _supabase.from('products').insert(productData);
+      
+      AppLogger.info('Product saved successfully', tag: 'ApiService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error saving product: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      debugPrint('Product save error: $e');
+      return false;
+    }
+  }
+
+  static Future<bool> deleteProduct(int productId) async {
+    try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('delete_product')) {
+        AppLogger.warning('Rate limit exceeded for deleteProduct', tag: 'ApiService');
+        return false;
+      }
+      
+      // If using mock data, simulate product deletion
+      if (_useMockData) {
+        AppLogger.info('Using mock product deletion', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+      }
+
+      AppLogger.debug('Deleting product from Supabase', tag: 'ApiService');
+      
+      await _supabase.from('products').delete().eq('id', productId);
+      
+      AppLogger.info('Product deleted successfully', tag: 'ApiService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error deleting product: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      debugPrint('Product delete error: $e');
+      return false;
+    }
+  }
+
+  static Future<List<String>> getCategories() async {
+    try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('get_categories')) {
+        AppLogger.warning('Rate limit exceeded for getCategories', tag: 'ApiService');
+        throw Exception('Too many requests. Please try again later.');
+      }
+      
+      if (_useMockData) {
+        AppLogger.info('Using mock categories data', tag: 'ApiService');
+        return _getMockCategories();
+      }
+
+      AppLogger.debug('Fetching categories from Supabase', tag: 'ApiService');
+      final response = await _supabase.from('categories').select('name').order('name');
+      final List<dynamic> data = response as List<dynamic>;
+      
+      AppLogger.info('Successfully fetched ${data.length} categories', tag: 'ApiService');
+      return data.map((json) => json['name'] as String).toList();
+    } catch (e, stackTrace) {
+      AppLogger.error('Error fetching categories', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      
+      // Return mock data as fallback for development
+      if (kDebugMode) {
+        AppLogger.warning('Falling back to mock categories data', tag: 'ApiService');
+        return _getMockCategories();
+      }
+      
+      rethrow;
+    }
+  }
+
+  static List<String> _getMockCategories() {
+    return [
+      'Smart watch',
+      'Buds',
+      'Buds plus',
+      'SPEAKERS',
+      'Air tag',
+      'Watch strap',
+    ];
+  }
+
   static List<ProductEntity> _getMockProducts() {
     AppLogger.debug('Generating mock products data', tag: 'ApiService');
     

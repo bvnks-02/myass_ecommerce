@@ -179,6 +179,12 @@ class ProductsProvider extends ChangeNotifier {
     fetchAll(forceRefresh: true);
   }
 
+  void forceRefresh() {
+    _lastFetchTime = null;
+    _retryCount = 0;
+    fetchAll(forceRefresh: true);
+  }
+
   void clearError() {
     _error = null;
     notifyListeners();

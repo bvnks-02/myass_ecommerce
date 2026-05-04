@@ -26,11 +26,34 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   bool _isUploading = false;
   XFile? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  List<String> _categories = [];
+  bool _isLoadingCategories = true;
 
   @override
   void initState() {
     super.initState();
     _fetchProducts();
+    _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    setState(() => _isLoadingCategories = true);
+    try {
+      final categories = await ApiService.getCategories();
+      if (mounted) {
+        setState(() {
+          _categories = categories;
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load categories: $e')),
+        );
+        setState(() => _isLoadingCategories = false);
+      }
+    }
   }
 
   Future<void> _fetchProducts() async {
@@ -55,14 +78,23 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
 
   Future<void> _deleteProduct(int id) async {
     try {
-      // For mock data, we'll just show a message and refresh
+      final success = await ApiService.deleteProduct(id);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Product deleted successfully (mock)'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Product deleted successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to delete product'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         _fetchProducts();
       }
     } catch (e) {
@@ -122,8 +154,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     
     final descController =
         TextEditingController(text: product?.description ?? '');
-    final categoryController =
-        TextEditingController(text: product?.category ?? '');
+    String? _selectedCategory = product?.category;
 
     showDialog(
       context: context,
@@ -148,8 +179,11 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                     const SizedBox(height: 10),
                     _buildTextField(descController, 'Description', maxLines: 3),
                     const SizedBox(height: 10),
-                    _buildTextField(categoryController,
-                        'Category (e.g., Sport, Luxury, Fitness)'),
+                    _buildCategoryDropdown(_selectedCategory, (value) {
+                      setDialogState(() {
+                        _selectedCategory = value;
+                      });
+                    }),
                     const SizedBox(height: 15),
                     Column(
                       children: [
@@ -218,11 +252,11 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                   onPressed: _isUploading
                       ? null
                       : () async {
+                          String? uploadedUrl;
                           if (_selectedImage != null) {
                             setDialogState(
                                 () {}); // Trigger rebuild to show loading
-                            final uploadedUrl =
-                                await _uploadImage(_selectedImage!);
+                            uploadedUrl = await _uploadImage(_selectedImage!);
                             if (uploadedUrl == null) {
                               return; // Error handled in _uploadImage
                             }
@@ -232,10 +266,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             // Sanitize inputs
                             final sanitizedName = InputSanitizer.sanitizeString(nameController.text.trim(), maxLength: 200);
                             final sanitizedDescription = InputSanitizer.sanitizeString(descController.text.trim(), maxLength: 2000);
-                            final sanitizedCategory = InputSanitizer.sanitizeString(categoryController.text.trim(), maxLength: 100);
-                            
-                            // Sanitized values are ready for use when implementing actual product save
-                            debugPrint('Product data sanitized - Name: $sanitizedName, Description length: ${sanitizedDescription.length}, Category: $sanitizedCategory');
                             
                             // Validate inputs
                             if (sanitizedName.isEmpty || sanitizedName.length < 2) {
@@ -250,11 +280,11 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               return;
                             }
                             
-                            if (sanitizedCategory.isEmpty) {
+                            if (_selectedCategory == null || _selectedCategory!.isEmpty) {
                               if (mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Category is required'),
+                                    content: Text('Please select a category'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );
@@ -298,16 +328,42 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               return;
                             }
 
-                            // For mock data, just show success message
+                            // Convert DZD price to USD for storage
+                            final usdPrice = CurrencyService.convertToUSD(dzdPrice);
+                            
+                            // Prepare image URL
+                            String imageUrl = product?.image ?? '';
+                            if (_selectedImage != null && uploadedUrl != null) {
+                              imageUrl = uploadedUrl;
+                            }
+                            
+                            // Save product to Supabase
+                            final success = await ApiService.saveProduct(
+                              name: sanitizedName,
+                              description: sanitizedDescription,
+                              price: usdPrice,
+                              category: _selectedCategory!,
+                              image: imageUrl,
+                            );
+                            
                             if (mounted) {
-                              Navigator.pop(context);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Product saved successfully (mock)'),
-                                  backgroundColor: Colors.green,
-                                ),
-                              );
-                              _fetchProducts();
+                              if (success) {
+                                Navigator.pop(context);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Product saved successfully'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                                _fetchProducts();
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Failed to save product'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
                             }
                           } catch (e) {
                             if (mounted) {
@@ -336,6 +392,66 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildCategoryDropdown(String? selectedCategory, Function(String?) onChanged) {
+    if (_isLoadingCategories) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Loading categories...',
+              style: TextStyle(color: Colors.white.withOpacity(0.7)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return DropdownButtonFormField<String>(
+      value: selectedCategory,
+      onChanged: onChanged,
+      style: const TextStyle(color: Colors.white),
+      dropdownColor: AppTheme.cardColor,
+      decoration: InputDecoration(
+        hintText: 'Select Category',
+        hintStyle: TextStyle(color: Colors.white.withOpacity(0.5)),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.05),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+      ),
+      items: _categories.map((String category) {
+        return DropdownMenuItem<String>(
+          value: category,
+          child: Text(
+            category,
+            style: const TextStyle(color: Colors.white),
+          ),
+        );
+      }).toList(),
     );
   }
 

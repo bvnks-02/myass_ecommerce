@@ -13,6 +13,7 @@ import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/favorites_provider.dart';
+import '../../../../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,16 +23,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<String> _categories = [
-    'All',
-    'Smart watch',
-    'Buds',
-    'Buds plus',
-    'SPEAKERS',
-    'Air tag',
-    'Watch strap',
-  ];
+  List<String> _categories = ['All'];
   String _selectedCategory = 'All';
+  bool _isLoadingCategories = true;
 
   @override
   void initState() {
@@ -39,12 +33,49 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when returning from admin screens
+    _loadData();
+  }
+
   void _loadData() {
     Future.microtask(() {
       if (mounted) {
-        context.read<ProductsProvider>().fetchProducts();
+        _fetchCategories();
+        context.read<ProductsProvider>().forceRefresh();
       }
     });
+  }
+
+  Future<void> _fetchCategories() async {
+    setState(() => _isLoadingCategories = true);
+    try {
+      final categories = await ApiService.getCategories();
+      if (mounted) {
+        setState(() {
+          _categories = ['All', ...categories];
+          _isLoadingCategories = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        // Fallback to hardcoded categories if API fails
+        setState(() {
+          _categories = [
+            'All',
+            'Smart watch',
+            'Buds',
+            'Buds plus',
+            'SPEAKERS',
+            'Air tag',
+            'Watch strap',
+          ];
+          _isLoadingCategories = false;
+        });
+      }
+    }
   }
 
   List<ProductEntity> _filteredProducts(List<ProductEntity> products) {
@@ -245,21 +276,43 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            height: ResponsiveUtils.sh(context, 30),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _categories.length,
-              itemBuilder: (context, index) {
-                final category = _categories[index];
-                final isSelected = category == _selectedCategory;
+          if (_isLoadingCategories)
+            SizedBox(
+              height: ResponsiveUtils.sh(context, 30),
+              child: Row(
+                children: [
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Loading categories...',
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.7),
+                      fontSize: ResponsiveUtils.sf(context, 12),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else
+            SizedBox(
+              height: ResponsiveUtils.sh(context, 30),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _categories.length,
+                itemBuilder: (context, index) {
+                  final category = _categories[index];
+                  final isSelected = category == _selectedCategory;
 
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _selectedCategory = category;
-                    });
-                  },
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedCategory = category;
+                      });
+                    },
                   child: Container(
                     margin: EdgeInsets.only(right: ResponsiveUtils.sw(context, 25)),
                     child: Column(
