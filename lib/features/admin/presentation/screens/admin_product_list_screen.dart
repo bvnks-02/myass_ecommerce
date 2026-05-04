@@ -40,16 +40,23 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     setState(() => _isLoadingCategories = true);
     try {
       final categories = await ApiService.getCategories();
+      debugPrint('Categories loaded: ${categories.length} - $categories');
       if (mounted) {
         setState(() {
           _categories = categories;
           _isLoadingCategories = false;
         });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      debugPrint('Error loading categories: $e');
+      debugPrint('Stack trace: $stackTrace');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load categories: $e')),
+          SnackBar(
+            content: Text('Failed to load categories: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
         );
         setState(() => _isLoadingCategories = false);
       }
