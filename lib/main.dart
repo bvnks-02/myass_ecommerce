@@ -38,18 +38,63 @@ import 'features/products/domain/usecases/get_featured_products.dart';
 import 'features/admin/presentation/screens/admin_dashboard_screen.dart';
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(() async {
+    WidgetsFlutterBinding.ensureInitialized();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+    // Catch Flutter framework errors
+    FlutterError.onError = (FlutterErrorDetails details) {
+      FlutterError.presentError(details);
+      debugPrint('Flutter Error: ${details.exception}');
+      debugPrint('Stack: ${details.stack}');
+    };
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
-  );
+    // Load environment variables with error handling
+    try {
+      await dotenv.load(fileName: ".env");
+      debugPrint('✓ .env file loaded successfully');
+    } catch (e) {
+      debugPrint(
+          '⚠️  Failed to load .env file: $e - Using fallback credentials');
+    }
 
-  runApp(const MyApp());
+    // Validate env vars and use hardcoded fallback if .env failed
+    final supabaseUrl = dotenv.env['SUPABASE_URL'];
+    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+
+    final url = (supabaseUrl != null && supabaseUrl.isNotEmpty)
+        ? supabaseUrl
+        : 'https://giilayepbjvwpkjlmgsv.supabase.co';
+    final anonKey = (supabaseAnonKey != null && supabaseAnonKey.isNotEmpty)
+        ? supabaseAnonKey
+        : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWxheWVwYmp2d3BramxtZ3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDQ1NDQsImV4cCI6MjA4OTAyMDU0NH0.GwWGh4yuRbReqs3g-ccWCV5Z7MaJV-PzbK6RbJ64jQw';
+
+    // Verify URLs are not empty or localhost
+    if (url.isEmpty || url.contains('localhost')) {
+      throw Exception(
+          '❌ CRITICAL: Invalid SUPABASE_URL: $url. Check your .env file.');
+    }
+    if (anonKey.isEmpty) {
+      throw Exception(
+          '❌ CRITICAL: SUPABASE_ANON_KEY is empty. Check your .env file.');
+    }
+
+    // Initialize Supabase with error handling
+    try {
+      debugPrint('🔄 Initializing Supabase...');
+      await Supabase.initialize(url: url, anonKey: anonKey);
+      debugPrint('✓ Supabase initialized successfully');
+    } catch (e, stackTrace) {
+      debugPrint('❌ CRITICAL: Supabase initialization failed!');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
+      rethrow; // Rethrow to ensure the error is visible and handled
+    }
+
+    runApp(const MyApp());
+  }, (error, stackTrace) {
+    debugPrint('❌ UNCAUGHT ERROR: $error');
+    debugPrint('Stack trace: $stackTrace');
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -71,7 +116,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _handleAuthStateChanges() {
-    _authSubscription = Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
+    _authSubscription =
+        Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
       // Skip the initial session restoration on app startup to avoid unwanted navigation
       if (_isFirstAuthEvent) {
         _isFirstAuthEvent = false;
@@ -87,13 +133,16 @@ class _MyAppState extends State<MyApp> {
           final navigator = _navigatorKey.currentState;
           if (navigator == null) return;
 
-          final authProvider = Provider.of<AuthProvider>(navigator.context, listen: false);
+          final authProvider =
+              Provider.of<AuthProvider>(navigator.context, listen: false);
           await authProvider.refreshRole();
 
           final targetRoute = authProvider.isAdmin ? '/admin' : '/home';
           // Only navigate if currently on an auth screen
           final currentRoute = ModalRoute.of(navigator.context)?.settings.name;
-          if (currentRoute == '/login' || currentRoute == '/register' || currentRoute == '/onboarding') {
+          if (currentRoute == '/login' ||
+              currentRoute == '/register' ||
+              currentRoute == '/onboarding') {
             navigator.pushReplacementNamed(targetRoute);
           }
         });
@@ -103,7 +152,8 @@ class _MyAppState extends State<MyApp> {
         // User clicked password reset link, navigate to reset password screen
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _navigatorKey.currentState?.pushNamedAndRemoveUntil('/reset_password', (route) => false);
+          _navigatorKey.currentState
+              ?.pushNamedAndRemoveUntil('/reset_password', (route) => false);
         });
       }
     });
@@ -137,13 +187,13 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
         home: const SplashScreen(),
-        initialRoute: '/',
         onGenerateRoute: (settings) {
           // Handle web hash routing for password reset
-          if (settings.name == '/reset_password' || 
+          if (settings.name == '/reset_password' ||
               settings.name?.contains('reset_password') == true) {
             return MaterialPageRoute(
               builder: (context) => const ResetPasswordScreen(),
+              settings: settings,
             );
           }
           return null;
@@ -153,7 +203,6 @@ class _MyAppState extends State<MyApp> {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/forgot_password': (context) => const ForgotPasswordScreen(),
-          '/reset_password': (context) => const ResetPasswordScreen(),
           '/home': (context) => const MainScreen(),
           '/admin': (context) => const AdminDashboardScreen(),
           '/admin/orders': (context) => const AdminOrdersScreen(),
@@ -167,7 +216,8 @@ class _MyAppState extends State<MyApp> {
           '/support': (context) => const SupportScreen(),
           '/profile': (context) => const ProfileScreen(),
           '/product_details': (context) {
-            final product = ModalRoute.of(context)?.settings.arguments as ProductEntity?;
+            final product =
+                ModalRoute.of(context)?.settings.arguments as ProductEntity?;
             if (product == null) return const SizedBox.shrink();
             return ProductDetailsScreen(product: product);
           },
@@ -185,7 +235,8 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen>
+    with SingleTickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
@@ -222,8 +273,7 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
   }
 
   Widget _buildNavItem(
-    BuildContext context,
-    {
+    BuildContext context, {
     required IconData icon,
     required IconData activeIcon,
     required int index,
@@ -297,11 +347,13 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                     // Navigation bar container with custom curve
                     Container(
                       height: ResponsiveUtils.sh(context, 70),
-                      margin: EdgeInsets.symmetric(horizontal: ResponsiveUtils.sw(context, 20)),
+                      margin: EdgeInsets.symmetric(
+                          horizontal: ResponsiveUtils.sw(context, 20)),
                       child: CustomPaint(
                         painter: CurvedBottomBarPainter(),
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.sw(context, 10)),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: ResponsiveUtils.sw(context, 10)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
@@ -405,15 +457,20 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                         return const SizedBox.shrink();
                                       }
                                       return Container(
-                                        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
+                                        padding: EdgeInsets.all(
+                                            ResponsiveUtils.sw(context, 6)),
                                         decoration: BoxDecoration(
                                           gradient: const LinearGradient(
-                                            colors: [Colors.red, Colors.redAccent],
+                                            colors: [
+                                              Colors.red,
+                                              Colors.redAccent
+                                            ],
                                           ),
                                           shape: BoxShape.circle,
                                           boxShadow: [
                                             BoxShadow(
-                                              color: Colors.red.withValues(alpha: 0.5),
+                                              color: Colors.red
+                                                  .withValues(alpha: 0.5),
                                               blurRadius: 8,
                                             ),
                                           ],
@@ -422,7 +479,8 @@ class _MainScreenState extends State<MainScreen> with SingleTickerProviderStateM
                                           '$itemCount',
                                           style: TextStyle(
                                             color: Colors.white,
-                                            fontSize: ResponsiveUtils.sf(context, 12),
+                                            fontSize:
+                                                ResponsiveUtils.sf(context, 12),
                                             fontWeight: FontWeight.bold,
                                           ),
                                         ),
@@ -456,58 +514,68 @@ class CurvedBottomBarPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final path = Path();
-    
+
     // Start from bottom left
     path.moveTo(0, 20);
-    
+
     // Top left corner curve
     path.quadraticBezierTo(0, 0, 20, 0);
-    
+
     // Left side to the center curve
     path.lineTo(size.width * 0.35, 0);
-    
+
     // Create the elevated curve for the cart button
     path.quadraticBezierTo(
-      size.width * 0.40, 0,
-      size.width * 0.42, 5,
+      size.width * 0.40,
+      0,
+      size.width * 0.42,
+      5,
     );
     path.quadraticBezierTo(
-      size.width * 0.45, 15,
-      size.width * 0.50, 15,
+      size.width * 0.45,
+      15,
+      size.width * 0.50,
+      15,
     );
     path.quadraticBezierTo(
-      size.width * 0.55, 15,
-      size.width * 0.58, 5,
+      size.width * 0.55,
+      15,
+      size.width * 0.58,
+      5,
     );
     path.quadraticBezierTo(
-      size.width * 0.60, 0,
-      size.width * 0.65, 0,
+      size.width * 0.60,
+      0,
+      size.width * 0.65,
+      0,
     );
-    
+
     // Right side
     path.lineTo(size.width - 20, 0);
-    
+
     // Top right corner curve
     path.quadraticBezierTo(size.width, 0, size.width, 20);
-    
+
     // Bottom right corner
     path.lineTo(size.width, size.height - 20);
     path.quadraticBezierTo(
-      size.width, size.height,
-      size.width - 20, size.height,
+      size.width,
+      size.height,
+      size.width - 20,
+      size.height,
     );
-    
+
     // Bottom side
     path.lineTo(20, size.height);
-    
+
     // Bottom left corner
     path.quadraticBezierTo(0, size.height, 0, size.height - 20);
-    
+
     path.close();
 
     // Draw shadow
     canvas.drawShadow(path, Colors.black.withValues(alpha: 0.5), 15, true);
-    
+
     // Draw the bar
     canvas.drawPath(path, paint);
 

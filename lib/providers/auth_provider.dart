@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart' show ChangeNotifier, debugPrint, kIsWeb;
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../core/security/rate_limiter.dart';
 
