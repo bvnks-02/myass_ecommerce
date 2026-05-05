@@ -645,6 +645,8 @@ class _CartScreenState extends State<CartScreen> {
         'product_id': product.id,
         'quantity': item['quantity'],
         'price': product.price,
+        'color': item['selectedColor'],
+        'size': item['selectedSize'],
       };
     }).toList();
 

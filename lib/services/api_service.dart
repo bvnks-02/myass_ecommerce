@@ -130,13 +130,15 @@ class ApiService {
       final orderId = orderResponse['id'];
       AppLogger.debug('Order created with ID: $orderId', tag: 'ApiService');
 
-      // 2. Prepare order items
+      // 2. Prepare order items with color and size
       final orderItemsList = items.map((item) {
         return {
           'order_id': orderId,
           'product_id': item['product_id'],
           'quantity': item['quantity'],
           'price_at_time': item['price'],
+          'color': item['color'],
+          'size': item['size'],
         };
       }).toList();
 
