@@ -8,6 +8,7 @@ import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/products/presentation/screens/home_screen.dart';
 import 'features/products/presentation/screens/product_details_screen.dart';
 import 'features/products/presentation/screens/watch_detail_screen.dart';
+import 'features/orders/presentation/screens/user_orders_screen.dart';
 import 'features/products/domain/entities/product_entity.dart';
 import 'features/cart/presentation/screens/cart_screen.dart';
 import 'features/favorites/presentation/screens/favorites_screen.dart';
@@ -221,6 +222,7 @@ class _MyAppState extends State<MyApp> {
             if (product == null) return const SizedBox.shrink();
             return ProductDetailsScreen(product: product);
           },
+          '/my_orders': (context) => const UserOrdersScreen(),
           '/watch_details': (context) => const WatchDetailScreen(),
         },
       ),

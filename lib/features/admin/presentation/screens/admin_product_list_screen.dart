@@ -216,11 +216,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     _selectedImages = []; // Reset selection
     final nameController = TextEditingController(text: product?.name ?? '');
 
-    // Display price as DZD directly without conversion
-    final displayPrice = product != null
-        ? CurrencyService.convertFromUSD(product.price).round().toString()
-        : '';
-    final priceController = TextEditingController(text: displayPrice);
+    // Display price directly (stored as DZD)
+    final priceController = TextEditingController(text: product?.price.round().toString() ?? '');
 
     final descController =
         TextEditingController(text: product?.description ?? '');
@@ -552,8 +549,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               return;
                             }
 
-                            // Convert DZD price to USD for storage
-                            final usdPrice = CurrencyService.convertToUSD(dzdPrice);
+                            // Store price directly in DZD (no conversion needed)
+                            final finalPrice = dzdPrice;
 
                             // Prepare image URLs - combine existing with new uploads
                             List<String> allImages = [];
@@ -573,7 +570,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                                 id: productId,
                                 name: sanitizedName,
                                 description: sanitizedDescription,
-                                price: usdPrice,
+                                price: finalPrice,
                                 category: _selectedCategory!,
                                 image: mainImageUrl.isNotEmpty ? mainImageUrl : null,
                                 images: allImages.isNotEmpty ? allImages : null,
@@ -583,7 +580,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               success = await ApiService.saveProduct(
                                 name: sanitizedName,
                                 description: sanitizedDescription,
-                                price: usdPrice,
+                                price: finalPrice,
                                 category: _selectedCategory!,
                                 image: mainImageUrl,
                                 images: allImages,

@@ -15,6 +15,7 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../orders/presentation/screens/user_orders_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -43,6 +44,18 @@ class _CartScreenState extends State<CartScreen> {
           'Cart',
           style: TextStyle(color: Colors.white),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.receipt_long, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const UserOrdersScreen()),
+              );
+            },
+            tooltip: 'Order History',
+          ),
+        ],
       ),
       body: Column(
         children: [
