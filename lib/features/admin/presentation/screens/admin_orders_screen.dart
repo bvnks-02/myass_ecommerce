@@ -16,6 +16,10 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
   bool _isLoading = true;
   List<dynamic> _orders = [];
+  List<dynamic> _filteredOrders = [];
+  String _selectedFilter = 'All';
+
+  final List<String> _filters = ['All', 'Pending', 'Shipped', 'Delivered', 'Completed'];
 
   @override
   void initState() {
@@ -96,6 +100,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       if (mounted) {
         setState(() {
           _orders = enrichedOrders;
+          _applyFilter();
           _isLoading = false;
         });
       }
@@ -162,17 +167,99 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     }
   }
 
+  void _applyFilter() {
+    if (_selectedFilter == 'All') {
+      _filteredOrders = List.from(_orders);
+    } else if (_selectedFilter == 'Completed') {
+      _filteredOrders = _orders.where((order) {
+        final status = order['status']?.toString().toLowerCase() ?? '';
+        return status.contains('completed');
+      }).toList();
+    } else if (_selectedFilter == 'Delivered') {
+      _filteredOrders = _orders.where((order) {
+        final status = order['status']?.toString().toLowerCase() ?? '';
+        return status.contains('delivered') && !status.contains('completed');
+      }).toList();
+    } else {
+      _filteredOrders = _orders.where((order) {
+        final status = order['status']?.toString().toLowerCase() ?? '';
+        return status.contains(_selectedFilter.toLowerCase());
+      }).toList();
+    }
+  }
+
+  void _onFilterChanged(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+      _applyFilter();
+    });
+  }
+
+  int _getOrderCount(String filter) {
+    if (filter == 'All') return _orders.length;
+    if (filter == 'Completed') {
+      return _orders.where((order) {
+        final status = order['status']?.toString().toLowerCase() ?? '';
+        return status.contains('completed');
+      }).length;
+    }
+    if (filter == 'Delivered') {
+      return _orders.where((order) {
+        final status = order['status']?.toString().toLowerCase() ?? '';
+        return status.contains('delivered') && !status.contains('completed');
+      }).length;
+    }
+    return _orders.where((order) {
+      final status = order['status']?.toString().toLowerCase() ?? '';
+      return status.contains(filter.toLowerCase());
+    }).length;
+  }
+
+  Color _getFilterColor(String filter) {
+    switch (filter) {
+      case 'Pending':
+        return Colors.orange;
+      case 'Shipped':
+        return Colors.blue;
+      case 'Delivered':
+        return Colors.teal;
+      case 'Completed':
+        return Colors.green;
+      default:
+        return Colors.white;
+    }
+  }
+
+  IconData _getFilterIcon(String filter) {
+    switch (filter) {
+      case 'Pending':
+        return Icons.pending;
+      case 'Shipped':
+        return Icons.local_shipping;
+      case 'Delivered':
+        return Icons.home;
+      case 'Completed':
+        return Icons.check_circle;
+      default:
+        return Icons.list;
+    }
+  }
+
   Color _getStatusColor(String status) {
-    if (status.toLowerCase().contains('delivered')) return Colors.green;
-    if (status.toLowerCase().contains('shipped')) return Colors.blue;
-    if (status.toLowerCase().contains('cancelled')) return Colors.red;
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus.contains('completed')) return Colors.green;
+    if (lowerStatus.contains('delivered')) return Colors.teal;
+    if (lowerStatus.contains('shipped')) return Colors.blue;
+    if (lowerStatus.contains('cancelled')) return Colors.red;
     return Colors.orange; // Pending
   }
 
   IconData _getStatusIcon(String status) {
-    if (status.toLowerCase().contains('delivered')) return Icons.check_circle;
-    if (status.toLowerCase().contains('shipped')) return Icons.local_shipping;
-    if (status.toLowerCase().contains('cancelled')) return Icons.cancel;
+    final lowerStatus = status.toLowerCase();
+    if (lowerStatus.contains('completed')) return Icons.check_circle;
+    if (lowerStatus.contains('delivered')) return Icons.home;
+    if (lowerStatus.contains('shipped')) return Icons.local_shipping;
+    if (lowerStatus.contains('cancelled')) return Icons.cancel;
     return Icons.pending;
   }
 
@@ -213,11 +300,91 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.white))
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: _orders.length,
-              itemBuilder: (context, index) {
-                final order = _orders[index];
+          : Column(
+              children: [
+                // Filter Tabs
+                Container(
+                  height: 55,
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: _filters.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final filter = _filters[index];
+                      final isSelected = _selectedFilter == filter;
+                      final filterColor = _getFilterColor(filter);
+                      
+                      return Material(
+                        color: isSelected ? filterColor.withOpacity(0.25) : Colors.transparent,
+                        borderRadius: BorderRadius.circular(25),
+                        child: InkWell(
+                          onTap: () => _onFilterChanged(filter),
+                          borderRadius: BorderRadius.circular(25),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25),
+                              border: Border.all(
+                                color: isSelected ? filterColor : Colors.white.withOpacity(0.2),
+                                width: isSelected ? 2 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isSelected)
+                                  Icon(
+                                    _getFilterIcon(filter),
+                                    color: filterColor,
+                                    size: 18,
+                                  ),
+                                if (isSelected)
+                                  const SizedBox(width: 8),
+                                Text(
+                                  filter,
+                                  style: TextStyle(
+                                    color: isSelected ? filterColor : Colors.white.withOpacity(0.7),
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Orders List
+                Expanded(
+                  child: _filteredOrders.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                _getFilterIcon(_selectedFilter),
+                                color: Colors.white.withOpacity(0.3),
+                                size: 48,
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No ${_selectedFilter.toLowerCase()} orders',
+                                style: TextStyle(
+                                  color: Colors.white.withOpacity(0.5),
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(16),
+                          itemCount: _filteredOrders.length,
+                          itemBuilder: (context, index) {
+                            final order = _filteredOrders[index];
                 final statusColor = _getStatusColor(order['status']);
                 
                 return Container(
@@ -564,35 +731,40 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                               const Divider(color: Colors.white12, height: 1),
                               const SizedBox(height: 16),
                               // Action Buttons
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: _buildStatusButton(
+                              SizedBox(
+                                height: 50,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: [
+                                    _buildStatusButton(
                                       'Pending',
                                       () => _updateOrderStatus(order['id'], 'Pending'),
-                                      isActive: order['status'] == 'Pending',
+                                      isActive: order['status']?.toString().toLowerCase() == 'pending',
                                       color: Colors.orange,
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: _buildStatusButton(
+                                    const SizedBox(width: 10),
+                                    _buildStatusButton(
                                       'Shipped',
                                       () => _updateOrderStatus(order['id'], 'Shipped'),
-                                      isActive: order['status'] == 'Shipped',
+                                      isActive: order['status']?.toString().toLowerCase() == 'shipped',
                                       color: Colors.blue,
                                     ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Expanded(
-                                    child: _buildStatusButton(
+                                    const SizedBox(width: 10),
+                                    _buildStatusButton(
                                       'Delivered',
                                       () => _updateOrderStatus(order['id'], 'Delivered'),
-                                      isActive: order['status'] == 'Delivered',
+                                      isActive: order['status']?.toString().toLowerCase() == 'delivered',
+                                      color: Colors.teal,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    _buildStatusButton(
+                                      'Completed',
+                                      () => _updateOrderStatus(order['id'], 'Completed'),
+                                      isActive: order['status']?.toString().toLowerCase() == 'completed',
                                       color: Colors.green,
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -601,7 +773,10 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                     ),
                   ),
                 );
-              },
+                          },
+                        ),
+                ),
+              ],
             ),
     );
   }
@@ -614,14 +789,15 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   }) {
     return Material(
       color: isActive ? color.withOpacity(0.25) : Colors.transparent,
-      borderRadius: BorderRadius.circular(10),
+      borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          constraints: const BoxConstraints(minWidth: 90),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isActive ? color : Colors.white.withOpacity(0.2),
               width: isActive ? 2 : 1,
@@ -632,8 +808,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               title,
               style: TextStyle(
                 color: isActive ? color : Colors.white.withOpacity(0.7),
-                fontSize: 12,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+                fontSize: 14,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
               ),
             ),
           ),
