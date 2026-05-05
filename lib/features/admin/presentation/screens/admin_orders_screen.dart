@@ -836,11 +836,9 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   }
 
   String _formatPrice(double price) {
-    // Format with thousands separator and 3 decimal places
-    final formatted = price.toStringAsFixed(3);
-    final parts = formatted.split('.');
-    final wholePart = parts[0];
-    final decimalPart = parts[1];
+    // Format with thousands separator, no decimal places
+    final roundedPrice = price.round();
+    final wholePart = roundedPrice.toString();
 
     // Add thousands separators
     final buffer = StringBuffer();
@@ -851,7 +849,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
       buffer.write(wholePart[i]);
     }
 
-    return '${buffer.toString()},$decimalPart';
+    return buffer.toString();
   }
 
   List<Widget> _buildProductList(dynamic orderItems) {

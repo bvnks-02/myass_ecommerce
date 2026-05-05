@@ -82,9 +82,11 @@ class ApiService {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
+      debugPrint('=== ApiService.createOrder START ===');
+      
       // Rate limiting check
       if (!RateLimiters.api.isAllowed('create_order')) {
-        AppLogger.warning('Rate limit exceeded for createOrder', tag: 'ApiService');
+        debugPrint('Rate limit exceeded for createOrder');
         return false;
       }
       
@@ -93,27 +95,28 @@ class ApiService {
       final sanitizedPhone = InputSanitizer.sanitizeNumeric(phone.trim());
       final sanitizedAddress = InputSanitizer.sanitizeString(address.trim(), maxLength: 500);
       
-      AppLogger.debug('Creating new order', tag: 'ApiService');
+      debugPrint('Sanitized inputs - Name: $sanitizedName, Phone: $sanitizedPhone, Address: $sanitizedAddress');
       
       final userId = _supabase.auth.currentUser?.id;
+      debugPrint('User ID: $userId');
+      
       if (userId == null) {
-        AppLogger.error('No authenticated user found', tag: 'ApiService');
+        debugPrint('ERROR: No authenticated user found');
         return false;
       }
 
       // If using mock data, simulate order creation
       if (_useMockData) {
-        AppLogger.info('Using mock order creation', tag: 'ApiService');
+        debugPrint('Using mock order creation');
         await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-        AppLogger.info('Mock order created successfully', tag: 'ApiService');
+        debugPrint('Mock order created successfully');
         return true;
       }
 
-      AppLogger.debug('User ID: $userId', tag: 'ApiService');
-      AppLogger.debug('Order data - Total: $total, Name: $name, Phone: $phone, Address: $address', tag: 'ApiService');
-      AppLogger.debug('Order items: $items', tag: 'ApiService');
+      debugPrint('Order data - Total: $total, Items count: ${items.length}');
 
       // 1. Insert order with sanitized data
+      debugPrint('Step 1: Inserting order...');
       final orderResponse = await _supabase
           .from('orders')
           .insert({
@@ -128,30 +131,46 @@ class ApiService {
           .single();
 
       final orderId = orderResponse['id'];
-      AppLogger.debug('Order created with ID: $orderId', tag: 'ApiService');
+      debugPrint('Step 1 SUCCESS: Order created with ID: $orderId');
 
       // 2. Prepare order items with color and size
+      debugPrint('Step 2: Preparing order items...');
       final orderItemsList = items.map((item) {
-        return {
+        final orderItem = {
           'order_id': orderId,
           'product_id': item['product_id'],
           'quantity': item['quantity'],
           'price_at_time': item['price'],
-          'color': item['color'],
-          'size': item['size'],
         };
+        // Only add color and size if they exist (for backward compatibility)
+        if (item['color'] != null) {
+          orderItem['color'] = item['color'];
+        }
+        if (item['size'] != null) {
+          orderItem['size'] = item['size'];
+        }
+        return orderItem;
       }).toList();
 
-      AppLogger.debug('Inserting order items: $orderItemsList', tag: 'ApiService');
+      debugPrint('Step 2: Order items prepared: $orderItemsList');
 
       // 3. Insert order items
+      debugPrint('Step 3: Inserting order items...');
       await _supabase.from('order_items').insert(orderItemsList);
+      debugPrint('Step 3 SUCCESS: Order items inserted');
       
-      AppLogger.info('Order and items created successfully', tag: 'ApiService');
+      debugPrint('=== ApiService.createOrder SUCCESS ===');
       return true;
     } catch (e, stackTrace) {
-      AppLogger.error('Error creating order: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
-      debugPrint('Order creation error: $e');
+      debugPrint('=== ApiService.createOrder ERROR ===');
+      debugPrint('Error: $e');
+      debugPrint('Stack trace: $stackTrace');
+      debugPrint('Error type: ${e.runtimeType}');
+      if (e is PostgrestException) {
+        debugPrint('Postgrest error code: ${e.code}');
+        debugPrint('Postgrest error message: ${e.message}');
+        debugPrint('Postgrest error details: ${e.details}');
+      }
       return false;
     }
   }

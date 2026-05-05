@@ -36,8 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Refresh data when returning from admin screens
-    _loadData();
+    // Removed automatic refresh to prevent unnecessary rebuilds
+    // Data is already loaded in initState
   }
 
   void _loadData() {
@@ -357,6 +357,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: ResponsiveUtils.gridAspectRatio(context),
@@ -466,7 +468,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     SizedBox(height: ResponsiveUtils.sh(context, 2)),
                     Text(
-                      '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
+                      CurrencyService.formatPrice(product.price),
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.7),
                         fontSize: ResponsiveUtils.sf(context, 12),
@@ -695,7 +697,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
             style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
-            '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
+            CurrencyService.formatPrice(product.price),
             style: const TextStyle(color: AppTheme.primaryColor),
           ),
           onTap: () {
@@ -753,7 +755,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
             style: const TextStyle(color: Colors.white),
           ),
           subtitle: Text(
-            '𝟯𝟱.𝟬𝟬𝟬𝗗𝗔',
+            CurrencyService.formatPrice(product.price),
             style: const TextStyle(color: AppTheme.primaryColor),
           ),
           onTap: () {

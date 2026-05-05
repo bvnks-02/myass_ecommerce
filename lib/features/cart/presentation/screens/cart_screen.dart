@@ -664,6 +664,14 @@ class _CartScreenState extends State<CartScreen> {
     }).toList();
 
     try {
+      debugPrint('=== Starting order creation ===');
+      debugPrint('User ID: ${user.id}');
+      debugPrint('Total: ${cart.totalAmount}');
+      debugPrint('Name: $name');
+      debugPrint('Phone: $phone');
+      debugPrint('Address: $address');
+      debugPrint('Order items: $orderItems');
+
       final success = await ApiService.createOrder(
         total: cart.totalAmount,
         name: name,
@@ -671,6 +679,8 @@ class _CartScreenState extends State<CartScreen> {
         address: address,
         items: orderItems,
       );
+
+      debugPrint('=== Order creation result: $success ===');
 
       // Pop the loading dialog
       if (mounted) Navigator.of(context).pop();
@@ -722,6 +732,8 @@ class _CartScreenState extends State<CartScreen> {
     } catch (e) {
       // Pop the loading dialog
       if (mounted) Navigator.of(context).pop();
+      
+      debugPrint('=== Order creation exception: $e ===');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

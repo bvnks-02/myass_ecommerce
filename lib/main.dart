@@ -326,12 +326,9 @@ class _MainScreenState extends State<MainScreen>
     return Scaffold(
       body: Stack(
         children: [
-          // The main screen content
+          // The main screen content - use conditional rendering instead of IndexedStack
           Positioned.fill(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: _screens,
-            ),
+            child: _screens[_currentIndex],
           ),
 
           // Floating Bottom Navigation Bar with curved design
@@ -575,10 +572,7 @@ class CurvedBottomBarPainter extends CustomPainter {
 
     path.close();
 
-    // Draw shadow
-    canvas.drawShadow(path, Colors.black.withValues(alpha: 0.5), 15, true);
-
-    // Draw the bar
+    // Draw the bar (removed shadow for performance)
     canvas.drawPath(path, paint);
 
     // Draw border
