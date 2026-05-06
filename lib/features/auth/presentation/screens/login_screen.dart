@@ -10,6 +10,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 
@@ -38,24 +39,18 @@ class _LoginScreenState extends State<LoginScreen> {
     
     // Validate inputs
     if (!InputValidator.isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email address')),
-      );
+      AppSnackBar.warning(context, 'Please enter a valid email address');
       return;
     }
     
     if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      AppSnackBar.warning(context, 'Please enter your email and password');
       return;
     }
 
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Too many login attempts. Please try again later.')),
-      );
+      AppSnackBar.warning(context, 'Too many attempts. Please try again later.');
       return;
     }
 
@@ -68,9 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!authProvider.isAuthenticated) {
         debugPrint('Login failed - not authenticated');
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid email or password')),
-          );
+          AppSnackBar.error(context, 'Invalid email or password. Please try again.');
         }
         return;
       }
@@ -94,9 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        AppSnackBar.error(context, message);
       }
     } finally {
       if (mounted) {
@@ -114,9 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       // If the provider has an immediate error (e.g. provider not enabled), stop here
       if (authProvider.hasError && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authProvider.errorMessage!)),
-        );
+        AppSnackBar.error(context, authProvider.errorMessage!);
         return;
       }
 
@@ -139,15 +128,11 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } on TimeoutException catch (_) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login timed out. Please try again.')),
-        );
+        AppSnackBar.error(context, 'Login timed out. Please try again.');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Social login failed: ${e.toString()}')),
-        );
+        AppSnackBar.error(context, 'Social login failed. Please try again.');
       }
     } finally {
       sub?.cancel();

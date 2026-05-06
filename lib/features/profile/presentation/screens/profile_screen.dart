@@ -8,6 +8,8 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/services/dialog_service.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../providers/auth_provider.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -57,25 +59,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     // Validate inputs
     final nameError = InputValidator.validateFullName(name);
     if (nameError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(nameError)),
-      );
+      AppSnackBar.warning(context, nameError);
       return;
     }
     
     final phoneError = InputValidator.validatePhoneNumber(phone);
     if (phoneError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(phoneError)),
-      );
+      AppSnackBar.warning(context, phoneError);
       return;
     }
     
     // Rate limiting check
     if (!RateLimiters.api.isAllowed('profile_update')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Too many update attempts. Please try again later.')),
-      );
+      AppSnackBar.warning(context, 'Too many update attempts. Please try again later.');
       return;
     }
     
@@ -92,17 +88,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       );
       if (mounted) {
         Provider.of<AuthProvider>(context, listen: false).refreshRole();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully!')),
-        );
+        AppSnackBar.success(context, 'Your profile has been updated successfully!');
       }
     } catch (e) {
       debugPrint('Error updating profile: $e');
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        AppSnackBar.error(context, 'Could not update profile: $message');
       }
     } finally {
       if (mounted) {
@@ -448,43 +440,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Logout',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to sign out?',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final authProvider =
-                  Provider.of<AuthProvider>(context, listen: false);
-              await authProvider.signOut();
-              if (mounted) {
-                Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
-              }
-            },
-            child: const Text(
-              'Sign Out',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showLogoutConfirmation(
+      onConfirm: () async {
+        final authProvider = Provider.of<AuthProvider>(context, listen: false);
+        await authProvider.signOut();
+        if (mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+        }
+      },
     );
   }
 }

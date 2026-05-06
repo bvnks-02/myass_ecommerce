@@ -15,6 +15,8 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/services/dialog_service.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../orders/presentation/screens/user_orders_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -496,84 +498,21 @@ class _CartScreenState extends State<CartScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to get location: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppSnackBar.error(context, 'Could not detect your location. Please enter it manually.');
     }
   }
 
   void _showLocationDisabledDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Location Services Disabled',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Please enable location services to detect your current address automatically.',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Geolocator.openLocationSettings();
-            },
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(color: AppTheme.primaryColor),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showLocationDisabled(
+      onOpenSettings: () => Geolocator.openLocationSettings(),
+      onDismiss: () {},
     );
   }
 
   void _showLocationPermissionDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Location Permission Denied',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Location permissions are permanently denied. Please enable them in app settings.',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Geolocator.openAppSettings();
-            },
-            child: const Text(
-              'Open Settings',
-              style: TextStyle(color: AppTheme.primaryColor),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showLocationPermissionDenied(
+      onOpenSettings: () => Geolocator.openAppSettings(),
+      onDismiss: () {},
     );
   }
 
@@ -585,99 +524,44 @@ class _CartScreenState extends State<CartScreen> {
     
     // Validate inputs
     if (name.isEmpty || phone.isEmpty || address.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please fill all fields'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppSnackBar.warning(context, 'Please fill in all delivery details');
       return;
     }
     
     final nameError = InputValidator.validateFullName(name);
     if (nameError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(nameError), backgroundColor: Colors.red),
-      );
+      AppSnackBar.warning(context, nameError);
       return;
     }
     
     final phoneError = InputValidator.validatePhoneNumber(phone);
     if (phoneError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(phoneError), backgroundColor: Colors.red),
-      );
+      AppSnackBar.warning(context, phoneError);
       return;
     }
     
     if (address.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Address must be at least 10 characters'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      AppSnackBar.warning(context, 'Please provide a complete address');
       return;
     }
     
     // Rate limiting check for order placement
     if (!RateLimiters.cart.isAllowed('place_order')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Too many order attempts. Please try again later.'),
-          backgroundColor: Colors.orange,
-        ),
-      );
+      AppSnackBar.warning(context, 'Too many attempts. Please try again in a moment.');
       return;
     }
 
     // Check if user is authenticated
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          backgroundColor: AppTheme.cardColor,
-          title: const Text(
-            'Login Required',
-            style: TextStyle(color: Colors.white),
-          ),
-          content: const Text(
-            'You need to log in to place an order. Would you like to log in now?',
-            style: TextStyle(color: Colors.grey),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: Colors.grey),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.of(context).pushNamed('/login');
-              },
-              child: const Text(
-                'Login',
-                style: TextStyle(color: AppTheme.primaryColor),
-              ),
-            ),
-          ],
-        ),
+      context.dialogs.showLoginRequired(
+        onLogin: () => Navigator.of(context).pushNamed('/login'),
       );
       return;
     }
 
     // Show loading dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(color: Colors.white),
-      ),
-    );
+    context.dialogs.showLoading(message: 'Placing your order...');
 
     final orderItems = cart.cartItems.map((item) {
       final product = item['product'] as ProductEntity;
@@ -709,66 +593,36 @@ class _CartScreenState extends State<CartScreen> {
 
       debugPrint('=== Order creation result: $success ===');
 
-      // Pop the loading dialog
-      if (mounted) Navigator.of(context).pop();
+      // Hide loading dialog
+      if (mounted) context.dialogs.hideLoading();
 
       if (success) {
         if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              backgroundColor: AppTheme.cardColor,
-              title: const Text(
-                'Order confirmed!',
-                style: TextStyle(color: Colors.white),
-              ),
-              content: const Text(
-                'Your order has been placed successfully.',
-                style: TextStyle(color: Colors.grey),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    cart.clearCart();
-                    Navigator.of(context).pop(); // Close dialog only
-                    // Navigate back to home instead of popping twice
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      '/home',
-                      (route) => false,
-                    );
-                  },
-                  child: const Text(
-                    'OK',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ],
+          cart.clearCart();
+          context.dialogs.showOrderSuccess(
+            onContinueShopping: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              '/home',
+              (route) => false,
+            ),
+            onViewOrders: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              '/my_orders',
+              (route) => false,
             ),
           );
         }
       } else {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Order failed. Check console for details.'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppSnackBar.error(context, 'Could not place order. Please try again.');
         }
       }
     } catch (e) {
-      // Pop the loading dialog
-      if (mounted) Navigator.of(context).pop();
+      // Hide loading dialog
+      if (mounted) context.dialogs.hideLoading();
       
       debugPrint('=== Order creation exception: $e ===');
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Order error: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AppSnackBar.error(context, 'Something went wrong. Please try again later.');
       }
     }
   }

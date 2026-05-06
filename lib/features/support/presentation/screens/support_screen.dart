@@ -6,6 +6,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../providers/support_provider.dart';
 import '../../domain/entities/faq_model.dart';
 
@@ -41,9 +42,7 @@ class _SupportScreenState extends State<SupportScreen> {
     final Uri whatsappUri = Uri.parse('https://wa.me/213542455634');
     if (!await launchUrl(whatsappUri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch WhatsApp')),
-        );
+        AppSnackBar.error(context, 'Could not open WhatsApp. Please check if it\'s installed.');
       }
     }
   }
@@ -56,9 +55,7 @@ class _SupportScreenState extends State<SupportScreen> {
     );
     if (!await launchUrl(emailUri)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch email client')),
-        );
+        AppSnackBar.error(context, 'Could not open email app. Please check your email settings.');
       }
     }
   }
@@ -70,31 +67,23 @@ class _SupportScreenState extends State<SupportScreen> {
     
     // Validate inputs
     if (title.isEmpty || description.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
-      );
+      AppSnackBar.warning(context, 'Please fill in all fields');
       return;
     }
 
     if (title.length < 5) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Title must be at least 5 characters')),
-      );
+      AppSnackBar.warning(context, 'Title must be at least 5 characters');
       return;
     }
 
     if (description.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Description must be at least 10 characters')),
-      );
+      AppSnackBar.warning(context, 'Description must be at least 10 characters');
       return;
     }
 
     // Rate limiting check
     if (!RateLimiters.contact.isAllowed('contact_form')) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Too many contact form submissions. Please try again later.')),
-      );
+      AppSnackBar.warning(context, 'Too many submissions. Please try again later.');
       return;
     }
 
@@ -107,17 +96,13 @@ class _SupportScreenState extends State<SupportScreen> {
 
     if (!await launchUrl(emailUri)) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not launch email client')),
-        );
+        AppSnackBar.error(context, 'Could not open email app. Please try again.');
       }
     } else {
       if (mounted) {
         _problemTitleController.clear();
         _problemDescriptionController.clear();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Email client opened successfully')),
-        );
+        AppSnackBar.success(context, 'Email app opened! Send your message to complete.');
       }
     }
   }

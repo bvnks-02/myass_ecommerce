@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/services/dialog_service.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../services/api_service.dart';
 
 class UserOrdersScreen extends StatefulWidget {
@@ -474,55 +476,18 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     );
   }
 
-  void _showCancelOrderDialog(int orderId) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Cancel Order',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to cancel this order? This action cannot be undone.',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text(
-              'No',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              Navigator.of(dialogContext).pop();
-              final success = await ApiService.cancelOrder(orderId);
-              if (success && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Order cancelled successfully'),
-                    backgroundColor: Colors.green,
-                  ),
-                );
-                _fetchOrders();
-              } else if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Failed to cancel order'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
-              }
-            },
-            child: const Text(
-              'Yes',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+  void _showCancelOrderDialog(int orderId) async {
+    await context.dialogs.showCancelOrderConfirmation(
+      orderId: orderId,
+      onConfirm: () async {
+        final success = await ApiService.cancelOrder(orderId);
+        if (success && mounted) {
+          AppSnackBar.success(context, 'Order #$orderId has been cancelled.');
+          _fetchOrders();
+        } else if (mounted) {
+          AppSnackBar.error(context, 'Could not cancel order. Please try again.');
+        }
+      },
     );
   }
 

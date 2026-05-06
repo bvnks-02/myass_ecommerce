@@ -36,6 +36,13 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="com.example.myazz" android:host="login-callback" android:pathPrefix="/"/>
             </intent-filter>
+            <!-- Deep link for product sharing -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="myazz" android:host="product" android:pathPrefix="/"/>
+            </intent-filter>
         </activity>
         <activity android:name="com.facebook.FacebookActivity"
             android:configChanges=

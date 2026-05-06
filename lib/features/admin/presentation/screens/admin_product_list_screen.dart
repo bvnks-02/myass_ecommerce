@@ -8,6 +8,8 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/services/dialog_service.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../services/api_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
 
@@ -51,13 +53,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       debugPrint('Error loading categories: $e');
       debugPrint('Stack trace: $stackTrace');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load categories: $e'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+        AppSnackBar.error(context, 'Could not load categories. Please try again.');
         setState(() => _isLoadingCategories = false);
       }
     }
@@ -75,43 +71,26 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load products: $e')),
-        );
+        AppSnackBar.error(context, 'Could not load products. Please try again.');
         setState(() => _isLoading = false);
       }
     }
   }
 
-  Future<void> _deleteProduct(int id) async {
+  Future<void> _deleteProduct(int id, String productName) async {
     try {
       final success = await ApiService.deleteProduct(id);
       if (mounted) {
         if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Product deleted successfully'),
-              backgroundColor: Colors.green,
-            ),
-          );
+          AppSnackBar.success(context, '"$productName" has been removed from the store.');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to delete product'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          AppSnackBar.error(context, 'Could not delete product. Please try again.');
         }
         _fetchProducts();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete product: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        AppSnackBar.error(context, 'Failed to delete product. Please check your connection.');
       }
     }
   }
@@ -135,9 +114,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       return publicUrl;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error during upload: $e')),
-        );
+        AppSnackBar.error(context, 'Image upload failed. Please try again.');
       }
       return null;
     }
@@ -198,9 +175,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       return urls;
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading images: $e')),
-        );
+        AppSnackBar.error(context, 'Could not upload images. Please try again.');
       }
       return urls;
     } finally {
@@ -491,24 +466,14 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             // Validate inputs
                             if (sanitizedName.isEmpty || sanitizedName.length < 2) {
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Product name must be at least 2 characters'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppSnackBar.warning(context, 'Product name must be at least 2 characters');
                               }
                               return;
                             }
                             
                             if (_selectedCategory == null || _selectedCategory!.isEmpty) {
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please select a category'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppSnackBar.warning(context, 'Please select a category for this product');
                               }
                               return;
                             }
@@ -526,12 +491,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                               }
                             } catch (priceError) {
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Invalid price: ${priceError.toString()}'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppSnackBar.warning(context, 'Please enter a valid price');
                               }
                               return;
                             }
@@ -539,12 +499,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             // Rate limiting check for admin operations
                             if (!RateLimiters.api.isAllowed('admin_product_save')) {
                               if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Too many product operations. Please try again later.'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
+                                AppSnackBar.warning(context, 'Too many attempts. Please try again in a moment.');
                               }
                               return;
                             }
@@ -591,29 +546,15 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             if (mounted) {
                               if (success) {
                                 Navigator.pop(context);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Product saved successfully'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
+                                AppSnackBar.success(context, 'Product has been saved successfully');
                                 _fetchProducts();
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Failed to save product'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                AppSnackBar.error(context, 'Could not save product. Please try again.');
                               }
                             }
                           } catch (e) {
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                    content: Text(
-                                        'Error saving: $e')),
-                              );
+                              AppSnackBar.error(context, 'Something went wrong. Please try again.');
                             }
                           }
                         },
@@ -802,30 +743,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: AppTheme.cardColor,
-                              title: const Text('Delete Product',
-                                  style: TextStyle(color: Colors.white)),
-                              content: const Text('Are you sure?',
-                                  style: TextStyle(color: Colors.white70)),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('Cancel',
-                                      style: TextStyle(color: Colors.white54)),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    _deleteProduct(product.id);
-                                  },
-                                  child: const Text('Delete',
-                                      style: TextStyle(color: Colors.red)),
-                                ),
-                              ],
-                            ),
+                          context.dialogs.showDeleteProductConfirmation(
+                            productName: product.name,
+                            onConfirm: () => _deleteProduct(product.id, product.name),
                           );
                         },
                       ),

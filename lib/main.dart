@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:app_links/app_links.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/products/presentation/screens/home_screen.dart';
@@ -108,12 +109,15 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   StreamSubscription<AuthState>? _authSubscription;
+  StreamSubscription<String>? _appLinksSubscription;
   bool _isFirstAuthEvent = true;
+  final AppLinks _appLinks = AppLinks();
 
   @override
   void initState() {
     super.initState();
     _handleAuthStateChanges();
+    _handleDeepLinks();
   }
 
   void _handleAuthStateChanges() {
@@ -163,7 +167,71 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _authSubscription?.cancel();
+    _appLinksSubscription?.cancel();
     super.dispose();
+  }
+
+  void _handleDeepLinks() async {
+    // Handle deep links when app is already running
+    _appLinksSubscription = _appLinks.stringLinkStream.listen((String link) {
+      _processDeepLink(link);
+    });
+
+    // Handle deep link when app is opened from cold start
+    final initialLink = await _appLinks.getInitialLinkString();
+    if (initialLink != null) {
+      _processDeepLink(initialLink);
+    }
+  }
+
+  void _processDeepLink(String link) {
+    debugPrint('Received deep link: $link');
+    
+    // Parse the deep link: myazz://product/{productId}
+    if (link.contains('myazz://product/')) {
+      final productId = link.split('myazz://product/').last;
+      debugPrint('Product ID from deep link: $productId');
+      
+      // Navigate to product details after a short delay to ensure app is ready
+      Future.delayed(const Duration(milliseconds: 500), () async {
+        if (_navigatorKey.currentState != null) {
+          try {
+            // Fetch the product from the provider
+            final productsProvider = Provider.of<ProductsProvider>(
+              _navigatorKey.currentContext!,
+              listen: false,
+            );
+            
+            await productsProvider.fetchProducts();
+            
+            // Find the product by ID
+            final product = productsProvider.products.firstWhere(
+              (p) => p.id.toString() == productId,
+              orElse: () => productsProvider.products.first,
+            );
+            
+            // Navigate to product details
+            _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              '/home',
+              (route) => false,
+            );
+            
+            // Then navigate to product details
+            _navigatorKey.currentState?.pushNamed(
+              '/product_details',
+              arguments: product,
+            );
+          } catch (e) {
+            debugPrint('Error fetching product from deep link: $e');
+            // Fallback to home screen
+            _navigatorKey.currentState?.pushNamedAndRemoveUntil(
+              '/home',
+              (route) => false,
+            );
+          }
+        }
+      });
+    }
   }
 
   @override

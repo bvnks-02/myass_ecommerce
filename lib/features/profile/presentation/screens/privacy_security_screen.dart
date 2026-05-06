@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/services/dialog_service.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 class PrivacySecurityScreen extends StatefulWidget {
   const PrivacySecurityScreen({super.key});
@@ -32,16 +34,12 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
 
   Future<void> _changePassword() async {
     if (_passwordController.text.isEmpty || _newPasswordController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all fields')),
-      );
+      AppSnackBar.warning(context, 'Please fill in all password fields');
       return;
     }
 
     if (_newPasswordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
-      );
+      AppSnackBar.warning(context, 'New password and confirmation do not match');
       return;
     }
 
@@ -52,110 +50,27 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
         ),
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password updated successfully')),
-        );
+        _passwordController.clear();
+        _newPasswordController.clear();
+        _confirmPasswordController.clear();
+        AppSnackBar.success(context, 'Your password has been updated successfully');
         Navigator.pop(context);
       }
     } catch (e) {
       debugPrint('Error changing password: $e');
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        AppSnackBar.error(context, 'Could not update password: $message');
       }
     }
   }
 
   Future<void> _showChangePasswordDialog() async {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Change Password',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Current Password',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: _newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'New Password',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-              ),
-              const SizedBox(height: 15),
-              TextField(
-                controller: _confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Confirm New Password',
-                  labelStyle: TextStyle(color: Colors.grey),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.grey),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.white),
-                  ),
-                ),
-                style: const TextStyle(color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _passwordController.clear();
-              _newPasswordController.clear();
-              _confirmPasswordController.clear();
-              Navigator.pop(dialogContext);
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              _changePassword();
-            },
-            child: const Text(
-              'Change',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showChangePasswordDialog(
+      currentPasswordController: _passwordController,
+      newPasswordController: _newPasswordController,
+      confirmPasswordController: _confirmPasswordController,
+      onSubmit: _changePassword,
     );
   }
 
@@ -165,74 +80,24 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       _emailController.text = user.email ?? '';
     }
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Change Email',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: TextField(
-          controller: _emailController,
-          decoration: const InputDecoration(
-            labelText: 'New Email',
-            labelStyle: TextStyle(color: Colors.grey),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
-          ),
-          style: const TextStyle(color: Colors.white),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _emailController.clear();
-              Navigator.pop(dialogContext);
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (_emailController.text.isEmpty) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  const SnackBar(content: Text('Please enter an email')),
-                );
-                return;
-              }
-              Navigator.pop(dialogContext);
-              try {
-                await Supabase.instance.client.auth.updateUser(
-                  UserAttributes(email: _emailController.text),
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Confirmation email sent')),
-                  );
-                }
-              } catch (e) {
-                debugPrint('Error changing email: $e');
-                if (mounted) {
-                  final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(message)),
-                  );
-                }
-              }
-            },
-            child: const Text(
-              'Change',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showChangeEmailDialog(
+      emailController: _emailController,
+      onSubmit: () async {
+        try {
+          await Supabase.instance.client.auth.updateUser(
+            UserAttributes(email: _emailController.text),
+          );
+          if (mounted) {
+            AppSnackBar.success(context, 'Check your new email for a confirmation link');
+          }
+        } catch (e) {
+          debugPrint('Error changing email: $e');
+          if (mounted) {
+            final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
+            AppSnackBar.error(context, 'Could not update email: $message');
+          }
+        }
+      },
     );
   }
 
@@ -242,75 +107,24 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
       _phoneController.text = user.userMetadata?['phone'] ?? '';
     }
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Change Phone',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: TextField(
-          controller: _phoneController,
-          decoration: const InputDecoration(
-            labelText: 'New Phone Number',
-            labelStyle: TextStyle(color: Colors.grey),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.white),
-            ),
-          ),
-          style: const TextStyle(color: Colors.white),
-          keyboardType: TextInputType.phone,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _phoneController.clear();
-              Navigator.pop(dialogContext);
-            },
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (_phoneController.text.isEmpty) {
-                ScaffoldMessenger.of(dialogContext).showSnackBar(
-                  const SnackBar(content: Text('Please enter a phone number')),
-                );
-                return;
-              }
-              Navigator.pop(dialogContext);
-              try {
-                await Supabase.instance.client.auth.updateUser(
-                  UserAttributes(data: {'phone': _phoneController.text}),
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Phone number updated')),
-                  );
-                }
-              } catch (e) {
-                debugPrint('Error changing phone: $e');
-                if (mounted) {
-                  final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(message)),
-                  );
-                }
-              }
-            },
-            child: const Text(
-              'Change',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showChangePhoneDialog(
+      phoneController: _phoneController,
+      onSubmit: () async {
+        try {
+          await Supabase.instance.client.auth.updateUser(
+            UserAttributes(data: {'phone': _phoneController.text}),
+          );
+          if (mounted) {
+            AppSnackBar.success(context, 'Your phone number has been updated');
+          }
+        } catch (e) {
+          debugPrint('Error changing phone: $e');
+          if (mounted) {
+            final message = e.toString().replaceAll('Exception: ', '').replaceAll('AuthException: ', '');
+            AppSnackBar.error(context, 'Could not update phone: $message');
+          }
+        }
+      },
     );
   }
 
@@ -381,9 +195,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               'Profile Visibility',
               'Control who can see your profile',
               () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Privacy settings coming soon!')),
-                );
+                AppSnackBar.info(context, 'Privacy settings coming soon!');
               },
             ),
             _buildSecurityItem(
@@ -391,9 +203,7 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
               'Data & Storage',
               'Manage your data and storage',
               () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Data settings coming soon!')),
-                );
+                AppSnackBar.info(context, 'Data management features coming soon!');
               },
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 30)),
@@ -481,40 +291,10 @@ class _PrivacySecurityScreenState extends State<PrivacySecurityScreen> {
   }
 
   void _showDeleteAccountDialog() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppTheme.cardColor,
-        title: const Text(
-          'Delete Account',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: const Text(
-          'Are you sure you want to delete your account? This action cannot be undone.',
-          style: TextStyle(color: Colors.grey),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Account deletion feature coming soon!')),
-              );
-            },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
+    context.dialogs.showDeleteAccountConfirmation(
+      onConfirm: () {
+        AppSnackBar.info(context, 'Account deletion feature coming soon!');
+      },
     );
   }
 }

@@ -10,6 +10,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -34,32 +35,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Validate inputs
     final nameError = InputValidator.validateFullName(name);
     if (nameError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(nameError)),
-      );
+      AppSnackBar.warning(context, nameError);
       return;
     }
     
     if (!InputValidator.isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email address')),
-      );
+      AppSnackBar.warning(context, 'Please enter a valid email address');
       return;
     }
     
     final passwordError = InputValidator.validatePassword(password);
     if (passwordError != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(passwordError)),
-      );
+      AppSnackBar.warning(context, passwordError);
       return;
     }
 
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Too many registration attempts. Please try again later.')),
-      );
+      AppSnackBar.warning(context, 'Too many attempts. Please try again later.');
       return;
     }
 
@@ -72,11 +65,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         fullName: name,
       );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-              content: Text(
-                  'Registration successful.')),
-        );
+        AppSnackBar.success(context, 'Welcome! Your account has been created.');
         if (authProvider.isAuthenticated) {
           if (authProvider.isAdmin) {
              Navigator.pushReplacementNamed(context, '/admin');
@@ -90,9 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       if (mounted) {
         final message = e.toString().replaceAll('Exception: ', '');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message)),
-        );
+        AppSnackBar.error(context, message);
       }
     } finally {
       if (mounted) {
@@ -110,9 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       // If the provider has an immediate error (e.g. provider not enabled), stop here
       if (authProvider.hasError && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(authProvider.errorMessage!)),
-        );
+        AppSnackBar.error(context, authProvider.errorMessage!);
         return;
       }
 

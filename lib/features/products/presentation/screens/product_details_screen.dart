@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../domain/entities/product_entity.dart';
@@ -185,7 +186,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   }
 
   void _showShareBottomSheet() {
-    final shareText = 'Check out this ${widget.product.name}!\n\nPrice: ${CurrencyService.formatPrice(widget.product.price)}\n\n${widget.product.description}';
+    final deepLink = 'myazz://product/${widget.product.id}';
+    // Web fallback URL - replace with your actual web store URL when available
+    final webUrl = 'https://myazz-store.com/product/${widget.product.id}';
+    final shareText = 'Check out this ${widget.product.name}!\n\nPrice: ${CurrencyService.formatPrice(widget.product.price)}\n\n${widget.product.description}\n\nOpen in app: $deepLink\n\nOr view online: $webUrl';
     
     showModalBottomSheet(
       context: context,
@@ -224,8 +228,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   label: 'Facebook',
                   color: const Color(0xFF1877F2),
                   onTap: () {
-                    final facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=${Uri.encodeComponent(shareText)}';
-                    _launchUrl(facebookUrl);
+                    Share.share(shareText, subject: widget.product.name);
+                  },
+                ),
+                _shareOption(
+                  icon: FaIcon(FontAwesomeIcons.xTwitter, size: 28, color: const Color(0xFF000000)),
+                  label: 'X (Twitter)',
+                  color: const Color(0xFF000000),
+                  onTap: () {
+                    final twitterUrl = 'https://twitter.com/intent/tweet?text=${Uri.encodeComponent(shareText)}';
+                    _launchUrl(twitterUrl);
                   },
                 ),
                 _shareOption(
@@ -233,12 +245,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   label: 'Instagram',
                   color: const Color(0xFFE4405F),
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Instagram requires image sharing'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                    Share.share(shareText, subject: widget.product.name);
                   },
                 ),
                 _shareOption(
@@ -246,11 +253,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   label: 'Copy Link',
                   color: const Color(0xFF666666),
                   onTap: () async {
-                    await Clipboard.setData(ClipboardData(text: shareText));
+                    await Clipboard.setData(ClipboardData(text: deepLink));
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Copied to clipboard!'),
+                          content: Text('Link copied to clipboard!'),
                           duration: Duration(seconds: 2),
                         ),
                       );
