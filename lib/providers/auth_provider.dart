@@ -166,9 +166,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       debugPrint('Starting Google sign in...');
+      final redirectTo = kIsWeb ? Uri.base.origin : 'com.example.myazz://login-callback/';
+      debugPrint('OAuth redirectTo: $redirectTo');
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.google,
-        redirectTo: 'com.example.myazz://login-callback/',
+        redirectTo: redirectTo,
+        authScreenLaunchMode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
       );
       debugPrint('Google OAuth initiated successfully');
     } on AuthException catch (e) {
@@ -189,9 +192,12 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       debugPrint('Starting Facebook sign in...');
+      final redirectTo = kIsWeb ? Uri.base.origin : 'com.example.myazz://login-callback/';
+      debugPrint('OAuth redirectTo: $redirectTo');
       await _supabase.auth.signInWithOAuth(
         OAuthProvider.facebook,
-        redirectTo: 'com.example.myazz://login-callback/',
+        redirectTo: redirectTo,
+        authScreenLaunchMode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
       );
       debugPrint('Facebook OAuth initiated successfully');
     } on AuthException catch (e) {

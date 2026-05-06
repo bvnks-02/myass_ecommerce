@@ -123,10 +123,13 @@ class _MyAppState extends State<MyApp> {
   void _handleAuthStateChanges() {
     _authSubscription =
         Supabase.instance.client.auth.onAuthStateChange.listen((data) async {
-      // Skip the initial session restoration on app startup to avoid unwanted navigation
+      // Skip only the initial session restoration on app startup.
+      // Do NOT skip a fresh signedIn event (e.g. OAuth cold-start).
       if (_isFirstAuthEvent) {
         _isFirstAuthEvent = false;
-        return;
+        if (data.event == AuthChangeEvent.initialSession) {
+          return;
+        }
       }
 
       final session = data.session;
@@ -184,9 +187,34 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> _handleOAuthCallback(String link) async {
+    try {
+      await Supabase.instance.client.auth.getSessionFromUrl(Uri.parse(link));
+      debugPrint('OAuth session established successfully from deep link');
+    } catch (e, stackTrace) {
+      debugPrint('Error processing OAuth deep link: $e');
+      debugPrint('Stack trace: $stackTrace');
+    }
+  }
+
   void _processDeepLink(String link) {
     debugPrint('Received deep link: $link');
-    
+
+    // Handle OAuth/auth callback links so Supabase can complete sign-in
+    if (link.contains('login-callback') ||
+        link.contains('access_token=') ||
+        link.contains('code=')) {
+      debugPrint('OAuth callback detected, forwarding to Supabase auth...');
+      _handleOAuthCallback(link);
+      return;
+    }
+
+    // Handle password reset deep links
+    if (link.contains('reset_password')) {
+      debugPrint('Password reset deep link detected');
+      return;
+    }
+
     // Parse the deep link: myazz://product/{productId}
     if (link.contains('myazz://product/')) {
       final productId = link.split('myazz://product/').last;
