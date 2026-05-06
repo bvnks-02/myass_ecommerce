@@ -634,10 +634,37 @@ class _CartScreenState extends State<CartScreen> {
     // Check if user is authenticated
     final user = Supabase.instance.client.auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please log in to place an order'),
-          backgroundColor: Colors.red,
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.cardColor,
+          title: const Text(
+            'Login Required',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'You need to log in to place an order. Would you like to log in now?',
+            style: TextStyle(color: Colors.grey),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pushNamed('/login');
+              },
+              child: const Text(
+                'Login',
+                style: TextStyle(color: AppTheme.primaryColor),
+              ),
+            ),
+          ],
         ),
       );
       return;
