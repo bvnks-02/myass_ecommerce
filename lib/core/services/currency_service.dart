@@ -33,7 +33,10 @@ class CurrencyService extends ChangeNotifier {
     switch (targetCurrency) {
       case Currency.dzd:
         // Algerian Dinar: price is already in DZD, no conversion needed
-        return '${targetCurrency.symbol}${price.round().toString()}';
+        // Format with thousands separator (e.g., 36.000 DA)
+        final roundedPrice = price.round();
+        final formattedNumber = _formatWithThousandsSeparator(roundedPrice);
+        return '$formattedNumber ${targetCurrency.symbol}';
       case Currency.usd:
         // USD: 2 decimal places
         return '${targetCurrency.symbol}${price.toStringAsFixed(2)}';
@@ -41,6 +44,19 @@ class CurrencyService extends ChangeNotifier {
         // EUR: 2 decimal places  
         return '${targetCurrency.symbol}${price.toStringAsFixed(2)}';
     }
+  }
+
+  static String _formatWithThousandsSeparator(int number) {
+    // Format number with period as thousands separator (Algerian style)
+    final stringNumber = number.toString();
+    final buffer = StringBuffer();
+    for (int i = 0; i < stringNumber.length; i++) {
+      if (i > 0 && (stringNumber.length - i) % 3 == 0) {
+        buffer.write('.');
+      }
+      buffer.write(stringNumber[i]);
+    }
+    return buffer.toString();
   }
   
   static String formatPriceWithCode(double price, {Currency? currency}) {
