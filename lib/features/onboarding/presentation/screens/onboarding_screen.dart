@@ -66,7 +66,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: TextButton(
                       onPressed: () {
                         debugPrint('Skip button tapped');
-                        Navigator.pushReplacementNamed(context, '/home');
+                        Navigator.pushReplacementNamed(context, '/login');
                       },
                       child: const Text(
                         'Skip',
