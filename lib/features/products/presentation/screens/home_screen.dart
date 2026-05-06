@@ -149,11 +149,18 @@ class _HomeScreenState extends State<HomeScreen> {
           // Search Bar
           Expanded(
             child: GestureDetector(
-              onTap: () {
-                showSearch(
+              onTap: () async {
+                final selectedProduct = await showSearch<ProductEntity?>(
                   context: context,
                   delegate: ProductSearchDelegate(allProducts),
                 );
+                if (selectedProduct != null && mounted) {
+                  Navigator.pushNamed(
+                    context,
+                    '/product_details',
+                    arguments: selectedProduct,
+                  );
+                }
               },
               child: Container(
                 height: ResponsiveUtils.sh(context, 45),

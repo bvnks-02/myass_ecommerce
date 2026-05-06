@@ -19,7 +19,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
   List<dynamic> _filteredOrders = [];
   String _selectedFilter = 'All';
 
-  final List<String> _filters = ['All', 'Pending', 'Shipped', 'Delivered', 'Completed'];
+  final List<String> _filters = ['All', 'Pending', 'Shipped', 'Delivered', 'Completed', 'Cancelled'];
 
   @override
   void initState() {
@@ -225,6 +225,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         return Colors.teal;
       case 'Completed':
         return Colors.green;
+      case 'Cancelled':
+        return Colors.red;
       default:
         return Colors.white;
     }
@@ -240,6 +242,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         return Icons.home;
       case 'Completed':
         return Icons.check_circle;
+      case 'Cancelled':
+        return Icons.cancel;
       default:
         return Icons.list;
     }

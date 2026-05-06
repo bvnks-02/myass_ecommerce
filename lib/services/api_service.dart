@@ -329,6 +329,39 @@ class ApiService {
     }
   }
 
+  static Future<bool> cancelOrder(int orderId) async {
+    try {
+      // Rate limiting check
+      if (!RateLimiters.api.isAllowed('cancel_order')) {
+        AppLogger.warning('Rate limit exceeded for cancelOrder', tag: 'ApiService');
+        return false;
+      }
+      
+      // If using mock data, simulate order cancellation
+      if (_useMockData) {
+        AppLogger.info('Using mock order cancellation', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1));
+        return true;
+      }
+
+      AppLogger.debug('Cancelling order $orderId in Supabase', tag: 'ApiService');
+      
+      await _supabase.from('orders').update({'status': 'Cancelled'}).eq('id', orderId);
+      
+      AppLogger.info('Order $orderId cancelled successfully', tag: 'ApiService');
+      return true;
+    } catch (e, stackTrace) {
+      AppLogger.error('Error cancelling order: $e', tag: 'ApiService', error: e, stackTrace: stackTrace);
+      debugPrint('Order cancel error: $e');
+      if (e is PostgrestException) {
+        debugPrint('Postgrest error code: ${e.code}');
+        debugPrint('Postgrest error message: ${e.message}');
+        debugPrint('Postgrest error details: ${e.details}');
+      }
+      return false;
+    }
+  }
+
   static Future<List<String>> getCategories() async {
     try {
       // Rate limiting check
