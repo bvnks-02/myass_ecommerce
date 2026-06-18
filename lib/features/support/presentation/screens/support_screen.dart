@@ -500,7 +500,7 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  Widget _buildContactButton(FaIconData icon, String label, Color color, VoidCallback onTap) {
+  Widget _buildContactButton(IconData icon, String label, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

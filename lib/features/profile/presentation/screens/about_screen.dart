@@ -262,7 +262,7 @@ class _AboutScreenState extends State<AboutScreen> {
     );
   }
 
-  Widget _buildSocialIcon(FaIconData icon, VoidCallback onTap) {
+  Widget _buildSocialIcon(IconData icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
