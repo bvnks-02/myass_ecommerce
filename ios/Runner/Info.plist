@@ -45,9 +45,14 @@
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app does not use your location.</string>
+	<string>Used to show nearby watch stores and delivery estimates.</string>
+
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app does not use your location.</string>
+	<string>Used to show nearby watch stores and delivery estimates.</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Used to show nearby watch stores and delivery estimates.</string>
 </dict>
 </plist>
