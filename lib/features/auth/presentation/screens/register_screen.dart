@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -31,19 +32,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final name = InputSanitizer.sanitizeString(_nameController.text);
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
     final password = InputSanitizer.sanitizeString(_passwordController.text);
-    
+
     // Validate inputs
     final nameError = InputValidator.validateFullName(name);
     if (nameError != null) {
       AppSnackBar.warning(context, nameError);
       return;
     }
-    
+
     if (!InputValidator.isValidEmail(email)) {
       AppSnackBar.warning(context, 'Please enter a valid email address');
       return;
     }
-    
+
     final passwordError = InputValidator.validatePassword(password);
     if (passwordError != null) {
       AppSnackBar.warning(context, passwordError);
@@ -52,7 +53,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
-      AppSnackBar.warning(context, 'Too many attempts. Please try again later.');
+      AppSnackBar.warning(
+          context, 'Too many attempts. Please try again later.');
       return;
     }
 
@@ -68,9 +70,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         AppSnackBar.success(context, 'Welcome! Your account has been created.');
         if (authProvider.isAuthenticated) {
           if (authProvider.isAdmin) {
-             Navigator.pushReplacementNamed(context, '/admin');
+            Navigator.pushReplacementNamed(context, '/admin');
           } else {
-             Navigator.pushReplacementNamed(context, '/home');
+            Navigator.pushReplacementNamed(context, '/home');
           }
         } else {
           Navigator.pop(context);
@@ -292,30 +294,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             const SizedBox(height: 30),
 
                             // Social Login Buttons
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _socialButton(
-                                  label: 'Google',
-                                  onTap: () => _handleSocialLogin(
-                                    () => Provider.of<AuthProvider>(
-                                            context,
-                                            listen: false)
-                                        .signInWithGoogle(),
-                                  ),
-                                ),
-                                const SizedBox(width: 24),
-                                _socialButton(
-                                  label: 'Facebook',
-                                  onTap: () => _handleSocialLogin(
-                                    () => Provider.of<AuthProvider>(
-                                            context,
-                                            listen: false)
-                                        .signInWithFacebook(),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            !Platform.isIOS
+                                ? Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      _socialButton(
+                                        label: 'Google',
+                                        onTap: () => _handleSocialLogin(
+                                          () => Provider.of<AuthProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .signInWithGoogle(),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 24),
+                                      _socialButton(
+                                        label: 'Facebook',
+                                        onTap: () => _handleSocialLogin(
+                                          () => Provider.of<AuthProvider>(
+                                                  context,
+                                                  listen: false)
+                                              .signInWithFacebook(),
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                : const SizedBox(),
                             const SizedBox(height: 40),
                           ],
                         ),

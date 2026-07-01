@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -36,13 +37,13 @@ class _LoginScreenState extends State<LoginScreen> {
     // Sanitize inputs
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
     final password = InputSanitizer.sanitizeString(_passwordController.text);
-    
+
     // Validate inputs
     if (!InputValidator.isValidEmail(email)) {
       AppSnackBar.warning(context, 'Please enter a valid email address');
       return;
     }
-    
+
     if (email.isEmpty || password.isEmpty) {
       AppSnackBar.warning(context, 'Please enter your email and password');
       return;
@@ -50,7 +51,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
-      AppSnackBar.warning(context, 'Too many attempts. Please try again later.');
+      AppSnackBar.warning(
+          context, 'Too many attempts. Please try again later.');
       return;
     }
 
@@ -58,23 +60,24 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.signIn(email, password);
-      
+
       // Check if login actually succeeded
       if (!authProvider.isAuthenticated) {
         debugPrint('Login failed - not authenticated');
         if (mounted) {
-          AppSnackBar.error(context, 'Invalid email or password. Please try again.');
+          AppSnackBar.error(
+              context, 'Invalid email or password. Please try again.');
         }
         return;
       }
-      
+
       // Force refresh role and wait for it
       debugPrint('Login completed, refreshing role...');
       await authProvider.refreshRole();
-      
+
       debugPrint('After signIn - userRole: ${authProvider.userRole}');
       debugPrint('After signIn - isAdmin: ${authProvider.isAdmin}');
-      
+
       if (mounted) {
         if (authProvider.isAdmin) {
           debugPrint('Navigating to /admin');
@@ -220,7 +223,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color: Colors.white.withOpacity(0.1),
                                           width: 1),
                                       image: const DecorationImage(
-                                        image: AssetImage('assets/images/logo.jpeg'),
+                                        image: AssetImage(
+                                            'assets/images/logo.jpeg'),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -271,8 +275,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Colors.white.withOpacity(0.4),
                                     size: 20,
                                   ),
-                                  onPressed: () => setState(
-                                      () => _obscurePassword = !_obscurePassword),
+                                  onPressed: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                 ),
                               ),
 
@@ -305,9 +309,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   borderRadius: BorderRadius.circular(20),
                                   child: Container(
                                     width: double.infinity,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
                                     decoration: BoxDecoration(
-                                      color: _isLoading ? Colors.white.withOpacity(0.7) : Colors.white,
+                                      color: _isLoading
+                                          ? Colors.white.withOpacity(0.7)
+                                          : Colors.white,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: _isLoading
@@ -316,7 +323,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                             width: 20,
                                             child: Center(
                                               child: CircularProgressIndicator(
-                                                  color: Colors.black, strokeWidth: 2),
+                                                  color: Colors.black,
+                                                  strokeWidth: 2),
                                             ),
                                           )
                                         : const Text(
@@ -336,10 +344,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 children: [
                                   Expanded(
                                       child: Divider(
-                                          color: Colors.white.withOpacity(0.1))),
+                                          color:
+                                              Colors.white.withOpacity(0.1))),
                                   Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
                                     child: Text(
                                       'Or continue with',
                                       style: TextStyle(
@@ -349,30 +358,40 @@ class _LoginScreenState extends State<LoginScreen> {
                                   ),
                                   Expanded(
                                       child: Divider(
-                                          color: Colors.white.withOpacity(0.1))),
+                                          color:
+                                              Colors.white.withOpacity(0.1))),
                                 ],
                               ),
                               const SizedBox(height: 20),
 
                               // Social Login Buttons
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  _socialButton(
-                                    label: 'Google',
-                                    onTap: () => _handleSocialLogin(
-                                      () => Provider.of<AuthProvider>(context, listen: false).signInWithGoogle(),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 24),
-                                  _socialButton(
-                                    label: 'Facebook',
-                                    onTap: () => _handleSocialLogin(
-                                      () => Provider.of<AuthProvider>(context, listen: false).signInWithFacebook(),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              !Platform.isIOS
+                                  ? Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        _socialButton(
+                                          label: 'Google',
+                                          onTap: () => _handleSocialLogin(
+                                            () => Provider.of<AuthProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .signInWithGoogle(),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 24),
+                                        _socialButton(
+                                          label: 'Facebook',
+                                          onTap: () => _handleSocialLogin(
+                                            () => Provider.of<AuthProvider>(
+                                                    context,
+                                                    listen: false)
+                                                .signInWithFacebook(),
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : const SizedBox(),
 
                               const SizedBox(height: 10),
                               Row(
