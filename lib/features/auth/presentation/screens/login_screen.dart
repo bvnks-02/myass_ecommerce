@@ -340,7 +340,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
 
                               const SizedBox(height: 25),
-                              Row(
+                               !Platform.isIOS
+                                  ? Row(
                                 children: [
                                   Expanded(
                                       child: Divider(
@@ -361,8 +362,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                           color:
                                               Colors.white.withOpacity(0.1))),
                                 ],
-                              ),
-                              const SizedBox(height: 20),
+                              ):const SizedBox(),
+                                !Platform.isIOS
+                                  ?const SizedBox(height: 20)
+                                  : const SizedBox(),
 
                               // Social Login Buttons
                               !Platform.isIOS

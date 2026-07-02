@@ -271,7 +271,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
 
                             const SizedBox(height: 40),
-                            Row(
+                             !Platform.isIOS? Row(
                               children: [
                                 Expanded(
                                     child: Divider(
@@ -290,8 +290,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     child: Divider(
                                         color: Colors.white.withOpacity(0.1))),
                               ],
-                            ),
-                            const SizedBox(height: 30),
+                            )
+                            :const SizedBox(),
+                                !Platform.isIOS
+                                  ?const SizedBox(height: 30)
+                                  : const SizedBox(),
 
                             // Social Login Buttons
                             !Platform.isIOS
