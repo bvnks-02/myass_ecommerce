@@ -337,13 +337,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -479,7 +475,7 @@
 				DEVELOPMENT_TEAM = 925N87PLYU;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 1.0.0;
-				FLUTTER_BUILD_NUMBER = 8;
+				FLUTTER_BUILD_NUMBER = 9;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MyAzz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -676,7 +672,7 @@
 				DEVELOPMENT_TEAM = 925N87PLYU;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 1.0.0;
-				FLUTTER_BUILD_NUMBER = 8;
+				FLUTTER_BUILD_NUMBER = 9;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MyAzz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
@@ -713,7 +709,7 @@
 				DEVELOPMENT_TEAM = 925N87PLYU;
 				ENABLE_BITCODE = NO;
 				FLUTTER_BUILD_NAME = 1.0.0;
-				FLUTTER_BUILD_NUMBER = 8;
+				FLUTTER_BUILD_NUMBER = 9;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = MyAzz;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.business";
