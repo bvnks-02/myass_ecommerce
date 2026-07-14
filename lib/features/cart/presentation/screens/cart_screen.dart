@@ -142,7 +142,7 @@ class _CartScreenState extends State<CartScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: const Text('Continue Shopping'),
+            child: const Text('Continuer mes achats'),
           ),
         ],
       ),
@@ -330,7 +330,7 @@ class _CartScreenState extends State<CartScreen> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                hintText: 'Full Name',
+                hintText: 'Nom complet',
                 prefixIcon: const Icon(Icons.person, color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -351,7 +351,7 @@ class _CartScreenState extends State<CartScreen> {
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
-                hintText: 'Phone Number',
+                hintText: 'Numéro de téléphone',
                 prefixIcon: const Icon(Icons.phone, color: Colors.white),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -372,7 +372,7 @@ class _CartScreenState extends State<CartScreen> {
               controller: _addressController,
               maxLines: 2,
               decoration: InputDecoration(
-                hintText: 'Delivery Address',
+                hintText: 'Adresse de livraison',
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 20.0, right: 5),
                   child: IconButton(
@@ -443,7 +443,7 @@ class _CartScreenState extends State<CartScreen> {
       if (permission == LocationPermission.denied) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Location permissions are denied.'),
+            content: Text('Les autorisations de localisation sont refusées.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -492,7 +492,7 @@ class _CartScreenState extends State<CartScreen> {
         _addressController.text = address;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Location detected: $address'),
+            content: Text('Position détectée : $address'),
             backgroundColor: Colors.green,
           ),
         );

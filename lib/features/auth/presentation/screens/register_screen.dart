@@ -41,7 +41,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
 
     if (!InputValidator.isValidEmail(email)) {
-      AppSnackBar.warning(context, 'Please enter a valid email address');
+      AppSnackBar.warning(context, 'Veuillez saisir une adresse e-mail valide.');
       return;
     }
 
@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
       AppSnackBar.warning(
-          context, 'Too many attempts. Please try again later.');
+          context, 'Trop de tentatives. Veuillez réessayer plus tard.');
       return;
     }
 
@@ -67,7 +67,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         fullName: name,
       );
       if (mounted) {
-        AppSnackBar.success(context, 'Welcome! Your account has been created.');
+        AppSnackBar.success(context, 'Bienvenue ! Votre compte a été créé.');
         if (authProvider.isAuthenticated) {
           if (authProvider.isAdmin) {
             Navigator.pushReplacementNamed(context, '/admin');
@@ -123,7 +123,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } on TimeoutException catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login timed out. Please try again.')),
+          const SnackBar(
+              content:
+                  Text('Délai de connexion dépassé. Veuillez réessayer.')),
         );
       }
     } catch (e) {
@@ -188,7 +190,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const Text(
-                              'Create an account',
+                              'Créer un compte',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 32,
@@ -198,7 +200,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Sign up to start your journey',
+                              'Inscrivez-vous pour commencer',
                               style: TextStyle(
                                 color: Colors.white.withOpacity(0.5),
                                 fontSize: 14,
@@ -209,7 +211,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             // Glassmorphic Name Field
                             _buildGlassTextField(
                               controller: _nameController,
-                              hintText: 'Full Name',
+                              hintText: 'Nom complet',
                               prefixIcon: Icons.person_outline,
                             ),
                             const SizedBox(height: 16),
@@ -225,7 +227,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             // Glassmorphic Password Field
                             _buildGlassTextField(
                               controller: _passwordController,
-                              hintText: 'Password',
+                              hintText: 'Mot de passe',
                               prefixIcon: Icons.lock_outline,
                               obscureText: _obscurePassword,
                               suffixIcon: IconButton(
@@ -263,7 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           color: Colors.black, strokeWidth: 2),
                                     )
                                   : const Text(
-                                      'Sign Up',
+                                      'S\'inscrire',
                                       style: TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w800),
@@ -271,58 +273,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
 
                             const SizedBox(height: 40),
-                             !Platform.isIOS? Row(
-                              children: [
-                                Expanded(
-                                    child: Divider(
-                                        color: Colors.white.withOpacity(0.1))),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16),
-                                  child: Text(
-                                    'Or sign up with',
-                                    style: TextStyle(
-                                        color: Colors.white.withOpacity(0.3),
-                                        fontSize: 12),
+                            if (!Platform.isIOS) ...[
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Divider(
+                                          color:
+                                              Colors.white.withOpacity(0.1))),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
+                                    child: Text(
+                                      'Ou s\'inscrire avec',
+                                      style: TextStyle(
+                                          color: Colors.white.withOpacity(0.3),
+                                          fontSize: 12),
+                                    ),
                                   ),
-                                ),
-                                Expanded(
-                                    child: Divider(
-                                        color: Colors.white.withOpacity(0.1))),
-                              ],
-                            )
-                            :const SizedBox(),
-                                !Platform.isIOS
-                                  ?const SizedBox(height: 30)
-                                  : const SizedBox(),
-
-                            // Social Login Buttons
-                            !Platform.isIOS
-                                ? Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      _socialButton(
-                                        label: 'Google',
-                                        onTap: () => _handleSocialLogin(
-                                          () => Provider.of<AuthProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .signInWithGoogle(),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 24),
-                                      _socialButton(
-                                        label: 'Facebook',
-                                        onTap: () => _handleSocialLogin(
-                                          () => Provider.of<AuthProvider>(
-                                                  context,
-                                                  listen: false)
-                                              .signInWithFacebook(),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : const SizedBox(),
+                                  Expanded(
+                                      child: Divider(
+                                          color:
+                                              Colors.white.withOpacity(0.1))),
+                                ],
+                              ),
+                              const SizedBox(height: 30),
+                              // Social Login Buttons
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _socialButton(
+                                    label: 'Google',
+                                    onTap: () => _handleSocialLogin(
+                                      () => Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .signInWithGoogle(),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 24),
+                                  _socialButton(
+                                    label: 'Facebook',
+                                    onTap: () => _handleSocialLogin(
+                                      () => Provider.of<AuthProvider>(context,
+                                              listen: false)
+                                          .signInWithFacebook(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
                             const SizedBox(height: 40),
                           ],
                         ),

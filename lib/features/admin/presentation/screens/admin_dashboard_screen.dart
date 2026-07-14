@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../chat/data/chat_repository.dart';
+import '../../../chat/domain/entities/chat_message.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -11,7 +13,7 @@ class AdminDashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.blackColor,
       appBar: AppBar(
-        title: const Text('Admin Dashboard',
+        title: const Text('Tableau de bord',
             style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -19,7 +21,8 @@ class AdminDashboardScreen extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+            Navigator.pushNamedAndRemoveUntil(
+                context, '/home', (route) => false);
           },
         ),
       ),
@@ -31,21 +34,19 @@ class AdminDashboardScreen extends StatelessWidget {
             children: [
               _buildAdminCard(
                 context,
-                title: 'Manage Products',
+                title: 'Gérer les produits',
                 icon: Icons.inventory_2_outlined,
-                onTap: () {
-                  Navigator.pushNamed(context, '/admin/products');
-                },
+                onTap: () => Navigator.pushNamed(context, '/admin/products'),
               ),
               const SizedBox(height: 20),
               _buildAdminCard(
                 context,
-                title: 'Manage Orders',
+                title: 'Gérer les commandes',
                 icon: Icons.receipt_long_outlined,
-                onTap: () {
-                  Navigator.pushNamed(context, '/admin/orders');
-                },
+                onTap: () => Navigator.pushNamed(context, '/admin/orders'),
               ),
+              const SizedBox(height: 20),
+              _buildMessagingCard(context),
             ],
           ),
         ),
@@ -53,10 +54,32 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAdminCard(BuildContext context,
-      {required String title,
-      required IconData icon,
-      required VoidCallback onTap}) {
+  /// Messaging card with a live unread badge (total unread customer messages).
+  Widget _buildMessagingCard(BuildContext context) {
+    return StreamBuilder<List<ChatMessage>>(
+      stream: ChatRepository().allMessagesStream(),
+      builder: (context, snapshot) {
+        final unread = (snapshot.data ?? const [])
+            .where((m) => m.isFromCustomer && m.readAt == null)
+            .length;
+        return _buildAdminCard(
+          context,
+          title: 'Messagerie',
+          icon: Icons.forum_outlined,
+          badge: unread,
+          onTap: () => Navigator.pushNamed(context, '/admin/messages'),
+        );
+      },
+    );
+  }
+
+  Widget _buildAdminCard(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+    int badge = 0,
+  }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
@@ -81,6 +104,27 @@ class AdminDashboardScreen extends StatelessWidget {
                 ),
               ),
             ),
+            if (badge > 0)
+              Container(
+                margin: const EdgeInsets.only(right: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints:
+                    const BoxConstraints(minWidth: 24, minHeight: 24),
+                child: Text(
+                  '$badge',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             const Icon(Icons.arrow_forward_ios,
                 color: Colors.white54, size: 16),
           ],

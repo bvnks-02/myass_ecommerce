@@ -29,12 +29,13 @@ dependencies:
   flutter_svg: ^2.0.9
   equatable: ^2.0.5
   dartz: ^0.10.1
-  font_awesome_flutter: ^10.9.1
+  font_awesome_flutter: ^11.0.0
   geolocator: ^10.1.0
   geocoding: ^2.1.0
   share_plus: ^10.0.0
   package_info_plus: ^8.0.0
   app_links: ^6.4.1
+  video_player: ^2.9.2
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +50,7 @@ flutter:
     - assets/lottie/
     - assets/images/
     - assets/icons/
+    - assets/videos/
     - .env
 
 flutter_launcher_icons:

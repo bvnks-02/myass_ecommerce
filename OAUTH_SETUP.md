@@ -1,5 +1,50 @@
 # OAuth Setup Guide for Google and Facebook Login
 
+## Current configuration status (verified — Lot 3)
+
+Supabase project in use: **`ifosyvmoynhglyxcitvw`** (`https://ifosyvmoynhglyxcitvw.supabase.co`).
+
+What is already correct in the codebase:
+
+- **Android** registers the OAuth callback scheme in `AndroidManifest.xml`:
+  `com.example.myazz://login-callback/` — and `AuthProvider.signInWithGoogle`
+  redirects to that exact URI, so the Android round-trip is wired correctly.
+- The cold-start / warm deep-link handler in `main.dart` forwards any link
+  containing `login-callback`, `access_token=`, or `code=` to
+  `Supabase.auth.getSessionFromUrl`, completing sign-in.
+- **First Google sign-in now creates a `user_profiles` row reliably.** The DB
+  trigger `on_auth_user_created` handles this, and `AuthProvider.refreshRole`
+  has a defensive fallback (`_ensureProfileExists`) that upserts the row if the
+  trigger ever fails to run. `refreshRole` uses `maybeSingle()` so a missing
+  profile no longer throws.
+
+What still requires **manual dashboard configuration** (cannot be done from code):
+
+1. **Enable the Google provider** in Supabase → Authentication → Providers →
+   Google, using a Client ID/Secret from a Google Cloud OAuth app (see below).
+2. **Add the redirect URLs** in Supabase → Authentication → URL Configuration →
+   Redirect URLs:
+   - `com.example.myazz://login-callback/`
+   - `com.example.myazz://reset_password/`
+3. In the Google Cloud OAuth app, register the same
+   `com.example.myazz://login-callback/` redirect and the Android package
+   `com.myazz.app` with the signing SHA-1.
+
+> **Note on the URL scheme:** the custom scheme is `com.example.myazz` (a leftover
+> from the original package id). It does not need to match the real app id
+> (`com.myazz.app`) to work, and it is internally consistent between the Android
+> manifest, `AuthProvider`, and the redirect URLs — so it is left as-is to avoid a
+> risky multi-place rename. If you ever rename it, change it in all four places:
+> `AndroidManifest.xml`, `AuthProvider` (Google/Facebook/reset redirects),
+> Supabase Redirect URLs, and the Google/Facebook OAuth apps.
+
+> **Note on iOS:** `ios/Runner/Info.plist` does **not** declare a
+> `CFBundleURLTypes` entry, so custom-scheme deep links (including OAuth
+> callbacks) do not route on iOS. This is acceptable today because the
+> Google/Facebook buttons are hidden on iOS (`Platform.isIOS` checks in the
+> login/register screens). If social login is ever enabled on iOS, add a
+> `CFBundleURLTypes` block registering `com.example.myazz`.
+
 ## Problem
 Google and Facebook login are not working because OAuth providers need to be configured in Supabase.
 

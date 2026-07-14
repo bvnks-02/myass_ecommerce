@@ -20,8 +20,15 @@ import 'features/profile/presentation/screens/help_support_screen.dart';
 import 'features/profile/presentation/screens/about_screen.dart';
 import 'features/admin/presentation/screens/admin_orders_screen.dart';
 import 'features/admin/presentation/screens/admin_product_list_screen.dart';
+import 'features/admin/presentation/screens/admin_conversations_screen.dart';
 import 'features/support/presentation/screens/support_screen.dart';
 import 'features/support/presentation/providers/support_provider.dart';
+import 'features/chat/presentation/providers/chat_provider.dart';
+import 'features/chat/presentation/screens/customer_chat_screen.dart';
+import 'features/smartwatch/presentation/providers/smartwatch_provider.dart';
+import 'features/smartwatch/presentation/screens/smartwatch_screen.dart';
+import 'features/smartwatch/presentation/screens/watch_pairing_screen.dart';
+import 'features/smartwatch/presentation/screens/watch_faces_screen.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -65,10 +72,10 @@ Future<void> main() async {
 
     final url = (supabaseUrl != null && supabaseUrl.isNotEmpty)
         ? supabaseUrl
-        : 'https://giilayepbjvwpkjlmgsv.supabase.co';
+        : 'https://ifosyvmoynhglyxcitvw.supabase.co';
     final anonKey = (supabaseAnonKey != null && supabaseAnonKey.isNotEmpty)
         ? supabaseAnonKey
-        : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaWxheWVwYmp2d3BramxtZ3N2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0NDQ1NDQsImV4cCI6MjA4OTAyMDU0NH0.GwWGh4yuRbReqs3g-ccWCV5Z7MaJV-PzbK6RbJ64jQw';
+        : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmb3N5dm1veW5oZ2x5eGNpdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMzkwNTMsImV4cCI6MjA5OTYxNTA1M30.8zY8hFVZCqi2nq-nVx_ienLXDTH4wdeaA86AjtfSRUE';
 
     // Verify URLs are not empty or localhost
     if (url.isEmpty || url.contains('localhost')) {
@@ -271,6 +278,8 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => SupportProvider()),
+        ChangeNotifierProvider(create: (_) => ChatProvider()),
+        ChangeNotifierProvider(create: (_) => SmartWatchProvider()),
         ChangeNotifierProvider(
           create: (_) => ProductsProvider(
             getProductsUseCase: GetProducts(productRepository),
@@ -304,6 +313,8 @@ class _MyAppState extends State<MyApp> {
           '/admin': (context) => const AdminDashboardScreen(),
           '/admin/orders': (context) => const AdminOrdersScreen(),
           '/admin/products': (context) => const AdminProductListScreen(),
+          '/admin/messages': (context) => const AdminConversationsScreen(),
+          '/chat': (context) => const CustomerChatScreen(),
           '/notifications': (context) => const NotificationsScreen(),
           '/privacy_security': (context) => const PrivacySecurityScreen(),
           '/help_support': (context) => const HelpSupportScreen(),
@@ -320,6 +331,9 @@ class _MyAppState extends State<MyApp> {
           },
           '/my_orders': (context) => const UserOrdersScreen(),
           '/watch_details': (context) => const WatchDetailScreen(),
+          '/smartwatch': (context) => const SmartWatchScreen(),
+          '/watch_pairing': (context) => const WatchPairingScreen(),
+          '/watch_faces': (context) => const WatchFacesScreen(),
         },
       ),
     );
@@ -335,15 +349,21 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen>
     with SingleTickerProviderStateMixin {
-  int _currentIndex = 0;
+  // Default landing tab = Store (index 2), the natural home for the shop.
+  int _currentIndex = 2;
+  int _prevCartCount = 0;
   late AnimationController _animationController;
   late Animation<double> _scaleAnimation;
 
+  // 5 tabs (CDC order): Profile, Messagerie (chat), Store (Home — unchanged
+  // logic), Ma Section (orders), Smart Watch. The floating cart button stays
+  // separate and is not one of these tabs.
   final List<Widget> _screens = [
-    const HomeScreen(key: PageStorageKey('home')),
-    const FavoritesScreen(key: PageStorageKey('favorites')),
-    const WatchDetailScreen(key: PageStorageKey('watch')),
     const ProfileScreen(key: PageStorageKey('profile')),
+    const CustomerChatScreen(key: PageStorageKey('chat')),
+    const HomeScreen(key: PageStorageKey('home')),
+    const UserOrdersScreen(key: PageStorageKey('orders')),
+    const SmartWatchScreen(key: PageStorageKey('smartwatch')),
   ];
 
   @override
@@ -353,7 +373,7 @@ class _MainScreenState extends State<MainScreen>
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.15).animate(
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.28).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
     );
   }
@@ -362,6 +382,13 @@ class _MainScreenState extends State<MainScreen>
   void dispose() {
     _animationController.dispose();
     super.dispose();
+  }
+
+  // Bump the floating cart button (used on tap and when an item is added).
+  void _playCartBump() {
+    _animationController.forward(from: 0).then((_) {
+      if (mounted) _animationController.reverse();
+    });
   }
 
   void _onItemTapped(int index) {
@@ -376,6 +403,7 @@ class _MainScreenState extends State<MainScreen>
     required IconData activeIcon,
     required int index,
     required String label,
+    int badge = 0,
   }) {
     final isSelected = _currentIndex == index;
     return Expanded(
@@ -392,10 +420,40 @@ class _MainScreenState extends State<MainScreen>
                 scale: isSelected ? 1.1 : 1.0,
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                child: Icon(
-                  isSelected ? activeIcon : icon,
-                  color: isSelected ? Colors.white : Colors.grey[600],
-                  size: ResponsiveUtils.sf(context, 26),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Icon(
+                      isSelected ? activeIcon : icon,
+                      color: isSelected ? Colors.white : Colors.grey[600],
+                      size: ResponsiveUtils.sf(context, 26),
+                    ),
+                    if (badge > 0)
+                      Positioned(
+                        top: -ResponsiveUtils.sh(context, 6),
+                        right: -ResponsiveUtils.sw(context, 8),
+                        child: Container(
+                          padding: EdgeInsets.all(ResponsiveUtils.sw(context, 4)),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: BoxConstraints(
+                            minWidth: ResponsiveUtils.sw(context, 16),
+                            minHeight: ResponsiveUtils.sw(context, 16),
+                          ),
+                          child: Text(
+                            badge > 9 ? '9+' : '$badge',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: ResponsiveUtils.sf(context, 9),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               if (isSelected) ...[
@@ -452,39 +510,48 @@ class _MainScreenState extends State<MainScreen>
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
-                              // Home
-                              _buildNavItem(
-                                context,
-                                icon: Icons.home_outlined,
-                                activeIcon: Icons.home,
-                                index: 0,
-                                label: 'Accueil',
-                              ),
-                              // Favorites
-                              _buildNavItem(
-                                context,
-                                icon: Icons.favorite_outline,
-                                activeIcon: Icons.favorite,
-                                index: 1,
-                                label: 'Favoris',
-                              ),
-                              // Spacer for elevated cart button
-                              SizedBox(width: ResponsiveUtils.sw(context, 70)),
-                              // Saved
-                              _buildNavItem(
-                                context,
-                                icon: Icons.watch_outlined,
-                                activeIcon: Icons.watch,
-                                index: 2,
-                                label: 'Watch',
-                              ),
                               // Profile
                               _buildNavItem(
                                 context,
                                 icon: Icons.person_outline,
                                 activeIcon: Icons.person,
-                                index: 3,
+                                index: 0,
                                 label: 'Profil',
+                              ),
+                              // Messagerie (chat) with unread badge
+                              _buildNavItem(
+                                context,
+                                icon: Icons.forum_outlined,
+                                activeIcon: Icons.forum,
+                                index: 1,
+                                label: 'Messages',
+                                badge: context
+                                    .watch<ChatProvider>()
+                                    .unreadCount,
+                              ),
+                              // Store (Home) — sits under the floating cart button
+                              _buildNavItem(
+                                context,
+                                icon: Icons.storefront_outlined,
+                                activeIcon: Icons.storefront,
+                                index: 2,
+                                label: 'Store',
+                              ),
+                              // Ma Section (orders)
+                              _buildNavItem(
+                                context,
+                                icon: Icons.receipt_long_outlined,
+                                activeIcon: Icons.receipt_long,
+                                index: 3,
+                                label: 'Commandes',
+                              ),
+                              // Smart Watch
+                              _buildNavItem(
+                                context,
+                                icon: Icons.watch_outlined,
+                                activeIcon: Icons.watch,
+                                index: 4,
+                                label: 'Montre',
                               ),
                             ],
                           ),
@@ -498,9 +565,7 @@ class _MainScreenState extends State<MainScreen>
                         scale: _scaleAnimation,
                         child: GestureDetector(
                           onTap: () {
-                            _animationController.forward().then((_) {
-                              _animationController.reverse();
-                            });
+                            _playCartBump();
                             Navigator.pushNamed(context, '/cart');
                           },
                           child: Container(
@@ -548,6 +613,15 @@ class _MainScreenState extends State<MainScreen>
                                   child: Selector<CartProvider, int>(
                                     selector: (context, cart) => cart.itemCount,
                                     builder: (context, itemCount, child) {
+                                      // Confirmation bump whenever the cart count
+                                      // grows (i.e. CartProvider added an item).
+                                      if (itemCount > _prevCartCount) {
+                                        WidgetsBinding.instance
+                                            .addPostFrameCallback((_) {
+                                          if (mounted) _playCartBump();
+                                        });
+                                      }
+                                      _prevCartCount = itemCount;
                                       if (itemCount == 0) {
                                         return const SizedBox.shrink();
                                       }

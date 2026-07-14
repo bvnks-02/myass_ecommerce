@@ -202,7 +202,7 @@ class _SupportScreenState extends State<SupportScreen> {
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                hintText: 'Search for help...',
+                hintText: 'Rechercher de l\'aide…',
                 hintStyle: TextStyle(
                   color: Colors.grey[500],
                   fontSize: ResponsiveUtils.sf(context, 14),
@@ -464,7 +464,7 @@ class _SupportScreenState extends State<SupportScreen> {
               Icon(Icons.support_agent, color: Colors.white, size: ResponsiveUtils.sf(context, 24)),
               SizedBox(width: ResponsiveUtils.sw(context, 10)),
               Text(
-                'Contact Support',
+                'Contacter le support',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.sf(context, 18),
                   fontWeight: FontWeight.bold,
@@ -500,7 +500,7 @@ class _SupportScreenState extends State<SupportScreen> {
     );
   }
 
-  Widget _buildContactButton(IconData icon, String label, Color color, VoidCallback onTap) {
+  Widget _buildContactButton(FaIconData icon, String label, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -558,7 +558,7 @@ class _SupportScreenState extends State<SupportScreen> {
             controller: _problemTitleController,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              labelText: 'Title',
+              labelText: 'Titre',
               labelStyle: TextStyle(color: Colors.grey[400]),
               filled: false,
               border: OutlineInputBorder(
@@ -612,7 +612,7 @@ class _SupportScreenState extends State<SupportScreen> {
                 ),
               ),
               child: Text(
-                'Submit',
+                'Envoyer',
                 style: TextStyle(
                   fontSize: ResponsiveUtils.sf(context, 14),
                   fontWeight: FontWeight.bold,

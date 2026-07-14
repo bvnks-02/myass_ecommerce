@@ -26,7 +26,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     // Validate input
     if (!InputValidator.isValidEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid email address')),
+        const SnackBar(
+            content: Text('Veuillez saisir une adresse e-mail valide.')),
       );
       return;
     }
@@ -34,7 +35,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     // Rate limiting check
     if (!RateLimiters.passwordReset.isAllowed(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Too many password reset attempts. Please try again later.')),
+        const SnackBar(
+            content: Text(
+                'Trop de tentatives de réinitialisation. Veuillez réessayer plus tard.')),
       );
       return;
     }
@@ -47,7 +50,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content:
-                  Text('Password reset link sent to your email!')),
+                  Text('Lien de réinitialisation envoyé à votre e-mail !')),
         );
         Navigator.pop(context);
       }
@@ -84,7 +87,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               const SizedBox(height: 20),
               const Text(
-                'Reset Password',
+                'Réinitialiser le mot de passe',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28,
@@ -93,7 +96,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                'Enter your email to receive a password reset link.',
+                'Saisissez votre e-mail pour recevoir un lien de réinitialisation.',
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.7),
                   fontSize: 16,
@@ -135,7 +138,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             color: Colors.black, strokeWidth: 2),
                       )
                     : const Text(
-                        'Send Link',
+                        'Envoyer le lien',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),

@@ -40,19 +40,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     // Validate inputs
     if (!InputValidator.isValidEmail(email)) {
-      AppSnackBar.warning(context, 'Please enter a valid email address');
+      AppSnackBar.warning(context, 'Veuillez saisir une adresse e-mail valide.');
       return;
     }
 
     if (email.isEmpty || password.isEmpty) {
-      AppSnackBar.warning(context, 'Please enter your email and password');
+      AppSnackBar.warning(
+          context, 'Veuillez saisir votre e-mail et votre mot de passe.');
       return;
     }
 
     // Rate limiting check
     if (!RateLimiters.auth.isAllowed(email)) {
       AppSnackBar.warning(
-          context, 'Too many attempts. Please try again later.');
+          context, 'Trop de tentatives. Veuillez réessayer plus tard.');
       return;
     }
 
@@ -66,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
         debugPrint('Login failed - not authenticated');
         if (mounted) {
           AppSnackBar.error(
-              context, 'Invalid email or password. Please try again.');
+              context, 'E-mail ou mot de passe invalide. Veuillez réessayer.');
         }
         return;
       }
@@ -131,11 +132,12 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } on TimeoutException catch (_) {
       if (mounted) {
-        AppSnackBar.error(context, 'Login timed out. Please try again.');
+        AppSnackBar.error(
+            context, 'Délai de connexion dépassé. Veuillez réessayer.');
       }
     } catch (e) {
       if (mounted) {
-        AppSnackBar.error(context, 'Social login failed. Please try again.');
+        AppSnackBar.error(context, 'Échec de la connexion. Veuillez réessayer.');
       }
     } finally {
       sub?.cancel();
@@ -191,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         Navigator.pushReplacementNamed(context, '/home');
                       },
                       child: const Text(
-                        'Skip',
+                        'Passer',
                         style: TextStyle(color: Colors.white70, fontSize: 16),
                       ),
                     ),
@@ -233,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 20),
                               const Text(
-                                'Welcome Back',
+                                'Bon retour',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 28,
@@ -244,7 +246,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                'Sign in to continue shopping',
+                                'Connectez-vous pour continuer vos achats',
                                 style: TextStyle(
                                   color: Colors.white.withOpacity(0.5),
                                   fontSize: 13,
@@ -264,7 +266,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               // Glassmorphic Password Field
                               _buildGlassTextField(
                                 controller: _passwordController,
-                                hintText: 'Password',
+                                hintText: 'Mot de passe',
                                 prefixIcon: Icons.lock_outline,
                                 obscureText: _obscurePassword,
                                 suffixIcon: IconButton(
@@ -292,7 +294,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     );
                                   },
                                   child: Text(
-                                    'Forgot password?',
+                                    'Mot de passe oublié ?',
                                     style: TextStyle(
                                         color: Colors.white.withOpacity(0.4),
                                         fontSize: 13),
@@ -328,7 +330,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             ),
                                           )
                                         : const Text(
-                                            'Sign In',
+                                            'Se connecter',
                                             textAlign: TextAlign.center,
                                             style: TextStyle(
                                                 fontSize: 16,
@@ -340,68 +342,62 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
 
                               const SizedBox(height: 25),
-                               !Platform.isIOS
-                                  ? Row(
-                                children: [
-                                  Expanded(
-                                      child: Divider(
-                                          color:
-                                              Colors.white.withOpacity(0.1))),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: Text(
-                                      'Or continue with',
-                                      style: TextStyle(
-                                          color: Colors.white.withOpacity(0.3),
-                                          fontSize: 12),
+                              if (!Platform.isIOS) ...[
+                                Row(
+                                  children: [
+                                    Expanded(
+                                        child: Divider(
+                                            color:
+                                                Colors.white.withOpacity(0.1))),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      child: Text(
+                                        'Ou continuer avec',
+                                        style: TextStyle(
+                                            color:
+                                                Colors.white.withOpacity(0.3),
+                                            fontSize: 12),
+                                      ),
                                     ),
-                                  ),
-                                  Expanded(
-                                      child: Divider(
-                                          color:
-                                              Colors.white.withOpacity(0.1))),
-                                ],
-                              ):const SizedBox(),
-                                !Platform.isIOS
-                                  ?const SizedBox(height: 20)
-                                  : const SizedBox(),
-
-                              // Social Login Buttons
-                              !Platform.isIOS
-                                  ? Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        _socialButton(
-                                          label: 'Google',
-                                          onTap: () => _handleSocialLogin(
-                                            () => Provider.of<AuthProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .signInWithGoogle(),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 24),
-                                        _socialButton(
-                                          label: 'Facebook',
-                                          onTap: () => _handleSocialLogin(
-                                            () => Provider.of<AuthProvider>(
-                                                    context,
-                                                    listen: false)
-                                                .signInWithFacebook(),
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : const SizedBox(),
+                                    Expanded(
+                                        child: Divider(
+                                            color:
+                                                Colors.white.withOpacity(0.1))),
+                                  ],
+                                ),
+                                const SizedBox(height: 20),
+                                // Social Login Buttons
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    _socialButton(
+                                      label: 'Google',
+                                      onTap: () => _handleSocialLogin(
+                                        () => Provider.of<AuthProvider>(context,
+                                                listen: false)
+                                            .signInWithGoogle(),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 24),
+                                    _socialButton(
+                                      label: 'Facebook',
+                                      onTap: () => _handleSocialLogin(
+                                        () => Provider.of<AuthProvider>(context,
+                                                listen: false)
+                                            .signInWithFacebook(),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
 
                               const SizedBox(height: 10),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "New here? ",
+                                    "Nouveau ici ? ",
                                     style: TextStyle(
                                         color: Colors.white.withOpacity(0.5)),
                                   ),
@@ -416,7 +412,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       );
                                     },
                                     child: const Text(
-                                      'Create an account',
+                                      'Créer un compte',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontWeight: FontWeight.bold),

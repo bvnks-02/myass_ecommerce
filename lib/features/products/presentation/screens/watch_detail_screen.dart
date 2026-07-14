@@ -47,6 +47,8 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
                     _buildFeatures(),
                     const SizedBox(height: 25),
                     _buildDescription(),
+                    const SizedBox(height: 24),
+                    _buildPairingButton(),
                     const SizedBox(height: 30),
                     _buildBottomBar(),
                     const SizedBox(height: 120),
@@ -404,6 +406,30 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPairingButton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: SizedBox(
+        width: double.infinity,
+        child: OutlinedButton.icon(
+          onPressed: () => Navigator.pushNamed(context, '/smartwatch'),
+          icon: const Icon(Icons.bluetooth, color: Colors.white),
+          label: const Text(
+            'Connecter à ma montre',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+          ),
+          style: OutlinedButton.styleFrom(
+            side: BorderSide(color: Colors.white.withOpacity(0.3)),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
       ),
     );
   }
