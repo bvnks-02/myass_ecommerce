@@ -31,6 +31,44 @@ ALTER TABLE public.user_profiles
   ADD CONSTRAINT user_profiles_weight_ck
     CHECK (weight IS NULL OR (weight >= 20 AND weight <= 500));
 
+-- The app upserts into user_profiles (saveProfileDetails, updateAvatar, and
+-- the first-OAuth-sign-in fallback), which needs INSERT + UPDATE policies on
+-- top of the SELECT-only policies in supabase_schema.sql. These match the
+-- policies already live on the project; kept here so a rebuild from the repo's
+-- SQL files reproduces them.
+DROP POLICY IF EXISTS "Users can insert own profile" ON public.user_profiles;
+CREATE POLICY "Users can insert own profile" ON public.user_profiles
+  FOR INSERT TO authenticated
+  WITH CHECK ((select auth.uid()) = id);
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.user_profiles;
+CREATE POLICY "Users can update own profile" ON public.user_profiles
+  FOR UPDATE TO authenticated
+  USING ((select auth.uid()) = id)
+  WITH CHECK ((select auth.uid()) = id);
+
+-- The UPDATE policy alone would let a user set role='admin' on their own row
+-- (privilege escalation: is_admin() gates every admin RLS path). This trigger
+-- blocks role changes unless the caller is already an admin. Dashboard /
+-- service-role sessions have auth.uid() = NULL and stay exempt, so the owner
+-- can still promote admins from the SQL editor.
+CREATE OR REPLACE FUNCTION public.protect_user_profile_role()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.role IS DISTINCT FROM OLD.role
+     AND (select auth.uid()) IS NOT NULL
+     AND NOT COALESCE(public.is_admin(), false) THEN
+    RAISE EXCEPTION 'changing role requires admin privileges';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
+
+DROP TRIGGER IF EXISTS protect_role ON public.user_profiles;
+CREATE TRIGGER protect_role
+  BEFORE UPDATE ON public.user_profiles
+  FOR EACH ROW EXECUTE FUNCTION public.protect_user_profile_role();
+
 -- Avatar storage: public-read bucket so avatar_url resolves without signing;
 -- writes are locked to the owner's {uid}/ folder. Upsert needs INSERT+SELECT+UPDATE.
 INSERT INTO storage.buckets (id, name, public)

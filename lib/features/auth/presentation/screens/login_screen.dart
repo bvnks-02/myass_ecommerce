@@ -1,11 +1,11 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/utils/platform_utils.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -36,7 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(milliseconds: 100));
     // Sanitize inputs
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
-    final password = InputSanitizer.sanitizeString(_passwordController.text);
+    // Do not sanitize passwords — destructive stripping breaks valid passwords.
+    final password = _passwordController.text;
 
     // Validate inputs
     if (!InputValidator.isValidEmail(email)) {
@@ -62,12 +63,14 @@ class _LoginScreenState extends State<LoginScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.signIn(email, password);
 
-      // Check if login actually succeeded
-      if (!authProvider.isAuthenticated) {
+      if (authProvider.hasError || !authProvider.isAuthenticated) {
         debugPrint('Login failed - not authenticated');
         if (mounted) {
           AppSnackBar.error(
-              context, 'E-mail ou mot de passe invalide. Veuillez réessayer.');
+            context,
+            authProvider.errorMessage ??
+                'E-mail ou mot de passe invalide. Veuillez réessayer.',
+          );
         }
         return;
       }
@@ -113,7 +116,8 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      // Wait for the OAuth callback to fire a signedIn event
+      // Wait for OAuth signedIn; navigation is owned by MyApp in main.dart
+      // to avoid a double pushReplacement race with the global listener.
       final completer = Completer<AuthState>();
       sub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
         if (data.event == AuthChangeEvent.signedIn && data.session != null) {
@@ -121,14 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
       await completer.future.timeout(const Duration(minutes: 2));
-
       if (mounted) {
         await authProvider.refreshRole();
-        if (authProvider.isAdmin) {
-          Navigator.pushReplacementNamed(context, '/admin');
-        } else {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
       }
     } on TimeoutException catch (_) {
       if (mounted) {
@@ -342,7 +340,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
 
                               const SizedBox(height: 25),
-                              if (!Platform.isIOS) ...[
+                              if (showSocialAuth) ...[
                                 Row(
                                   children: [
                                     Expanded(

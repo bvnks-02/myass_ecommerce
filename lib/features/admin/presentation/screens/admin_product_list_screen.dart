@@ -10,8 +10,10 @@ import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/rate_limiter.dart';
 import '../../../../core/services/dialog_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import 'package:provider/provider.dart';
 import '../../../../services/api_service.dart';
 import '../../../products/domain/entities/product_entity.dart';
+import '../../../products/presentation/providers/products_provider.dart';
 
 class AdminProductListScreen extends StatefulWidget {
   const AdminProductListScreen({super.key});
@@ -82,6 +84,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
       final success = await ApiService.deleteProduct(id);
       if (mounted) {
         if (success) {
+          context.read<ProductsProvider>().forceRefresh();
           AppSnackBar.success(context, '"$productName" has been removed from the store.');
         } else {
           AppSnackBar.error(context, 'Could not delete product. Please try again.');
@@ -507,12 +510,16 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             // Store price directly in DZD (no conversion needed)
                             final finalPrice = dzdPrice;
 
-                            // Prepare image URLs - combine existing with new uploads
+                            // Prepare image URLs - preserve existing gallery on text-only edits
                             List<String> allImages = [];
                             if (uploadedUrls.isNotEmpty) {
                               allImages = uploadedUrls;
-                            } else if (isEditing && product.image.isNotEmpty) {
-                              allImages = [product.image];
+                            } else if (isEditing) {
+                              if (product.images.isNotEmpty) {
+                                allImages = List<String>.from(product.images);
+                              } else if (product.image.isNotEmpty) {
+                                allImages = [product.image];
+                              }
                             }
 
                             // Use first image as main image
@@ -545,6 +552,8 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                             
                             if (mounted) {
                               if (success) {
+                                // Bust storefront cache so customers see new prices/images.
+                                context.read<ProductsProvider>().forceRefresh();
                                 Navigator.pop(context);
                                 AppSnackBar.success(context, 'Product has been saved successfully');
                                 _fetchProducts();

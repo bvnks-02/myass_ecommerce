@@ -20,15 +20,17 @@ class ProductModel extends ProductEntity {
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    final id = _parseInt(json['id']);
+    if (id == null) {
+      throw FormatException('Product missing valid id: ${json['id']}');
+    }
     return ProductModel(
-      id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
+      id: id,
       name: json['name'] ?? json['product_name'] ?? '',
       brand: json['brand'] ?? json['name']?.toString().split(' ').first ?? '',
       model: json['model'] ?? json['name']?.toString().split(' ').last ?? '',
       description: json['description'] ?? json['product_description'] ?? '',
-      price: json['price'] is double
-          ? json['price']
-          : double.parse((json['price'] ?? 0.0).toString()),
+      price: _parseDouble(json['price']) ?? 0.0,
       image: json['image_url'] ?? json['image'] ?? json['product_image'] ?? '',
       images: json['images'] is List
           ? List<String>.from(json['images'])
@@ -42,13 +44,28 @@ class ProductModel extends ProductEntity {
       features: json['features'] is Map
           ? Map<String, dynamic>.from(json['features'])
           : {},
-      categoryId: json['category_id'] is int
-          ? json['category_id']
-          : int.parse((json['category_id'] ?? 0).toString()),
-      category: json['category_name'] ?? json['category'] ?? json['product_category'] ?? '',
-      isFeatured: json['is_featured'] ?? json['featured'] ?? false,
-      isAvailable: json['is_available'] ?? true,
+      categoryId: _parseInt(json['category_id']) ?? 0,
+      category: json['category_name'] ??
+          json['category'] ??
+          json['product_category'] ??
+          '',
+      isFeatured: json['is_featured'] == true || json['featured'] == true,
+      isAvailable: json['is_available'] != false,
     );
+  }
+
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value.toString());
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is num) return value.toDouble();
+    return double.tryParse(value.toString());
   }
 
   Map<String, dynamic> toJson() {

@@ -44,20 +44,34 @@ class _AdminChatThreadScreenState extends State<AdminChatThreadScreen> {
     super.dispose();
   }
 
-  void _onMessages(int count) {
-    if (count != _lastCount) {
-      _lastCount = count;
+  void _onMessages(List<ChatMessage> messages) {
+    final count = messages.length;
+    if (count == _lastCount) return;
+    final isFirstBatch = _lastCount == 0;
+    _lastCount = count;
+
+    // Only mark customer inbound as read — not admin's own replies.
+    final myId = _repo.currentUserId;
+    final hasInboundUnread = messages.any(
+      (m) => !m.isMine(myId) && m.readAt == null,
+    );
+    if (hasInboundUnread) {
       _repo.markRead(widget.conversationId);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-          );
-        }
-      });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      final bottom = _scrollController.position.maxScrollExtent;
+      if (isFirstBatch) {
+        _scrollController.jumpTo(bottom);
+      } else {
+        _scrollController.animateTo(
+          bottom,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -81,7 +95,7 @@ class _AdminChatThreadScreenState extends State<AdminChatThreadScreen> {
                       child: CircularProgressIndicator(color: Colors.white));
                 }
                 final messages = snapshot.data ?? const [];
-                _onMessages(messages.length);
+                _onMessages(messages);
                 if (messages.isEmpty) {
                   return Center(
                     child: Text(

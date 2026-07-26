@@ -28,16 +28,9 @@ class ApiService {
       final List<dynamic> data = response as List<dynamic>;
       
       AppLogger.info('Successfully fetched ${data.length} products', tag: 'ApiService');
-      return data.map((json) => ProductModel.fromJson(json)).toList();
+      return _mapProducts(data);
     } catch (e, stackTrace) {
       AppLogger.error('Error fetching products', tag: 'ApiService', error: e, stackTrace: stackTrace);
-      
-      // Return mock data as fallback for development
-      if (kDebugMode) {
-        AppLogger.warning('Falling back to mock data', tag: 'ApiService');
-        return _getMockProducts();
-      }
-      
       rethrow;
     }
   }
@@ -60,20 +53,28 @@ class ApiService {
       final List<dynamic> data = response as List<dynamic>;
       
       AppLogger.info('Successfully fetched ${data.length} featured products', tag: 'ApiService');
-      return data.map((json) => ProductModel.fromJson(json)).toList();
+      return _mapProducts(data);
     } catch (e, stackTrace) {
       AppLogger.error('Error fetching featured products', tag: 'ApiService', error: e, stackTrace: stackTrace);
-      
-      // Return mock data as fallback for development
-      if (kDebugMode) {
-        AppLogger.warning('Falling back to mock featured data', tag: 'ApiService');
-        return _getMockProducts().take(3).toList();
-      }
-      
       rethrow;
     }
   }
 
+  /// Parse product rows; skip malformed rows instead of failing the whole list.
+  static List<ProductEntity> _mapProducts(List<dynamic> data) {
+    final products = <ProductEntity>[];
+    for (final raw in data) {
+      try {
+        final json = Map<String, dynamic>.from(raw as Map);
+        products.add(ProductModel.fromJson(json));
+      } catch (e) {
+        AppLogger.warning('Skipping malformed product row: $e', tag: 'ApiService');
+      }
+    }
+    return products;
+  }
+
+  /// Places an order via atomic RPC. [total] is ignored — server prices items.
   static Future<bool> createOrder({
     required double total,
     required String name,
@@ -82,95 +83,65 @@ class ApiService {
     required List<Map<String, dynamic>> items,
   }) async {
     try {
-      debugPrint('=== ApiService.createOrder START ===');
-      
       // Rate limiting check
       if (!RateLimiters.api.isAllowed('create_order')) {
-        debugPrint('Rate limit exceeded for createOrder');
-        return false;
-      }
-      
-      // Sanitize inputs (double-check)
-      final sanitizedName = InputSanitizer.sanitizeString(name.trim(), maxLength: 100);
-      final sanitizedPhone = InputSanitizer.sanitizeNumeric(phone.trim());
-      final sanitizedAddress = InputSanitizer.sanitizeString(address.trim(), maxLength: 500);
-      
-      debugPrint('Sanitized inputs - Name: $sanitizedName, Phone: $sanitizedPhone, Address: $sanitizedAddress');
-      
-      final userId = _supabase.auth.currentUser?.id;
-      debugPrint('User ID: $userId');
-      
-      if (userId == null) {
-        debugPrint('ERROR: No authenticated user found');
+        AppLogger.warning('Rate limit exceeded for createOrder', tag: 'ApiService');
         return false;
       }
 
-      // If using mock data, simulate order creation
+      final sanitizedName =
+          InputSanitizer.sanitizeString(name.trim(), maxLength: 100);
+      final sanitizedPhone = InputSanitizer.sanitizeNumeric(phone.trim());
+      final sanitizedAddress =
+          InputSanitizer.sanitizeString(address.trim(), maxLength: 500);
+
+      final userId = _supabase.auth.currentUser?.id;
+      if (userId == null) {
+        AppLogger.error('createOrder: no authenticated user', tag: 'ApiService');
+        return false;
+      }
+
       if (_useMockData) {
-        debugPrint('Using mock order creation');
-        await Future.delayed(const Duration(seconds: 1)); // Simulate network delay
-        debugPrint('Mock order created successfully');
+        AppLogger.info('Using mock order creation', tag: 'ApiService');
+        await Future.delayed(const Duration(seconds: 1));
         return true;
       }
 
-      debugPrint('Order data - Total: $total, Items count: ${items.length}');
-
-      // 1. Insert order with sanitized data
-      debugPrint('Step 1: Inserting order...');
-      final orderResponse = await _supabase
-          .from('orders')
-          .insert({
-            'user_id': userId,
-            'total_amount': total,
-            'name': sanitizedName,
-            'phone': sanitizedPhone,
-            'address': sanitizedAddress,
-            'status': 'Pending',
-          })
-          .select()
-          .single();
-
-      final orderId = orderResponse['id'];
-      debugPrint('Step 1 SUCCESS: Order created with ID: $orderId');
-
-      // 2. Prepare order items with color and size
-      debugPrint('Step 2: Preparing order items...');
-      final orderItemsList = items.map((item) {
-        final orderItem = {
-          'order_id': orderId,
+      // Client total is not trusted; RPC computes total from products.price.
+      final rpcItems = items.map((item) {
+        final row = <String, dynamic>{
           'product_id': item['product_id'],
           'quantity': item['quantity'],
-          'price_at_time': item['price'],
         };
-        // Only add color and size if they exist (for backward compatibility)
-        if (item['color'] != null) {
-          orderItem['color'] = item['color'];
-        }
-        if (item['size'] != null) {
-          orderItem['size'] = item['size'];
-        }
-        return orderItem;
+        if (item['color'] != null) row['color'] = item['color'];
+        if (item['size'] != null) row['size'] = item['size'];
+        return row;
       }).toList();
 
-      debugPrint('Step 2: Order items prepared: $orderItemsList');
+      AppLogger.info(
+        'createOrder via RPC: user=$userId items=${rpcItems.length}',
+        tag: 'ApiService',
+      );
 
-      // 3. Insert order items
-      debugPrint('Step 3: Inserting order items...');
-      await _supabase.from('order_items').insert(orderItemsList);
-      debugPrint('Step 3 SUCCESS: Order items inserted');
-      
-      debugPrint('=== ApiService.createOrder SUCCESS ===');
+      final orderId = await _supabase.rpc(
+        'create_order_with_items',
+        params: {
+          'p_name': sanitizedName,
+          'p_phone': sanitizedPhone,
+          'p_address': sanitizedAddress,
+          'p_items': rpcItems,
+        },
+      );
+
+      AppLogger.info('createOrder success orderId=$orderId', tag: 'ApiService');
       return true;
     } catch (e, stackTrace) {
-      debugPrint('=== ApiService.createOrder ERROR ===');
-      debugPrint('Error: $e');
-      debugPrint('Stack trace: $stackTrace');
-      debugPrint('Error type: ${e.runtimeType}');
-      if (e is PostgrestException) {
-        debugPrint('Postgrest error code: ${e.code}');
-        debugPrint('Postgrest error message: ${e.message}');
-        debugPrint('Postgrest error details: ${e.details}');
-      }
+      AppLogger.error(
+        'createOrder failed',
+        tag: 'ApiService',
+        error: e,
+        stackTrace: stackTrace,
+      );
       return false;
     }
   }
@@ -383,13 +354,6 @@ class ApiService {
       return data.map((json) => json['name'] as String).toList();
     } catch (e, stackTrace) {
       AppLogger.error('Error fetching categories', tag: 'ApiService', error: e, stackTrace: stackTrace);
-      
-      // Return mock data as fallback for development
-      if (kDebugMode) {
-        AppLogger.warning('Falling back to mock categories data', tag: 'ApiService');
-        return _getMockCategories();
-      }
-      
       rethrow;
     }
   }

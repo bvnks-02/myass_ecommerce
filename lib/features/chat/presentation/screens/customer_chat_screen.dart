@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
+import '../../domain/entities/chat_message.dart';
 import '../providers/chat_provider.dart';
 import '../widgets/chat_composer.dart';
 import '../widgets/message_bubble.dart';
@@ -34,21 +35,33 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
     super.dispose();
   }
 
-  void _onMessages(int count) {
-    if (count != _lastCount) {
-      _lastCount = count;
-      // New messages arrived — mark read and scroll to the bottom.
+  void _onMessages(List<ChatMessage> messages) {
+    final count = messages.length;
+    if (count == _lastCount) return;
+    final isFirstBatch = _lastCount == 0;
+    _lastCount = count;
+
+    // Only mark inbound (support) messages as read — not our own sends.
+    final hasInboundUnread = messages.any(
+      (m) => !m.isFromCustomer && m.readAt == null,
+    );
+    if (hasInboundUnread) {
       context.read<ChatProvider>().markRead();
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeOut,
-          );
-        }
-      });
     }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scrollController.hasClients) return;
+      final bottom = _scrollController.position.maxScrollExtent;
+      if (isFirstBatch) {
+        _scrollController.jumpTo(bottom);
+      } else {
+        _scrollController.animateTo(
+          bottom,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
@@ -123,7 +136,7 @@ class _CustomerChatScreenState extends State<CustomerChatScreen> {
     return Consumer<ChatProvider>(
       builder: (context, chat, _) {
         final messages = chat.messages;
-        _onMessages(messages.length);
+        _onMessages(messages);
         if (messages.isEmpty) {
           return _buildEmptyState(context);
         }

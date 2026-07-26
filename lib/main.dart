@@ -66,25 +66,17 @@ Future<void> main() async {
           '⚠️  Failed to load .env file: $e - Using fallback credentials');
     }
 
-    // Validate env vars and use hardcoded fallback if .env failed
-    final supabaseUrl = dotenv.env['SUPABASE_URL'];
-    final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+    // Credentials come only from .env (gitignored asset). No hardcoded secrets.
+    final url = dotenv.env['SUPABASE_URL']?.trim() ?? '';
+    final anonKey = dotenv.env['SUPABASE_ANON_KEY']?.trim() ?? '';
 
-    final url = (supabaseUrl != null && supabaseUrl.isNotEmpty)
-        ? supabaseUrl
-        : 'https://ifosyvmoynhglyxcitvw.supabase.co';
-    final anonKey = (supabaseAnonKey != null && supabaseAnonKey.isNotEmpty)
-        ? supabaseAnonKey
-        : 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlmb3N5dm1veW5oZ2x5eGNpdHZ3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMzkwNTMsImV4cCI6MjA5OTYxNTA1M30.8zY8hFVZCqi2nq-nVx_ienLXDTH4wdeaA86AjtfSRUE';
-
-    // Verify URLs are not empty or localhost
     if (url.isEmpty || url.contains('localhost')) {
       throw Exception(
-          '❌ CRITICAL: Invalid SUPABASE_URL: $url. Check your .env file.');
+          '❌ CRITICAL: Invalid SUPABASE_URL. Copy .env.example → .env and set SUPABASE_URL.');
     }
     if (anonKey.isEmpty) {
       throw Exception(
-          '❌ CRITICAL: SUPABASE_ANON_KEY is empty. Check your .env file.');
+          '❌ CRITICAL: SUPABASE_ANON_KEY is empty. Copy .env.example → .env and set the key.');
     }
 
     // Initialize Supabase with error handling
@@ -216,54 +208,47 @@ class _MyAppState extends State<MyApp> {
       return;
     }
 
-    // Handle password reset deep links
-    if (link.contains('reset_password')) {
-      debugPrint('Password reset deep link detected');
-      return;
-    }
-
-    // Parse the deep link: myazz://product/{productId}
+    // Password-reset tokens arrive with access_token=/code= and are handled above.
+    // Product share: myazz://product/{productId}
     if (link.contains('myazz://product/')) {
-      final productId = link.split('myazz://product/').last;
+      final productId = link.split('myazz://product/').last.split('?').first;
       debugPrint('Product ID from deep link: $productId');
-      
-      // Navigate to product details after a short delay to ensure app is ready
+
       Future.delayed(const Duration(milliseconds: 500), () async {
-        if (_navigatorKey.currentState != null) {
-          try {
-            // Fetch the product from the provider
-            final productsProvider = Provider.of<ProductsProvider>(
-              _navigatorKey.currentContext!,
-              listen: false,
-            );
-            
-            await productsProvider.fetchProducts();
-            
-            // Find the product by ID
-            final product = productsProvider.products.firstWhere(
-              (p) => p.id.toString() == productId,
-              orElse: () => productsProvider.products.first,
-            );
-            
-            // Navigate to product details
-            _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-              '/home',
-              (route) => false,
-            );
-            
-            // Then navigate to product details
-            _navigatorKey.currentState?.pushNamed(
-              '/product_details',
-              arguments: product,
-            );
-          } catch (e) {
-            debugPrint('Error fetching product from deep link: $e');
-            // Fallback to home screen
-            _navigatorKey.currentState?.pushNamedAndRemoveUntil(
-              '/home',
-              (route) => false,
-            );
+        final navigator = _navigatorKey.currentState;
+        final context = _navigatorKey.currentContext;
+        if (navigator == null || context == null) return;
+
+        try {
+          final productsProvider = Provider.of<ProductsProvider>(
+            context,
+            listen: false,
+          );
+
+          await productsProvider.fetchProducts();
+
+          ProductEntity? product;
+          for (final p in productsProvider.products) {
+            if (p.id.toString() == productId) {
+              product = p;
+              break;
+            }
           }
+
+          navigator.pushNamedAndRemoveUntil('/home', (route) => false);
+
+          if (product == null) {
+            debugPrint('Deep link product not found: $productId');
+            return;
+          }
+
+          navigator.pushNamed(
+            '/product_details',
+            arguments: product,
+          );
+        } catch (e) {
+          debugPrint('Error fetching product from deep link: $e');
+          navigator.pushNamedAndRemoveUntil('/home', (route) => false);
         }
       });
     }
@@ -310,10 +295,14 @@ class _MyAppState extends State<MyApp> {
           '/register': (context) => const RegisterScreen(),
           '/forgot_password': (context) => const ForgotPasswordScreen(),
           '/home': (context) => const MainScreen(),
-          '/admin': (context) => const AdminDashboardScreen(),
-          '/admin/orders': (context) => const AdminOrdersScreen(),
-          '/admin/products': (context) => const AdminProductListScreen(),
-          '/admin/messages': (context) => const AdminConversationsScreen(),
+          '/admin': (context) =>
+              const _AdminGate(child: AdminDashboardScreen()),
+          '/admin/orders': (context) =>
+              const _AdminGate(child: AdminOrdersScreen()),
+          '/admin/products': (context) =>
+              const _AdminGate(child: AdminProductListScreen()),
+          '/admin/messages': (context) =>
+              const _AdminGate(child: AdminConversationsScreen()),
           '/chat': (context) => const CustomerChatScreen(),
           '/notifications': (context) => const NotificationsScreen(),
           '/privacy_security': (context) => const PrivacySecurityScreen(),
@@ -337,6 +326,29 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
+  }
+}
+
+/// Redirects non-admins away from admin routes (defense-in-depth; RLS still gates data).
+class _AdminGate extends StatelessWidget {
+  const _AdminGate({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    if (!auth.isAuthenticated || !auth.isAdmin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
+      });
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+      );
+    }
+    return child;
   }
 }
 
@@ -518,16 +530,19 @@ class _MainScreenState extends State<MainScreen>
                                 index: 0,
                                 label: 'Profil',
                               ),
-                              // Messagerie (chat) with unread badge
-                              _buildNavItem(
-                                context,
-                                icon: Icons.forum_outlined,
-                                activeIcon: Icons.forum,
-                                index: 1,
-                                label: 'Messages',
-                                badge: context
-                                    .watch<ChatProvider>()
-                                    .unreadCount,
+                              // Messagerie (chat) with unread badge. Selector
+                              // keeps chat updates from rebuilding the whole
+                              // MainScreen (same pattern as the cart badge).
+                              Selector<ChatProvider, int>(
+                                selector: (_, chat) => chat.unreadCount,
+                                builder: (context, unread, _) => _buildNavItem(
+                                  context,
+                                  icon: Icons.forum_outlined,
+                                  activeIcon: Icons.forum,
+                                  index: 1,
+                                  label: 'Messages',
+                                  badge: unread,
+                                ),
                               ),
                               // Store (Home) — sits under the floating cart button
                               _buildNavItem(

@@ -56,9 +56,6 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _user != null;
   String? get userRole => _userRole;
   bool get isAdmin {
-    // Check by email (backup) + check by role from database
-    final userEmail = _user?.email?.toLowerCase().trim();
-    if (userEmail == 'belaggounamina2@gmail.com') return true;
     return _userRole?.toLowerCase() == 'admin';
   }
   String? get errorMessage => _errorMessage;
@@ -83,26 +80,27 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
     try {
       debugPrint('=== SIGN IN START ===');
-      debugPrint('Email: $email');
       final response = await _supabase.auth.signInWithPassword(email: email, password: password);
       
       debugPrint('Sign in response user: ${response.user?.email}');
       debugPrint('Sign in response session: ${response.session != null}');
       
-      // Update _user immediately from response
-      if (response.user != null) {
-        _user = response.user;
-        debugPrint('Updated _user: ${_user?.email}');
-      }
-      
-      // Check if email is not confirmed
+      // Only treat as authenticated when a session exists (email confirmed).
       if (response.user != null && response.session == null) {
-        _errorMessage = 'Please confirm your email address. Check your inbox for the confirmation link.';
+        _user = null;
+        _errorMessage =
+            'Please confirm your email address. Check your inbox for the confirmation link.';
         _isLoading = false;
         notifyListeners();
         return;
       }
-      
+
+      if (response.session != null) {
+        _user = response.session!.user;
+      } else {
+        _user = null;
+      }
+
       // Fetch the role immediately so isAdmin is available before navigation
       debugPrint('Calling refreshRole after sign in...');
       await refreshRole();

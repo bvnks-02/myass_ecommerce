@@ -121,10 +121,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (url != null) {
         AppSnackBar.success(context, 'Photo de profil mise à jour.');
       } else {
+        // Revert the optimistic preview: the new photo was never saved.
+        setState(() => _avatarPreview = null);
         AppSnackBar.error(context, 'Le téléversement de la photo a échoué.');
       }
     } catch (e) {
       if (mounted) {
+        setState(() => _avatarPreview = null);
         AppSnackBar.error(context, 'Impossible de sélectionner l\'image.');
       }
     } finally {
@@ -706,6 +709,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'Mes commandes',
           'Consulter l\'historique de vos commandes',
           () => Navigator.pushNamed(context, '/my_orders'),
+        ),
+        _buildSettingItem(
+          Icons.favorite_border,
+          'Mes favoris',
+          'Retrouver les produits que vous aimez',
+          () => Navigator.pushNamed(context, '/favorites'),
         ),
         _buildSettingItem(
           Icons.notifications,

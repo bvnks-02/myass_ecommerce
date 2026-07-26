@@ -47,6 +47,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.resetPassword(email);
       if (mounted) {
+        if (authProvider.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                authProvider.errorMessage ??
+                    'Échec de l\'envoi du lien de réinitialisation.',
+              ),
+            ),
+          );
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
               content:

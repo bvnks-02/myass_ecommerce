@@ -2,7 +2,7 @@
 
 ## Current configuration status (verified — Lot 3)
 
-Supabase project in use: **`ifosyvmoynhglyxcitvw`** (`https://ifosyvmoynhglyxcitvw.supabase.co`).
+Supabase project in use: **`pvxmqjdhmwpcoaqatzjb`** (`https://pvxmqjdhmwpcoaqatzjb.supabase.co`).
 
 What is already correct in the codebase:
 

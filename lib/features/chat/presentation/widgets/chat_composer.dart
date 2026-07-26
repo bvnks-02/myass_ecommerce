@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/utils/responsive_utils.dart';
+import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../theme/app_theme.dart';
 
 /// Text field + send button used at the bottom of a chat thread.
@@ -28,10 +29,20 @@ class _ChatComposerState extends State<ChatComposer> {
     final text = _controller.text.trim();
     if (text.isEmpty || _sending) return;
     setState(() => _sending = true);
-    final ok = await widget.onSend(text);
+    var ok = false;
+    try {
+      ok = await widget.onSend(text);
+    } finally {
+      if (mounted) setState(() => _sending = false);
+    }
     if (!mounted) return;
-    if (ok) _controller.clear();
-    setState(() => _sending = false);
+    if (ok) {
+      // Keep the input focused so the user can chain messages.
+      _controller.clear();
+    } else {
+      AppSnackBar.error(
+          context, 'Message non envoyé. Vérifiez votre connexion et réessayez.');
+    }
   }
 
   @override

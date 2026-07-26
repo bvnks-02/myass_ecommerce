@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
-import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
@@ -22,9 +21,9 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   bool _obscureConfirmPassword = true;
 
   Future<void> _updatePassword() async {
-    // Sanitize inputs
-    final newPassword = InputSanitizer.sanitizeString(_newPasswordController.text);
-    final confirmPassword = InputSanitizer.sanitizeString(_confirmPasswordController.text);
+    // Do not sanitize passwords — destructive stripping breaks valid passwords.
+    final newPassword = _newPasswordController.text;
+    final confirmPassword = _confirmPasswordController.text;
     
     // Validate password
     final passwordError = InputValidator.validatePassword(newPassword);
@@ -47,6 +46,16 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       await authProvider.updatePassword(newPassword);
       if (mounted) {
+        if (authProvider.hasError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                authProvider.errorMessage ?? 'Failed to update password.',
+              ),
+            ),
+          );
+          return;
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Password updated successfully!')),
         );

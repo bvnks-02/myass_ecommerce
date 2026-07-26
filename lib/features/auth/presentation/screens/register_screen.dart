@@ -1,11 +1,11 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/utils/platform_utils.dart';
 import '../../../../providers/auth_provider.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -31,7 +31,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // Sanitize inputs
     final name = InputSanitizer.sanitizeString(_nameController.text);
     final email = InputSanitizer.sanitizeEmail(_emailController.text);
-    final password = InputSanitizer.sanitizeString(_passwordController.text);
+    // Do not sanitize passwords — destructive stripping breaks valid passwords.
+    final password = _passwordController.text;
 
     // Validate inputs
     final nameError = InputValidator.validateFullName(name);
@@ -67,6 +68,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
         fullName: name,
       );
       if (mounted) {
+        if (authProvider.hasError) {
+          AppSnackBar.warning(
+            context,
+            authProvider.errorMessage ?? 'Inscription échouée.',
+          );
+          if (!authProvider.isAuthenticated) {
+            // Soft success path: email confirmation required (message in errorMessage)
+            if ((authProvider.errorMessage ?? '')
+                .toLowerCase()
+                .contains('email')) {
+              Navigator.pop(context);
+            }
+          }
+          return;
+        }
         AppSnackBar.success(context, 'Bienvenue ! Votre compte a été créé.');
         if (authProvider.isAuthenticated) {
           if (authProvider.isAdmin) {
@@ -103,7 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return;
       }
 
-      // Wait for the OAuth callback to fire a signedIn event
+      // Wait for OAuth signedIn; navigation is owned by MyApp in main.dart.
       final completer = Completer<AuthState>();
       sub = Supabase.instance.client.auth.onAuthStateChange.listen((data) {
         if (data.event == AuthChangeEvent.signedIn && data.session != null) {
@@ -111,14 +127,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       });
       await completer.future.timeout(const Duration(minutes: 2));
-
       if (mounted) {
         await authProvider.refreshRole();
-        if (authProvider.isAdmin) {
-          Navigator.pushReplacementNamed(context, '/admin');
-        } else {
-          Navigator.pushReplacementNamed(context, '/home');
-        }
       }
     } on TimeoutException catch (_) {
       if (mounted) {
@@ -273,7 +283,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
 
                             const SizedBox(height: 40),
-                            if (!Platform.isIOS) ...[
+                            if (showSocialAuth) ...[
                               Row(
                                 children: [
                                   Expanded(

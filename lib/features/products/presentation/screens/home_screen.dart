@@ -193,6 +193,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           SizedBox(width: ResponsiveUtils.sw(context, 15)),
+          // Favorites
+          IconButton(
+            icon: const Icon(Icons.favorite_border, color: Colors.white),
+            onPressed: () {
+              Navigator.pushNamed(context, '/favorites');
+            },
+          ),
           // Customer Service Icon
           IconButton(
             icon: const Icon(Icons.support_agent, color: Colors.white),

@@ -7,6 +7,7 @@ import '../../../../core/services/currency_service.dart';
 import '../../../../providers/favorites_provider.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../services/api_service.dart';
+import '../../domain/entities/product_entity.dart';
 
 class WatchDetailScreen extends StatefulWidget {
   const WatchDetailScreen({super.key});
@@ -90,10 +91,21 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
               GestureDetector(
                 onTap: () async {
                   final products = await ApiService.getProducts();
-                  final product = products.firstWhere(
-                    (p) => p.id == 21,
-                    orElse: () => products.first,
-                  );
+                  ProductEntity? product;
+                  for (final p in products) {
+                    if (p.id == 21) {
+                      product = p;
+                      break;
+                    }
+                  }
+                  if (product == null) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Produit introuvable')),
+                      );
+                    }
+                    return;
+                  }
                   favorites.toggleFavorite(product);
                 },
                 child: Container(
@@ -465,15 +477,25 @@ class _WatchDetailScreenState extends State<WatchDetailScreen> {
             child: ElevatedButton(
               onPressed: () async {
                 final products = await ApiService.getProducts();
-                final product = products.firstWhere(
-                  (p) => p.id == 21,
-                  orElse: () => products.first,
-                );
-                if (mounted) {
-                  final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                  cartProvider.addToCart(product, 1, selectedColor: colors[selectedColorIndex]);
-                  Navigator.pushNamed(context, '/cart');
+                ProductEntity? product;
+                for (final p in products) {
+                  if (p.id == 21) {
+                    product = p;
+                    break;
+                  }
                 }
+                if (!mounted) return;
+                if (product == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Produit introuvable')),
+                  );
+                  return;
+                }
+                final cartProvider =
+                    Provider.of<CartProvider>(context, listen: false);
+                cartProvider.addToCart(product, 1,
+                    selectedColor: colors[selectedColorIndex]);
+                Navigator.pushNamed(context, '/cart');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppTheme.primaryColor,

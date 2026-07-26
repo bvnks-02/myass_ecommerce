@@ -27,6 +27,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Future<void> _loadPreferences() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
       setState(() {
         _pushNotifications = prefs.getBool('push_notifications') ?? true;
         _emailNotifications = prefs.getBool('email_notifications') ?? true;

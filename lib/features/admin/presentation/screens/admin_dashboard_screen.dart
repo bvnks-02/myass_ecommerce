@@ -5,8 +5,18 @@ import '../../../../theme/app_theme.dart';
 import '../../../chat/data/chat_repository.dart';
 import '../../../chat/domain/entities/chat_message.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  // Created once: building the stream inline would open a new Realtime
+  // channel (and re-fetch the window) on every rebuild.
+  late final Stream<List<ChatMessage>> _messagesStream =
+      ChatRepository().allMessagesStream();
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +67,7 @@ class AdminDashboardScreen extends StatelessWidget {
   /// Messaging card with a live unread badge (total unread customer messages).
   Widget _buildMessagingCard(BuildContext context) {
     return StreamBuilder<List<ChatMessage>>(
-      stream: ChatRepository().allMessagesStream(),
+      stream: _messagesStream,
       builder: (context, snapshot) {
         final unread = (snapshot.data ?? const [])
             .where((m) => m.isFromCustomer && m.readAt == null)

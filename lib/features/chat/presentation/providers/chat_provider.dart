@@ -27,12 +27,14 @@ class ChatProvider extends ChangeNotifier {
   List<ChatMessage> get messages => _messages;
   String? get conversationId => _conversationId;
 
-  /// Number of unread messages sent by support (not by the customer).
-  int get unreadCount => _conversationId == null
-      ? 0
-      : _messages
-          .where((m) => m.senderId != _conversationId && m.readAt == null)
-          .length;
+  /// Number of unread messages sent by support (not by the current user).
+  int get unreadCount {
+    final uid = _repo.currentUserId;
+    if (uid == null) return 0;
+    return _messages
+        .where((m) => m.senderId != uid && m.readAt == null)
+        .length;
+  }
 
   void _bind() {
     final uid = _repo.currentUserId;
