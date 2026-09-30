@@ -79,13 +79,14 @@ class _SplashScreenState extends State<SplashScreen> {
     _navigated = true;
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Login is optional: guests land on the store. Admins still go to dashboard.
     if (authProvider.isAuthenticated) {
       await authProvider.refreshRole();
       if (!mounted) return;
       Navigator.of(context)
           .pushReplacementNamed(authProvider.isAdmin ? '/admin' : '/home');
     } else {
-      Navigator.of(context).pushReplacementNamed('/onboarding');
+      Navigator.of(context).pushReplacementNamed('/home');
     }
   }
 
@@ -108,14 +109,22 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Widget _buildVideo() {
     final controller = _videoController!;
-    return Center(
-      child: SizedBox.expand(
-        child: FittedBox(
-          fit: BoxFit.cover,
-          child: SizedBox(
-            width: controller.value.size.width,
-            height: controller.value.size.height,
-            child: VideoPlayer(controller),
+    // contain + slight scale: larger than pure fit, milder crop than cover.
+    return ColoredBox(
+      color: Colors.black,
+      child: Center(
+        child: Transform.scale(
+          scale: 1.18,
+          child: SizedBox.expand(
+            child: FittedBox(
+              fit: BoxFit.contain,
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: controller.value.size.width,
+                height: controller.value.size.height,
+                child: VideoPlayer(controller),
+              ),
+            ),
           ),
         ),
       ),
@@ -123,6 +132,10 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Widget _buildFallback() {
+    final shortest = MediaQuery.sizeOf(context).shortestSide;
+    final logoW = shortest * 0.38;
+    final splashW = shortest * 0.72;
+
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -130,7 +143,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Center(
             child: Image.asset(
               'assets/images/logo.jpeg',
-              width: 150,
+              width: logoW,
               fit: BoxFit.contain,
             )
                 .animate()
@@ -146,7 +159,7 @@ class _SplashScreenState extends State<SplashScreen> {
             Center(
               child: Image.asset(
                 'assets/images/splash.jpeg',
-                width: 300,
+                width: splashW,
                 fit: BoxFit.contain,
               )
                   .animate()

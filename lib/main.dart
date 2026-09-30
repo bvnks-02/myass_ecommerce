@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app_links/app_links.dart';
 import 'features/onboarding/presentation/screens/splash_screen.dart';
-import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'features/products/presentation/screens/home_screen.dart';
 import 'features/products/presentation/screens/product_details_screen.dart';
 import 'features/products/presentation/screens/watch_detail_screen.dart';
@@ -147,9 +146,7 @@ class _MyAppState extends State<MyApp> {
           final targetRoute = authProvider.isAdmin ? '/admin' : '/home';
           // Only navigate if currently on an auth screen
           final currentRoute = ModalRoute.of(navigator.context)?.settings.name;
-          if (currentRoute == '/login' ||
-              currentRoute == '/register' ||
-              currentRoute == '/onboarding') {
+          if (currentRoute == '/login' || currentRoute == '/register') {
             navigator.pushReplacementNamed(targetRoute);
           }
         });
@@ -290,7 +287,6 @@ class _MyAppState extends State<MyApp> {
           return null;
         },
         routes: {
-          '/onboarding': (context) => const OnboardingScreen(),
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
           '/forgot_password': (context) => const ForgotPasswordScreen(),
@@ -359,17 +355,12 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen>
-    with SingleTickerProviderStateMixin {
+class _MainScreenState extends State<MainScreen> {
   // Default landing tab = Store (index 2), the natural home for the shop.
   int _currentIndex = 2;
-  int _prevCartCount = 0;
-  late AnimationController _animationController;
-  late Animation<double> _scaleAnimation;
 
   // 5 tabs (CDC order): Profile, Messagerie (chat), Store (Home — unchanged
-  // logic), Ma Section (orders), Smart Watch. The floating cart button stays
-  // separate and is not one of these tabs.
+  // logic), Ma Section (orders), Smart Watch.
   final List<Widget> _screens = [
     const ProfileScreen(key: PageStorageKey('profile')),
     const CustomerChatScreen(key: PageStorageKey('chat')),
@@ -377,31 +368,6 @@ class _MainScreenState extends State<MainScreen>
     const UserOrdersScreen(key: PageStorageKey('orders')),
     const SmartWatchScreen(key: PageStorageKey('smartwatch')),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
-      vsync: this,
-    );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.28).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
-    );
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  // Bump the floating cart button (used on tap and when an item is added).
-  void _playCartBump() {
-    _animationController.forward(from: 0).then((_) {
-      if (mounted) _animationController.reverse();
-    });
-  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -544,7 +510,7 @@ class _MainScreenState extends State<MainScreen>
                                   badge: unread,
                                 ),
                               ),
-                              // Store (Home) — sits under the floating cart button
+                              // Store (Home)
                               _buildNavItem(
                                 context,
                                 icon: Icons.storefront_outlined,
@@ -573,111 +539,6 @@ class _MainScreenState extends State<MainScreen>
                         ),
                       ),
                     ),
-                    // Elevated cart button in center (always on top)
-                    Positioned(
-                      top: -ResponsiveUtils.sh(context, 35),
-                      child: ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: GestureDetector(
-                          onTap: () {
-                            _playCartBump();
-                            Navigator.pushNamed(context, '/cart');
-                          },
-                          child: Container(
-                            width: ResponsiveUtils.sw(context, 70),
-                            height: ResponsiveUtils.sh(context, 70),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFF2C2C2E),
-                                  Color(0xFF1C1C1E),
-                                ],
-                              ),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                width: 2,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.6),
-                                  blurRadius: 25,
-                                  offset: const Offset(0, 10),
-                                ),
-                                BoxShadow(
-                                  color: Colors.white.withValues(alpha: 0.05),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, -5),
-                                ),
-                              ],
-                            ),
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                Icon(
-                                  Icons.shopping_cart,
-                                  color: Colors.white,
-                                  size: ResponsiveUtils.sf(context, 32),
-                                ),
-                                // Cart badge
-                                Positioned(
-                                  top: ResponsiveUtils.sh(context, 8),
-                                  right: ResponsiveUtils.sw(context, 8),
-                                  child: Selector<CartProvider, int>(
-                                    selector: (context, cart) => cart.itemCount,
-                                    builder: (context, itemCount, child) {
-                                      // Confirmation bump whenever the cart count
-                                      // grows (i.e. CartProvider added an item).
-                                      if (itemCount > _prevCartCount) {
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          if (mounted) _playCartBump();
-                                        });
-                                      }
-                                      _prevCartCount = itemCount;
-                                      if (itemCount == 0) {
-                                        return const SizedBox.shrink();
-                                      }
-                                      return Container(
-                                        padding: EdgeInsets.all(
-                                            ResponsiveUtils.sw(context, 6)),
-                                        decoration: BoxDecoration(
-                                          gradient: const LinearGradient(
-                                            colors: [
-                                              Colors.red,
-                                              Colors.redAccent
-                                            ],
-                                          ),
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.red
-                                                  .withValues(alpha: 0.5),
-                                              blurRadius: 8,
-                                            ),
-                                          ],
-                                        ),
-                                        child: Text(
-                                          '$itemCount',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize:
-                                                ResponsiveUtils.sf(context, 12),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -689,7 +550,7 @@ class _MainScreenState extends State<MainScreen>
   }
 }
 
-// Custom painter for curved bottom navigation bar
+// Custom painter for rounded bottom navigation bar
 class CurvedBottomBarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -705,36 +566,7 @@ class CurvedBottomBarPainter extends CustomPainter {
     // Top left corner curve
     path.quadraticBezierTo(0, 0, 20, 0);
 
-    // Left side to the center curve
-    path.lineTo(size.width * 0.35, 0);
-
-    // Create the elevated curve for the cart button
-    path.quadraticBezierTo(
-      size.width * 0.40,
-      0,
-      size.width * 0.42,
-      5,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.45,
-      15,
-      size.width * 0.50,
-      15,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.55,
-      15,
-      size.width * 0.58,
-      5,
-    );
-    path.quadraticBezierTo(
-      size.width * 0.60,
-      0,
-      size.width * 0.65,
-      0,
-    );
-
-    // Right side
+    // Flat top edge
     path.lineTo(size.width - 20, 0);
 
     // Top right corner curve
@@ -757,7 +589,7 @@ class CurvedBottomBarPainter extends CustomPainter {
 
     path.close();
 
-    // Draw the bar (removed shadow for performance)
+    // Draw the bar
     canvas.drawPath(path, paint);
 
     // Draw border

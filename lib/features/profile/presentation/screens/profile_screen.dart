@@ -261,41 +261,101 @@ class _ProfileScreenState extends State<ProfileScreen> {
               children: [
                 _buildHeader(context, authProvider),
                 Expanded(
-                  child: authProvider.isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Colors.white))
-                      : SingleChildScrollView(
-                          padding: EdgeInsets.only(
-                            left: ResponsiveUtils.padding(context),
-                            right: ResponsiveUtils.padding(context),
-                            top: ResponsiveUtils.sh(context, 20),
-                            bottom: ResponsiveUtils.sh(context, 100),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildProfileHeader(authProvider),
-                              const SizedBox(height: 30),
-                              _buildUserInfo(),
-                              const SizedBox(height: 20),
-                              _buildBodyMetrics(),
-                              const SizedBox(height: 20),
-                              _buildShippingAddress(),
-                              const SizedBox(height: 20),
-                              _buildBillingAddress(),
-                              const SizedBox(height: 25),
-                              _buildSaveButton(),
-                              const SizedBox(height: 30),
-                              _buildSettings(authProvider),
-                            ],
-                          ),
-                        ),
+                  child: !authProvider.isAuthenticated
+                      ? _buildGuestPrompt(context)
+                      : authProvider.isLoading
+                          ? const Center(
+                              child:
+                                  CircularProgressIndicator(color: Colors.white))
+                          : SingleChildScrollView(
+                              padding: EdgeInsets.only(
+                                left: ResponsiveUtils.padding(context),
+                                right: ResponsiveUtils.padding(context),
+                                top: ResponsiveUtils.sh(context, 20),
+                                bottom: ResponsiveUtils.sh(context, 100),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  _buildProfileHeader(authProvider),
+                                  const SizedBox(height: 30),
+                                  _buildUserInfo(),
+                                  const SizedBox(height: 20),
+                                  _buildBodyMetrics(),
+                                  const SizedBox(height: 20),
+                                  _buildShippingAddress(),
+                                  const SizedBox(height: 20),
+                                  _buildBillingAddress(),
+                                  const SizedBox(height: 25),
+                                  _buildSaveButton(),
+                                  const SizedBox(height: 30),
+                                  _buildSettings(authProvider),
+                                ],
+                              ),
+                            ),
                 ),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildGuestPrompt(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_outline,
+              size: ResponsiveUtils.sf(context, 72),
+              color: Colors.white24,
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 16)),
+            Text(
+              'Connectez-vous pour gérer votre profil',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: ResponsiveUtils.sf(context, 18),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 8)),
+            Text(
+              'Parcourez le catalogue librement. La connexion est requise pour les commandes et le chat.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: ResponsiveUtils.sf(context, 14),
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 24)),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pushNamed(context, '/login'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('Se connecter'),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pushNamed(context, '/register'),
+              child: const Text(
+                'Créer un compte',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -779,8 +839,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         final authProvider = Provider.of<AuthProvider>(context, listen: false);
         await authProvider.signOut();
         if (mounted) {
+          // Stay in the app as guest after logout.
           Navigator.of(context)
-              .pushNamedAndRemoveUntil('/login', (route) => false);
+              .pushNamedAndRemoveUntil('/home', (route) => false);
         }
       },
     );

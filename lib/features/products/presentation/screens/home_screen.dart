@@ -9,6 +9,7 @@ import '../../../../core/services/currency_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/rate_limiter.dart';
+import '../../../../core/widgets/add_to_cart_animation.dart';
 import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
@@ -22,10 +23,61 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   List<String> _categories = ['All'];
   String _selectedCategory = 'All';
   bool _isLoadingCategories = true;
+  final GlobalKey _cartKey = GlobalKey();
+  final Map<int, GlobalKey> _addButtonKeys = {};
+
+  GlobalKey _addButtonKeyFor(int productId) =>
+      _addButtonKeys.putIfAbsent(productId, GlobalKey.new);
+
+  void _onAddToCart(ProductEntity product, GlobalKey buttonKey) {
+    if (!product.isAvailable) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('This product is currently unavailable'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final cartProvider = Provider.of<CartProvider>(context, listen: false);
+    final selectedColor =
+        product.colors.isNotEmpty ? product.colors.first : null;
+    final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
+
+    AddToCartAnimation.run(
+      context: context,
+      vsync: this,
+      sourceKey: buttonKey,
+      cartKey: _cartKey,
+      flyColor: AppTheme.primaryColor,
+      iconColor: Colors.black,
+      icon: Icons.add_shopping_cart,
+      onComplete: () {
+        if (!mounted) return;
+        final added = cartProvider.addToCart(
+          product,
+          1,
+          selectedColor: selectedColor,
+          selectedSize: selectedSize,
+        );
+        if (added) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${product.name} added to cart'),
+              backgroundColor: AppTheme.primaryColor,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+    );
+  }
 
   @override
   void initState() {
@@ -200,11 +252,17 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.pushNamed(context, '/favorites');
             },
           ),
-          // Customer Service Icon
-          IconButton(
-            icon: const Icon(Icons.support_agent, color: Colors.white),
-            onPressed: () {
-              Navigator.pushNamed(context, '/support');
+          // Cart (fly-to-cart target + bounce on count increase)
+          Selector<CartProvider, int>(
+            selector: (_, cart) => cart.itemCount,
+            builder: (context, itemCount, _) {
+              return AnimatedCartIcon(
+                key: _cartKey,
+                itemCount: itemCount,
+                onPressed: () {
+                  Navigator.pushNamed(context, '/cart');
+                },
+              );
             },
           ),
         ],
@@ -491,53 +549,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              // Add to cart button (plus) at bottom right
+              // Add to cart button (plus) at bottom right — flies to header cart
               Positioned(
                 bottom: ResponsiveUtils.sh(context, 12),
                 right: ResponsiveUtils.sw(context, 10),
-                child: GestureDetector(
-                  onTap: product.isAvailable
-                      ? () {
-                          final cartProvider = Provider.of<CartProvider>(context, listen: false);
-                          final selectedColor = product.colors.isNotEmpty ? product.colors.first : null;
-                          final selectedSize = product.sizes.isNotEmpty ? product.sizes.first : null;
-                          final added = cartProvider.addToCart(
-                            product,
-                            1,
-                            selectedColor: selectedColor,
-                            selectedSize: selectedSize,
-                          );
-                          if (added) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${product.name} added to cart'),
-                                backgroundColor: AppTheme.primaryColor,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        }
-                      : () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('This product is currently unavailable'),
-                              backgroundColor: Colors.red,
-                              duration: Duration(seconds: 2),
-                            ),
-                          );
-                        },
-                  child: Container(
-                    padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
-                    decoration: BoxDecoration(
-                      color: product.isAvailable ? AppTheme.primaryColor : Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      product.isAvailable ? Icons.add : Icons.block,
-                      color: product.isAvailable ? Colors.black : Colors.white,
-                      size: ResponsiveUtils.sf(context, 18),
-                    ),
-                  ),
+                child: Builder(
+                  builder: (context) {
+                    final buttonKey = _addButtonKeyFor(product.id);
+                    return GestureDetector(
+                      key: buttonKey,
+                      onTap: () => _onAddToCart(product, buttonKey),
+                      child: Container(
+                        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
+                        decoration: BoxDecoration(
+                          color: product.isAvailable
+                              ? AppTheme.primaryColor
+                              : Colors.grey,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          product.isAvailable ? Icons.add : Icons.block,
+                          color: product.isAvailable
+                              ? Colors.black
+                              : Colors.white,
+                          size: ResponsiveUtils.sf(context, 18),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               // Availability indicator

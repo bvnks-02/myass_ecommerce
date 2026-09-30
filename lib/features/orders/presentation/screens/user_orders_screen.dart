@@ -31,7 +31,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     try {
       final supabase = Supabase.instance.client;
       final user = supabase.auth.currentUser;
-      if (user == null) return;
+      if (user == null) {
+        if (mounted) setState(() => _isLoading = false);
+        return;
+      }
 
       final response = await supabase
           .from('orders')
@@ -58,8 +61,57 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     }
   }
 
+  Widget _buildSignedOut(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.receipt_long_outlined,
+              size: ResponsiveUtils.sf(context, 72),
+              color: Colors.white24,
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 16)),
+            Text(
+              'Connectez-vous pour voir vos commandes',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: ResponsiveUtils.sf(context, 18),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 8)),
+            Text(
+              'Vos commandes apparaîtront ici après connexion.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: ResponsiveUtils.sf(context, 14),
+              ),
+            ),
+            SizedBox(height: ResponsiveUtils.sh(context, 24)),
+            ElevatedButton(
+              onPressed: () => Navigator.pushNamed(context, '/login'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+              ),
+              child: const Text('Se connecter'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isSignedIn = Supabase.instance.client.auth.currentUser != null;
     try {
       return Scaffold(
         backgroundColor: AppTheme.blackColor,
@@ -73,7 +125,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
         ),
         body: _isLoading
             ? const Center(child: CircularProgressIndicator(color: Colors.white))
-            : _orders.isEmpty
+            : !isSignedIn
+                ? _buildSignedOut(context)
+                : _orders.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

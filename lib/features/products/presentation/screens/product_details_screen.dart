@@ -9,6 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
+import '../../../../core/widgets/add_to_cart_animation.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/favorites_provider.dart';
@@ -22,13 +23,16 @@ class ProductDetailsScreen extends StatefulWidget {
   State<ProductDetailsScreen> createState() => _ProductDetailsScreenState();
 }
 
-class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+class _ProductDetailsScreenState extends State<ProductDetailsScreen>
+    with TickerProviderStateMixin {
   int _quantity = 1;
   int _currentImageIndex = 0;
   int _selectedColorIndex = 0;
   int _selectedSizeIndex = 0;
   int _selectedTabIndex = 0;
   final PageController _pageController = PageController();
+  final GlobalKey _cartKey = GlobalKey();
+  final GlobalKey _addToCartButtonKey = GlobalKey();
 
   // ── Palette
   static const _bg      = Color(0xFF000000);
@@ -151,7 +155,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 Icons.share,
                 () => _showShareBottomSheet(),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 4),
+              Selector<CartProvider, int>(
+                selector: (_, cart) => cart.itemCount,
+                builder: (context, itemCount, _) {
+                  return AnimatedCartIcon(
+                    key: _cartKey,
+                    itemCount: itemCount,
+                    iconSize: 20,
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/cart');
+                    },
+                  );
+                },
+              ),
               Consumer<FavoritesProvider>(
                 builder: (context, favorites, _) {
                   final isFav = favorites.isFavorite(widget.product.id);
@@ -1069,9 +1086,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Ajouter au panier
+              // Ajouter au panier — flies to header cart
               Expanded(
                 child: GestureDetector(
+                  key: _addToCartButtonKey,
                   onTap: widget.product.isAvailable
                       ? () {
                           final selectedColor = widget.product.colors.isNotEmpty
@@ -1080,31 +1098,44 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           final selectedSize = widget.product.sizes.isNotEmpty
                               ? widget.product.sizes[_selectedSizeIndex]
                               : null;
-                          final added = cart.addToCart(
-                            widget.product,
-                            _quantity,
-                            selectedColor: selectedColor,
-                            selectedSize: selectedSize,
+
+                          AddToCartAnimation.run(
+                            context: context,
+                            vsync: this,
+                            sourceKey: _addToCartButtonKey,
+                            cartKey: _cartKey,
+                            flyColor: _accent,
+                            iconColor: Colors.black,
+                            onComplete: () {
+                              if (!mounted) return;
+                              final added = cart.addToCart(
+                                widget.product,
+                                _quantity,
+                                selectedColor: selectedColor,
+                                selectedSize: selectedSize,
+                              );
+                              if (added) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
+                                    ),
+                                    backgroundColor: _accent,
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'This product is currently unavailable'),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
                           );
-                          if (added) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
-                                ),
-                                backgroundColor: _accent,
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('This product is currently unavailable'),
-                                backgroundColor: Colors.red,
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          }
                         }
                       : null,
                   child: Container(
