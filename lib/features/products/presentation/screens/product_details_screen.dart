@@ -10,6 +10,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/widgets/add_to_cart_animation.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/price_text.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/favorites_provider.dart';
@@ -318,7 +320,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.2),
+              color: color.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: Center(child: icon),
@@ -386,13 +388,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               ),
             ),
             const SizedBox(height: 12),
-            // Image Gallery with PageView
+            // Image Gallery with PageView — transparent-PNG product shots
+            // sit on a raised ivory tile with generous padding.
             Container(
               height: 320,
               margin: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: _surface,
+                color: _card,
                 borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _divider, width: 1),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(16),
@@ -564,13 +569,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    CurrencyService.formatPrice(widget.product.price),
-                    style: const TextStyle(
-                      color: _accent,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  PriceText(
+                    price: widget.product.price,
+                    fontSize: 24,
                   ),
                     const SizedBox(height: 2),
                     Text(
@@ -594,7 +595,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _gold.withOpacity(0.12),
+                  color: _gold.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -748,7 +749,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: _gold.withOpacity(0.35),
+                              color: _gold.withValues(alpha: 0.35),
                               blurRadius: 8,
                               spreadRadius: 1,
                             ),
@@ -1046,7 +1047,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Bouton moins — cercle gris
-                    GestureDetector(
+                    PressScale(
+                      scale: 0.88,
                       onTap: _quantity > 1
                           ? () => setState(() => _quantity--)
                           : null,
@@ -1080,7 +1082,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                       ),
                     ),
                     // Bouton plus — cercle sombre (pill CTA)
-                    GestureDetector(
+                    PressScale(
+                      scale: 0.88,
                       onTap: () => setState(() => _quantity++),
                       child: Container(
                         width: 32,
@@ -1099,8 +1102,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               const SizedBox(width: 12),
               // Ajouter au panier — flies to header cart
               Expanded(
-                child: GestureDetector(
+                child: PressScale(
                   key: _addToCartButtonKey,
+                  scale: 0.96,
                   onTap: widget.product.isAvailable
                       ? () {
                           final selectedColor = widget.product.colors.isNotEmpty
@@ -1125,16 +1129,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                                 selectedColor: selectedColor,
                                 selectedSize: selectedSize,
                               );
-                              if (added) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
+                                if (added) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
+                                      ),
+                                      backgroundColor: AppTheme.accent, // success = gold accent
+                                      duration: const Duration(seconds: 2),
                                     ),
-                                    backgroundColor: _accent,
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
+                                  );
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

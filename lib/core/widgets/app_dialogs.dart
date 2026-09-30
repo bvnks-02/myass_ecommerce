@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
+import 'press_scale.dart';
 
 /// Dialog types for consistent styling
 enum DialogType {
@@ -31,12 +32,12 @@ class DialogConfigs {
   static const Map<DialogType, DialogConfig> configs = {
     DialogType.success: DialogConfig(
       icon: Icons.check_circle_outline,
-      iconColor: Color(0xFF4CAF50),
+      iconColor: AppTheme.success,
       backgroundColor: Color(0xFF1B5E20),
     ),
     DialogType.error: DialogConfig(
       icon: Icons.error_outline,
-      iconColor: Color(0xFFEF5350),
+      iconColor: AppTheme.danger,
       backgroundColor: Color(0xFFB71C1C),
     ),
     DialogType.warning: DialogConfig(
@@ -246,11 +247,13 @@ class AppDialog extends StatelessWidget {
   }
 
   Widget _buildPrimaryButton() {
-    final backgroundColor = isDestructive 
-        ? const Color(0xFFEF5350) 
-        : const Color(0xFF4CAF50);
-    
-    return GestureDetector(
+    // Website CTA style: dark fg pill with ivory text; danger red when
+    // the action is destructive.
+    final backgroundColor =
+        isDestructive ? AppTheme.danger : AppTheme.fg;
+
+    return PressScale(
+      scale: 0.97,
       onTap: () {
         HapticFeedback.mediumImpact();
         onPrimaryAction!();
@@ -260,13 +263,13 @@ class AppDialog extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(999),
         ),
         child: Text(
           primaryActionText!,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            color: Colors.white,
+            color: AppTheme.bg,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -276,7 +279,8 @@ class AppDialog extends StatelessWidget {
   }
 
   Widget _buildSecondaryButton() {
-    return GestureDetector(
+    return PressScale(
+      scale: 0.97,
       onTap: () {
         HapticFeedback.lightImpact();
         onSecondaryAction!();
@@ -285,8 +289,8 @@ class AppDialog extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: AppTheme.surface2,
-          borderRadius: BorderRadius.circular(16),
+          color: AppTheme.surface,
+          borderRadius: BorderRadius.circular(999),
           border: Border.all(
             color: AppTheme.line,
             width: 1,

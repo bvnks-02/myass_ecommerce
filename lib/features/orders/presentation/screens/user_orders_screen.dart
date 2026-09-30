@@ -6,6 +6,7 @@ import '../../../../theme/app_theme.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/services/dialog_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/price_text.dart';
 import '../../../../services/api_service.dart';
 import '../../../../core/services/currency_service.dart';
 
@@ -223,7 +224,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
       margin: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 20)),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: AppTheme.line,
           width: 1,
@@ -231,7 +232,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
         boxShadow: [AppTheme.cardShadow],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -332,7 +333,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             vertical: ResponsiveUtils.sh(context, 6),
                           ),
                           decoration: BoxDecoration(
-                            color: AppTheme.fg.withOpacity(0.9),
+                            color: AppTheme.fg.withValues(alpha: 0.9),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -477,7 +478,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                     ),
                     decoration: BoxDecoration(
                       color: AppTheme.surface2,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppTheme.lineSoft, width: 1),
                     ),
                     child: Row(
@@ -486,18 +487,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Text(
                           'Total',
                           style: TextStyle(
-                            color: AppTheme.fg,
-                            fontSize: ResponsiveUtils.sf(context, 14),
+                            color: AppTheme.silver,
+                            fontSize: ResponsiveUtils.sf(context, 13),
                             fontWeight: FontWeight.w600,
+                            letterSpacing: 0.3,
                           ),
                         ),
-                        Text(
-                          '${totalAmount.toStringAsFixed(2)} DA',
-                          style: TextStyle(
-                            color: AppTheme.fg,
-                            fontSize: ResponsiveUtils.sf(context, 16),
-                            fontWeight: FontWeight.bold,
-                          ),
+                        PriceText(
+                          price: totalAmount,
+                          fontSize: ResponsiveUtils.sf(context, 17),
                         ),
                       ],
                     ),

@@ -10,13 +10,13 @@ import '../../../../providers/cart_provider.dart';
 import '../../../products/domain/entities/product_entity.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../services/api_service.dart';
-import '../../../../core/services/currency_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/input_validator.dart';
 import '../../../../core/security/rate_limiter.dart';
 import '../../../../core/services/dialog_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/price_text.dart';
 import '../../../orders/presentation/screens/user_orders_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -123,10 +123,19 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.shopping_cart_outlined,
-            size: ResponsiveUtils.sf(context, 100),
-            color: AppTheme.dim,
+          Container(
+            width: ResponsiveUtils.sw(context, 110),
+            height: ResponsiveUtils.sw(context, 110),
+            decoration: BoxDecoration(
+              color: AppTheme.surface2,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.lineSoft, width: 1),
+            ),
+            child: Icon(
+              Icons.shopping_cart_outlined,
+              size: ResponsiveUtils.sf(context, 48),
+              color: AppTheme.dim,
+            ),
           ),
           SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Text(
@@ -157,7 +166,7 @@ class _CartScreenState extends State<CartScreen> {
               backgroundColor: AppTheme.primaryColor,
               foregroundColor: AppTheme.bg,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(999),
               ),
             ),
             child: const Text('Continuer mes achats'),
@@ -177,7 +186,7 @@ class _CartScreenState extends State<CartScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppTheme.line, width: 1),
         boxShadow: [AppTheme.cardShadow],
       ),
@@ -186,8 +195,9 @@ class _CartScreenState extends State<CartScreen> {
           Container(
             width: ResponsiveUtils.sw(context, 80),
             height: ResponsiveUtils.sh(context, 80),
+            padding: EdgeInsets.all(ResponsiveUtils.sw(context, 8)),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               color: AppTheme.surface2,
               border: Border.all(color: AppTheme.lineSoft, width: 1),
             ),
@@ -229,13 +239,9 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                   ),
                 SizedBox(height: ResponsiveUtils.sh(context, 4)),
-                Text(
-                  CurrencyService.formatPrice(product.price),
-                  style: TextStyle(
-                    color: AppTheme.fg,
-                    fontSize: ResponsiveUtils.sf(context, 16),
-                    fontWeight: FontWeight.bold,
-                  ),
+                PriceText(
+                  price: product.price,
+                  fontSize: ResponsiveUtils.sf(context, 16),
                 ),
               ],
             ),
@@ -330,18 +336,15 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   'Total',
                   style: TextStyle(
-                    color: AppTheme.fg,
-                    fontSize: ResponsiveUtils.sf(context, 18),
+                    color: AppTheme.silver,
+                    fontSize: ResponsiveUtils.sf(context, 14),
                     fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
                   ),
                 ),
-                Text(
-                  CurrencyService.formatPrice(cart.totalAmount),
-                  style: TextStyle(
-                    color: AppTheme.fg,
-                    fontSize: ResponsiveUtils.sf(context, 24),
-                    fontWeight: FontWeight.bold,
-                  ),
+                PriceText(
+                  price: cart.totalAmount,
+                  fontSize: ResponsiveUtils.sf(context, 26),
                 ),
               ],
             ),

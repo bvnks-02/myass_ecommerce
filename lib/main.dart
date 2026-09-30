@@ -340,8 +340,8 @@ class _AdminGate extends StatelessWidget {
         Navigator.of(context).pushNamedAndRemoveUntil('/home', (r) => false);
       });
       return const Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(child: CircularProgressIndicator(color: Colors.white)),
+        backgroundColor: AppTheme.bg,
+        body: Center(child: CircularProgressIndicator(color: AppTheme.accent)),
       );
     }
     return child;

@@ -206,6 +206,10 @@ class AppTheme {
         contentTextStyle: TextStyle(color: bg, fontFamily: 'Inter'),
         actionTextColor: accentDim,
         elevation: 0,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(14)),
+        ),
       ),
       progressIndicatorTheme: const ProgressIndicatorThemeData(
         color: accent,

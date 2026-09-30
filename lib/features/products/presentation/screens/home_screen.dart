@@ -12,6 +12,8 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
 import '../../../../core/security/rate_limiter.dart';
 import '../../../../core/widgets/add_to_cart_animation.dart';
+import '../../../../core/widgets/press_scale.dart';
+import '../../../../core/widgets/price_text.dart';
 import '../../domain/entities/product_entity.dart';
 import '../providers/products_provider.dart';
 import '../../../../providers/cart_provider.dart';
@@ -72,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('${product.name} added to cart'),
-              backgroundColor: AppTheme.primaryColor,
+              backgroundColor: AppTheme.accent, // success = gold accent
               duration: const Duration(seconds: 2),
             ),
           );
@@ -115,16 +117,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       }
     } catch (e) {
       if (mounted) {
-        // Fallback to hardcoded categories if API fails
+        // Fallback to the real DB categories if the API fails (kept in
+        // French so filtering still matches product.category values).
         setState(() {
           _categories = [
             'All',
-            'Smart watch',
-            'Buds',
-            'Buds plus',
-            'SPEAKERS',
-            'Air tag',
-            'Watch strap',
+            'Montres connectées',
+            'Casques audio',
+            'Écouteurs',
+            'Enceintes',
           ];
           _isLoadingCategories = false;
         });
@@ -152,6 +153,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           final filteredProducts =
               _filteredProducts(productsProvider.products);
 
+          // Featured hero treatment (website-style): the featured product —
+          // or, with a small catalog, simply the first one — gets a wide
+          // banner card on the "All" tab; the rest stay in the grid.
+          ProductEntity? heroProduct;
+          if (_selectedCategory == 'All' && filteredProducts.isNotEmpty) {
+            for (final p in filteredProducts) {
+              if (p.isFeatured) {
+                heroProduct = p;
+                break;
+              }
+            }
+            heroProduct ??= filteredProducts.first;
+          }
+          final hero = heroProduct;
+          final gridProducts = hero == null
+              ? filteredProducts
+              : filteredProducts.where((p) => p.id != hero.id).toList();
+
           // Height of the sticky frosted header — must mirror
           // [_buildStickyHeader] exactly so grid content starts right
           // below it and scrolls UNDER the blur.
@@ -174,8 +193,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: SingleChildScrollView(
-                      padding: EdgeInsets.only(top: headerHeight, bottom: 100),
-                      child: _buildProductGrid(filteredProducts),
+                      padding: EdgeInsets.only(
+                        top: headerHeight + ResponsiveUtils.sh(context, 16),
+                        bottom: 100,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (hero != null) ...[
+                            _buildFeaturedHero(hero),
+                            SizedBox(height: ResponsiveUtils.sh(context, 20)),
+                          ],
+                          if (filteredProducts.isEmpty)
+                            _buildEmptyCategory()
+                          else
+                            _buildProductGrid(gridProducts),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -396,6 +430,193 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // _buildFeaturedSlider removed for cheetah app design
 
+  /// Wide banner card for the featured product — website-style hierarchy:
+  /// muted category label, bold fg name, big fg numerals with a dim "DA"
+  /// unit, and a dark pill CTA that flies to the header cart.
+  Widget _buildFeaturedHero(ProductEntity product) {
+    final buttonKey = _addButtonKeyFor(product.id);
+    return Padding(
+      padding:
+          EdgeInsets.symmetric(horizontal: ResponsiveUtils.padding(context)),
+      child: PressScale(
+        scale: 0.985,
+        onTap: () => Navigator.pushNamed(
+          context,
+          '/product_details',
+          arguments: product,
+        ),
+        child: Container(
+          padding: EdgeInsets.all(ResponsiveUtils.sw(context, 16)),
+          decoration: BoxDecoration(
+            color: AppTheme.surface,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: AppTheme.line, width: 1),
+            boxShadow: [AppTheme.cardShadow],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.category,
+                      style: TextStyle(
+                        color: AppTheme.silver,
+                        fontSize: ResponsiveUtils.sf(context, 11),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.4,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: ResponsiveUtils.sh(context, 6)),
+                    Text(
+                      product.name,
+                      style: TextStyle(
+                        color: AppTheme.fg,
+                        fontSize: ResponsiveUtils.sf(context, 20),
+                        fontWeight: FontWeight.bold,
+                        height: 1.15,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SizedBox(height: ResponsiveUtils.sh(context, 10)),
+                    PriceText(
+                      price: product.price,
+                      fontSize: ResponsiveUtils.sf(context, 24),
+                    ),
+                    SizedBox(height: ResponsiveUtils.sh(context, 14)),
+                    PressScale(
+                      scale: 0.94,
+                      onTap: () => _onAddToCart(product, buttonKey),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveUtils.sw(context, 18),
+                          vertical: ResponsiveUtils.sh(context, 11),
+                        ),
+                        decoration: BoxDecoration(
+                          color: product.isAvailable
+                              ? AppTheme.fg
+                              : AppTheme.dim,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              product.isAvailable
+                                  ? Icons.add_shopping_cart
+                                  : Icons.block,
+                              color: AppTheme.bg,
+                              size: ResponsiveUtils.sf(context, 15),
+                            ),
+                            SizedBox(width: ResponsiveUtils.sw(context, 8)),
+                            Text(
+                              product.isAvailable ? 'Add to Cart' : 'Unavailable',
+                              style: TextStyle(
+                                color: AppTheme.bg,
+                                fontSize: ResponsiveUtils.sf(context, 13),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: ResponsiveUtils.sw(context, 14)),
+              // Transparent-PNG product shot on a raised ivory tile with
+              // generous padding so it floats instead of touching edges.
+              Expanded(
+                flex: 2,
+                child: Container(
+                  height: ResponsiveUtils.sh(context, 150),
+                  padding: EdgeInsets.all(ResponsiveUtils.sw(context, 14)),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surface2,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppTheme.lineSoft, width: 1),
+                  ),
+                  child: product.image.startsWith('assets/')
+                      ? Image.asset(
+                          product.image,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                            Icons.watch,
+                            color: AppTheme.dim,
+                            size: 50,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: product.image,
+                          fit: BoxFit.contain,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.accent,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.watch,
+                            color: AppTheme.dim,
+                            size: 50,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Graceful state for categories that have no products yet — one line,
+  /// muted, on-brand. No blank voids.
+  Widget _buildEmptyCategory() {
+    return Padding(
+      padding: EdgeInsets.only(
+        top: ResponsiveUtils.sh(context, 72),
+        bottom: ResponsiveUtils.sh(context, 48),
+      ),
+      child: Column(
+        children: [
+          Container(
+            width: ResponsiveUtils.sw(context, 72),
+            height: ResponsiveUtils.sw(context, 72),
+            decoration: BoxDecoration(
+              color: AppTheme.surface2,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.lineSoft, width: 1),
+            ),
+            child: Icon(
+              Icons.watch_later_outlined,
+              color: AppTheme.dim,
+              size: ResponsiveUtils.sf(context, 30),
+            ),
+          ),
+          SizedBox(height: ResponsiveUtils.sh(context, 16)),
+          Text(
+            'Bientôt disponible',
+            style: TextStyle(
+              color: AppTheme.silver,
+              fontSize: ResponsiveUtils.sf(context, 14),
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Inter',
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCategories() {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: ResponsiveUtils.padding(context)),
@@ -440,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       });
                     },
                   child: Container(
-                    margin: EdgeInsets.only(right: ResponsiveUtils.sw(context, 25)),
+                    margin: EdgeInsets.only(right: ResponsiveUtils.sw(context, 20)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
@@ -448,7 +669,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Text(
                           category,
                           style: TextStyle(
-                            color: isSelected ? AppTheme.fg : AppTheme.dim,
+                            color: isSelected ? AppTheme.fg : AppTheme.silver,
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
                             fontSize: ResponsiveUtils.sf(context, 15),
@@ -458,9 +679,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         SizedBox(height: ResponsiveUtils.sh(context, 5)),
                         if (isSelected)
                           Container(
-                            height: ResponsiveUtils.sh(context, 2),
+                            height: ResponsiveUtils.sh(context, 2.5),
                             width: ResponsiveUtils.sw(context, 25),
-                            color: AppTheme.accent,
+                            decoration: BoxDecoration(
+                              color: AppTheme.accent,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
                           ),
                       ],
                     ),
@@ -488,8 +712,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
           childAspectRatio: ResponsiveUtils.gridAspectRatio(context),
-          crossAxisSpacing: ResponsiveUtils.sw(context, 15),
-          mainAxisSpacing: ResponsiveUtils.sh(context, 15),
+          crossAxisSpacing: ResponsiveUtils.sw(context, 12),
+          mainAxisSpacing: ResponsiveUtils.sh(context, 12),
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
@@ -501,7 +725,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildProductCard(ProductEntity product) {
-    return GestureDetector(
+    return PressScale(
+      scale: 0.97,
       onTap: () {
         Navigator.pushNamed(
           context,
@@ -513,16 +738,23 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         decoration: BoxDecoration(
           color: AppTheme.surface,
           border: Border.all(color: AppTheme.line, width: 1),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(20),
           child: Stack(
             children: [
-              // Product Image on a raised ivory tile
+              // Product Image on a raised ivory tile — padded so the
+              // transparent-PNG shot floats with breathing room.
               Positioned.fill(
                 child: Container(
                   color: AppTheme.surface2,
+                  padding: EdgeInsets.fromLTRB(
+                    ResponsiveUtils.sw(context, 10),
+                    ResponsiveUtils.sw(context, 10),
+                    ResponsiveUtils.sw(context, 10),
+                    ResponsiveUtils.sh(context, 56),
+                  ),
                   child: product.image.startsWith('assets/')
                       ? Image.asset(
                           product.image,
@@ -586,13 +818,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    SizedBox(height: ResponsiveUtils.sh(context, 2)),
-                    Text(
-                      CurrencyService.formatPrice(product.price),
-                      style: TextStyle(
-                        color: AppTheme.silver,
-                        fontSize: ResponsiveUtils.sf(context, 12),
-                      ),
+                    SizedBox(height: ResponsiveUtils.sh(context, 3)),
+                    PriceText(
+                      price: product.price,
+                      fontSize: ResponsiveUtils.sf(context, 13),
                     ),
                   ],
                 ),
@@ -604,22 +833,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Builder(
                   builder: (context) {
                     final buttonKey = _addButtonKeyFor(product.id);
-                    return GestureDetector(
+                    return PressScale(
                       key: buttonKey,
+                      scale: 0.88,
                       onTap: () => _onAddToCart(product, buttonKey),
                       child: Container(
                         padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
                         decoration: BoxDecoration(
                           color: product.isAvailable
                               ? AppTheme.primaryColor
-                              : Colors.grey,
+                              : AppTheme.dim,
                           shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            width: 1,
+                          ),
                         ),
                         child: Icon(
                           product.isAvailable ? Icons.add : Icons.block,
-                          color: product.isAvailable
-                              ? AppTheme.bg
-                              : Colors.white,
+                          color: AppTheme.bg,
                           size: ResponsiveUtils.sf(context, 18),
                         ),
                       ),
@@ -771,7 +1003,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   product.image,
                   width: ResponsiveUtils.sw(context, 50),
                   height: ResponsiveUtils.sh(context, 50),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
                     color: AppTheme.dim,
@@ -782,7 +1014,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   imageUrl: product.image,
                   width: ResponsiveUtils.sw(context, 50),
                   height: ResponsiveUtils.sh(context, 50),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   placeholder: (context, url) => Icon(
                     Icons.watch,
                     color: AppTheme.dim,
@@ -829,7 +1061,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   product.image,
                   width: ResponsiveUtils.sw(context, 50),
                   height: ResponsiveUtils.sh(context, 50),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
                     color: AppTheme.dim,
@@ -840,7 +1072,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   imageUrl: product.image,
                   width: ResponsiveUtils.sw(context, 50),
                   height: ResponsiveUtils.sh(context, 50),
-                  fit: BoxFit.cover,
+                  fit: BoxFit.contain,
                   placeholder: (context, url) => Icon(
                     Icons.watch,
                     color: AppTheme.dim,
