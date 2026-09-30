@@ -22,6 +22,11 @@ No CI workflows in-repo.
 
 ## Env / Supabase
 
+- **The app now shares ONE Supabase project with the website** (`~/myazz-ecomerce/web`, Next.js): project **`myazz` / `icxcsjcmpipbtwzydzks`** (eu-central-1). `.env` holds its URL + legacy anon JWT. The old project `pvxmqjdhmwpcoaqatzjb` is retired (INACTIVE) — don't repoint to it.
+  - Order/item prices are **integers (DA)**; checkout RPC is `create_order_with_items` (adapted to web schema: writes `full_name`/`phone/order_items.product_name/price`, wilaya `'Non spécifiée'`, decrements `stock`).
+  - `user_profiles` is a **view over `profiles`** (web table): `role` column ('admin'/'customer', admin can change via `profiles.is_admin` SQL), app profile columns live there.
+  - Orders enum values are **lowercase** (`pending`, `cancelled`, …); web orders require `wilaya`.
+  - Compatibility shim `~/myazz-ecomerce/sql/app_companion_schema.sql` documents the full surface — apply schema changes to this project there, and never break the website's API (`web/src/lib/data.ts`, `/api/checkout`).
 - Copy `.env.example` → `.env` (`SUPABASE_URL`, `SUPABASE_ANON_KEY`).
 - `.env` is gitignored **and** listed under `flutter: assets` in `pubspec.yaml` — the file must exist or asset bundling fails. `main.dart` still falls back to hardcoded Supabase credentials if load fails.
 - Root `*.sql` files are **manual** Supabase SQL Editor scripts, not a migration runner. Base: `supabase_schema.sql`. Apply extras as needed (`create_messages_table.sql`, `add_profile_details_columns.sql`, RLS fixes, etc.).
@@ -61,8 +66,9 @@ Feature-first under `lib/features/`, but layers are **inconsistent**:
 
 ## When changing the DB
 
-1. Prefer a new root `*.sql` script (or update schema docs) over silent app-only assumptions.
-2. Keep RLS policies aligned (many historical fix scripts exist — read before inventing new policies).
-3. Admin elevation is SQL: `UPDATE user_profiles SET role = 'admin' WHERE email = '...'`.
-4. Fresh / rebuild apply order after `supabase_schema.sql`: `ensure_canonical_schema.sql` then `create_order_with_items.sql`. Checkout uses RPC `create_order_with_items` (server-priced); do not reintroduce client-only order inserts.
-5. Bug review findings: `docs/codebase-bug-review.md`.
+1. The DB lives in project `icxcsjcmpipbtwzydzks` (shared with the website). Apply changes via the companion shim `~/myazz-ecomerce/sql/app_companion_schema.sql` (or update it), **plus** the website's `~/myazz-ecomerce/sql/schema.sql` is the base schema — never break web code (`web/src/lib/data.ts`, `/api/checkout`).
+2. Keep RLS policies aligned — admin checks use `public.is_admin()` (SECURITY DEFINER over `profiles.is_admin`); DO NOT write inline `EXISTS (SELECT … FROM profiles)` policies (infinite recursion).
+3. Admin elevation is SQL: `UPDATE public.profiles SET is_admin = true WHERE id = (SELECT id FROM auth.users WHERE email = '...')` (the `user_profiles.role` column follows via sync).
+4. Checkout uses RPC `create_order_with_items` (server-priced, stock-decrementing); the website bills through `/api/checkout` (service-role). Do not reintroduce client-only order inserts on either side.
+5. Prices: **integer DA** everywhere on this project.
+6. Bug review findings: `docs/codebase-bug-review.md`.
