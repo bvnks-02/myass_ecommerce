@@ -7,6 +7,7 @@ import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/services/dialog_service.dart';
 import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../services/api_service.dart';
+import '../../../../core/services/currency_service.dart';
 
 class UserOrdersScreen extends StatefulWidget {
   const UserOrdersScreen({super.key});
@@ -38,7 +39,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
 
       final response = await supabase
           .from('orders')
-          .select('*, order_items(*, products(name, image, images))')
+          .select('*, order_items(*, products(name, image_url, image, images))')
           .eq('user_id', user.id)
           .order('created_at', ascending: false);
 
@@ -199,7 +200,8 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
       if (images != null && images.isNotEmpty) {
         productImage = images[0] as String?;
       } else {
-        productImage = product['image'] as String?;
+        productImage =
+            (product['image_url'] ?? product['image']) as String?;
       }
     }
 
@@ -404,7 +406,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                           final itemProduct = itemData['products'] as Map<String, dynamic>?;
                           final itemName = itemProduct?['name'] as String? ?? 'Unknown Product';
                           final quantity = itemData['quantity'] as int? ?? 1;
-                          final price = (itemData['price_at_time'] as num?)?.toDouble() ?? 0.0;
+                          // Schema: 'price' (web project); fall back to 'price_at_time'
+                          // (legacy app project) so both order sources render.
+                          final price = (itemData['price'] as num?)?.toDouble() ??
+                              (itemData['price_at_time'] as num?)?.toDouble() ?? 0.0;
                           
                           return Padding(
                             padding: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 6)),
@@ -439,7 +444,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 ),
                                 SizedBox(width: ResponsiveUtils.sw(context, 8)),
                                 Text(
-                                  '${(price * quantity).toStringAsFixed(2)} DA',
+                                  '${CurrencyService.formatPrice(price * quantity)}',
                                   style: TextStyle(
                                     color: AppTheme.primaryColor,
                                     fontSize: ResponsiveUtils.sf(context, 12),

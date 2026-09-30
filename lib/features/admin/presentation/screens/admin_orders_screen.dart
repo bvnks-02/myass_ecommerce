@@ -57,7 +57,8 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         try {
           final itemsResponse = await _supabase
               .from('order_items')
-              .select('*, products(id, name, image, images)')
+              // Schema: 'image_url' (web project); keep 'image' (legacy) too.
+              .select('*, products(id, name, image_url, image, images)')
               .eq('order_id', orderId);
 
           debugPrint('Order $orderId items: $itemsResponse');
@@ -875,9 +876,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     return orderItems.map<Widget>((item) {
       final product = item['products'];
       final productName = product != null ? product['name'] ?? 'Unknown' : 'Unknown';
-      final productImage = product != null ? (product['image'] ?? (product['images'] != null && product['images'] is List && product['images'].isNotEmpty ? product['images'][0] : null)) : null;
+      final productImage = product != null ? (product['image_url'] ?? product['image'] ?? (product['images'] != null && product['images'] is List && product['images'].isNotEmpty ? product['images'][0] : null)) : null;
       final quantity = item['quantity'] ?? 0;
-      final price = double.tryParse(item['price_at_time']?.toString() ?? '0') ?? 0;
+      // Schema: 'price' (web project); fall back to 'price_at_time' (legacy).
+      final price = double.tryParse(item['price']?.toString() ??
+              item['price_at_time']?.toString() ?? '0') ??
+          0;
       final totalItemPrice = price * quantity;
       // Get selected color and size from order_item
       final selectedColor = item['color'];
