@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously, unused_import
 
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -38,7 +40,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('This product is currently unavailable'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.danger,
           duration: Duration(seconds: 2),
         ),
       );
@@ -56,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       sourceKey: buttonKey,
       cartKey: _cartKey,
       flyColor: AppTheme.primaryColor,
-      iconColor: Colors.black,
+      iconColor: AppTheme.bg,
       icon: Icons.add_shopping_cart,
       onComplete: () {
         if (!mounted) return;
@@ -141,39 +143,88 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        bottom: false,
-        child: Consumer<ProductsProvider>(
-          builder: (context, productsProvider, child) {
-            if (productsProvider.isLoading &&
-                productsProvider.products.isEmpty) {
-              return _buildShimmerLoading();
-            }
+      body: Consumer<ProductsProvider>(
+        builder: (context, productsProvider, child) {
+          if (productsProvider.isLoading && productsProvider.products.isEmpty) {
+            return SafeArea(bottom: false, child: _buildShimmerLoading());
+          }
 
-            final filteredProducts =
-                _filteredProducts(productsProvider.products);
+          final filteredProducts =
+              _filteredProducts(productsProvider.products);
 
-            return Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1200),
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    _buildTopBar(productsProvider.products),
-                    const SizedBox(height: 20),
-                    _buildCategories(),
-                    const SizedBox(height: 10),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        padding: const EdgeInsets.only(bottom: 100),
-                        child: _buildProductGrid(filteredProducts),
-                      ),
+          // Height of the sticky frosted header — must mirror
+          // [_buildStickyHeader] exactly so grid content starts right
+          // below it and scrolls UNDER the blur.
+          final topInset = MediaQuery.of(context).padding.top;
+          final headerHeight = topInset +
+              10 + // header top padding
+              ResponsiveUtils.sh(context, 45) + // top bar row
+              14 + // gap
+              ResponsiveUtils.sh(context, 30) + // category rail
+              ResponsiveUtils.sh(context, 10) + // rail breathing room
+              9 + // header bottom padding
+              1; // hairline border
+
+          return Stack(
+            children: [
+              // Scrolling grid — passes behind the frosted header and the
+              // floating glass tab bar (MainScreen).
+              Positioned.fill(
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.only(top: headerHeight, bottom: 100),
+                      child: _buildProductGrid(filteredProducts),
                     ),
-                  ],
+                  ),
                 ),
               ),
-            );
-          },
+              // Sticky frosted-glass header (search + categories)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    child: _buildStickyHeader(
+                      topInset,
+                      productsProvider.products,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// Frosted header bar: real glass over the scrolling product grid.
+  /// Kept as a tight RepaintBoundary'd strip — never a full-screen blur.
+  Widget _buildStickyHeader(double topInset, List<ProductEntity> allProducts) {
+    return RepaintBoundary(
+      child: ClipRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          child: Container(
+            padding: EdgeInsets.only(top: topInset + 10, bottom: 9),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.6),
+              border: const Border(
+                bottom: BorderSide(color: AppTheme.line, width: 1),
+              ),
+            ),
+            child: Column(
+              children: [
+                _buildTopBar(allProducts),
+                const SizedBox(height: 14),
+                _buildCategories(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -217,23 +268,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               child: Container(
                 height: ResponsiveUtils.sh(context, 45),
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
+                  // Translucent white pill over the frosted header —
+                  // reads as a lighter pane of the same glass.
+                  color: Colors.white.withValues(alpha: 0.55),
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Colors.white.withOpacity(0.3),
+                    color: Colors.white.withValues(alpha: 0.65),
                     width: 1,
                   ),
                 ),
                 child: Row(
                   children: [
                     SizedBox(width: ResponsiveUtils.sw(context, 15)),
-                    Icon(Icons.search, color: Colors.grey[400], size: ResponsiveUtils.sf(context, 20)),
+                    Icon(Icons.search, color: AppTheme.dim, size: ResponsiveUtils.sf(context, 20)),
                     SizedBox(width: ResponsiveUtils.sw(context, 10)),
                     Expanded(
                       child: Text(
                         'Search luxury watches...',
                         style: TextStyle(
-                          color: Colors.grey[500],
+                          color: AppTheme.dim,
                           fontSize: ResponsiveUtils.sf(context, 14),
                           fontFamily: 'Inter',
                         ),
@@ -247,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           SizedBox(width: ResponsiveUtils.sw(context, 15)),
           // Favorites
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.white),
+            icon: const Icon(Icons.favorite_border, color: AppTheme.fg),
             onPressed: () {
               Navigator.pushNamed(context, '/favorites');
             },
@@ -259,6 +312,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               return AnimatedCartIcon(
                 key: _cartKey,
                 itemCount: itemCount,
+                iconColor: AppTheme.fg,
                 onPressed: () {
                   Navigator.pushNamed(context, '/cart');
                 },
@@ -279,8 +333,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisSize: MainAxisSize.min,
           children: [
             Shimmer.fromColors(
-              baseColor: Colors.grey[800]!,
-              highlightColor: Colors.grey[600]!,
+              baseColor: const Color(0xFFE9E7E0),
+              highlightColor: const Color(0xFFF6F5F0),
               child: Container(
                 height: 200,
                 decoration: BoxDecoration(
@@ -291,8 +345,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 20),
             Shimmer.fromColors(
-              baseColor: Colors.grey[800]!,
-              highlightColor: Colors.grey[600]!,
+              baseColor: const Color(0xFFE9E7E0),
+              highlightColor: const Color(0xFFF6F5F0),
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -323,8 +377,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               itemCount: 6,
               itemBuilder: (context, index) {
                 return Shimmer.fromColors(
-                  baseColor: Colors.grey[800]!,
-                  highlightColor: Colors.grey[600]!,
+                  baseColor: const Color(0xFFE9E7E0),
+                  highlightColor: const Color(0xFFF6F5F0),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -356,13 +410,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   const SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.accent),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'Loading categories...',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
+                      color: AppTheme.silver,
                       fontSize: ResponsiveUtils.sf(context, 12),
                     ),
                   ),
@@ -394,7 +448,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         Text(
                           category,
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.grey[500],
+                            color: isSelected ? AppTheme.fg : AppTheme.dim,
                             fontWeight:
                                 isSelected ? FontWeight.bold : FontWeight.w500,
                             fontSize: ResponsiveUtils.sf(context, 15),
@@ -406,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           Container(
                             height: ResponsiveUtils.sh(context, 2),
                             width: ResponsiveUtils.sw(context, 25),
-                            color: Colors.white,
+                            color: AppTheme.accent,
                           ),
                       ],
                     ),
@@ -415,9 +469,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               },
             ),
           ),
+          // Breathing room below the rail — the frosted header's hairline
+          // bottom border replaces the old in-flow divider.
           SizedBox(height: ResponsiveUtils.sh(context, 10)),
-          Divider(
-              color: Colors.white.withOpacity(0.2), height: 1, thickness: 1),
         ],
       ),
     );
@@ -457,51 +511,45 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          color: AppTheme.surface,
+          border: Border.all(color: AppTheme.line, width: 1),
           borderRadius: BorderRadius.circular(16),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(16),
           child: Stack(
             children: [
-              // Product Image (Opacity 0.9 for dark vibe)
+              // Product Image on a raised ivory tile
               Positioned.fill(
-                child: Opacity(
-                  opacity: 0.9,
-                  child: Container(
-                    color: const Color(0xFF1C1C1E),
-                    child: product.image.startsWith('assets/')
-                        ? Image.asset(
-                            product.image,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center,
-                            errorBuilder: (context, error, stackTrace) => const Icon(
-                              Icons.watch,
-                              color: Colors.white24,
-                              size: 50,
-                            ),
-                          )
-                        : CachedNetworkImage(
-                            imageUrl: product.image,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(color: Colors.white24, strokeWidth: 2),
-                            ),
-                            errorWidget: (context, url, error) => const Icon(
-                              Icons.watch,
-                              color: Colors.white24,
-                              size: 50,
-                            ),
+                child: Container(
+                  color: AppTheme.surface2,
+                  child: product.image.startsWith('assets/')
+                      ? Image.asset(
+                          product.image,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.watch,
+                            color: AppTheme.dim,
+                            size: 50,
                           ),
-                  ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: product.image,
+                          fit: BoxFit.contain,
+                          alignment: Alignment.center,
+                          placeholder: (context, url) => const Center(
+                            child: CircularProgressIndicator(color: AppTheme.accent, strokeWidth: 2),
+                          ),
+                          errorWidget: (context, url, error) => const Icon(
+                            Icons.watch,
+                            color: AppTheme.dim,
+                            size: 50,
+                          ),
+                        ),
                 ),
               ),
-              // Dark gradient overlay at the bottom for text readability
+              // Light scrim at the bottom for text readability
               Positioned(
                 bottom: 0,
                 left: 0,
@@ -511,8 +559,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.black.withOpacity(0.0),
-                        Colors.black.withOpacity(0.8),
+                        AppTheme.surface2.withValues(alpha: 0.0),
+                        AppTheme.surface2.withValues(alpha: 0.95),
                       ],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
@@ -531,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Text(
                       product.name,
                       style: TextStyle(
-                        color: Colors.white,
+                        color: AppTheme.fg,
                         fontSize: ResponsiveUtils.sf(context, 13),
                         fontWeight: FontWeight.w600,
                       ),
@@ -542,7 +590,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     Text(
                       CurrencyService.formatPrice(product.price),
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.7),
+                        color: AppTheme.silver,
                         fontSize: ResponsiveUtils.sf(context, 12),
                       ),
                     ),
@@ -570,7 +618,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: Icon(
                           product.isAvailable ? Icons.add : Icons.block,
                           color: product.isAvailable
-                              ? Colors.black
+                              ? AppTheme.bg
                               : Colors.white,
                           size: ResponsiveUtils.sf(context, 18),
                         ),
@@ -589,7 +637,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     vertical: ResponsiveUtils.sh(context, 4),
                   ),
                   decoration: BoxDecoration(
-                    color: product.isAvailable ? Colors.green : Colors.red,
+                    color: product.isAvailable ? AppTheme.success : AppTheme.danger,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -648,12 +696,13 @@ class _FavoriteIconButton extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.all(ResponsiveUtils.sw(context, 6)),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
+              color: AppTheme.surface.withValues(alpha: 0.9),
               shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.line, width: 1),
             ),
             child: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.white : Colors.white70,
+              color: isFavorite ? AppTheme.danger : AppTheme.silver,
               size: ResponsiveUtils.sf(context, 18),
             ),
           ),
@@ -702,7 +751,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
           padding: EdgeInsets.all(20),
           child: Text(
             'Too many search requests. Please try again later.',
-            style: TextStyle(color: Colors.white70),
+            style: TextStyle(color: AppTheme.silver),
           ),
         ),
       );
@@ -725,7 +774,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                 )
@@ -736,18 +785,18 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                   errorWidget: (context, url, error) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                 ),
           title: Text(
             product.name,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: AppTheme.fg),
           ),
           subtitle: Text(
             CurrencyService.formatPrice(product.price),
@@ -783,7 +832,7 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                 )
@@ -794,18 +843,18 @@ class ProductSearchDelegate extends SearchDelegate<ProductEntity?> {
                   fit: BoxFit.cover,
                   placeholder: (context, url) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                   errorWidget: (context, url, error) => Icon(
                     Icons.watch,
-                    color: Colors.white24,
+                    color: AppTheme.dim,
                     size: ResponsiveUtils.sf(context, 50),
                   ),
                 ),
           title: Text(
             product.name,
-            style: const TextStyle(color: Colors.white),
+            style: const TextStyle(color: AppTheme.fg),
           ),
           subtitle: Text(
             CurrencyService.formatPrice(product.price),

@@ -34,21 +34,21 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.blackColor,
+      backgroundColor: AppTheme.bg,
       appBar: AppBar(
-        backgroundColor: AppTheme.blackColor,
+        backgroundColor: AppTheme.bg,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.fg),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'Cart',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: AppTheme.fg),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.receipt_long, color: Colors.white),
+            icon: const Icon(Icons.receipt_long, color: AppTheme.fg),
             onPressed: () {
               Navigator.push(
                 context,
@@ -59,9 +59,11 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
+          // Cart list — scrolls under the frosted checkout sheet so the
+          // blur reads as real glass.
+          Positioned.fill(
             child: Consumer<CartProvider>(
               builder: (context, cart, child) {
                 if (cart.cartItems.isEmpty) {
@@ -72,7 +74,7 @@ class _CartScreenState extends State<CartScreen> {
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1000),
                     child: ListView.builder(
-                      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 100),
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 16, bottom: 440),
                       itemCount: cart.cartItems.length,
                       itemBuilder: (context, index) {
                         final item = cart.cartItems[index];
@@ -87,13 +89,29 @@ class _CartScreenState extends State<CartScreen> {
               },
             ),
           ),
-          Consumer<CartProvider>(
-            builder: (context, cart, child) {
-              if (cart.cartItems.isEmpty) {
-                return const SizedBox.shrink();
-              }
-              return _buildCheckoutSection(cart);
-            },
+          // Floating frosted checkout sheet (capped so the keyboard can
+          // never squeeze it into an overflow — it scrolls internally).
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: constraints.maxHeight * 0.78,
+                  ),
+                  child: Consumer<CartProvider>(
+                    builder: (context, cart, child) {
+                      if (cart.cartItems.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+                      return _buildCheckoutSection(cart);
+                    },
+                  ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -108,14 +126,14 @@ class _CartScreenState extends State<CartScreen> {
           Icon(
             Icons.shopping_cart_outlined,
             size: ResponsiveUtils.sf(context, 100),
-            color: Colors.grey[600],
+            color: AppTheme.dim,
           ),
           SizedBox(height: ResponsiveUtils.sh(context, 20)),
           Text(
             'Your cart is empty',
             style: TextStyle(
               fontSize: ResponsiveUtils.sf(context, 20),
-              color: Colors.grey[400],
+              color: AppTheme.fg,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -124,7 +142,7 @@ class _CartScreenState extends State<CartScreen> {
             'Add products to get started',
             style: TextStyle(
               fontSize: ResponsiveUtils.sf(context, 14),
-              color: Colors.grey[500],
+              color: AppTheme.silver,
             ),
           ),
           SizedBox(height: ResponsiveUtils.sh(context, 30)),
@@ -137,7 +155,7 @@ class _CartScreenState extends State<CartScreen> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
-              foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+              foregroundColor: AppTheme.bg,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -158,12 +176,10 @@ class _CartScreenState extends State<CartScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.line, width: 1),
+        boxShadow: [AppTheme.cardShadow],
       ),
       child: Row(
         children: [
@@ -172,17 +188,18 @@ class _CartScreenState extends State<CartScreen> {
             height: ResponsiveUtils.sh(context, 80),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              color: Colors.white.withOpacity(0.05),
+              color: AppTheme.surface2,
+              border: Border.all(color: AppTheme.lineSoft, width: 1),
             ),
             child: CachedNetworkImage(
               imageUrl: product.image,
               fit: BoxFit.contain,
               placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: CircularProgressIndicator(color: AppTheme.accent),
               ),
               errorWidget: (context, url, error) => Icon(
                 Icons.watch,
-                color: Colors.white,
+                color: AppTheme.dim,
                 size: ResponsiveUtils.sf(context, 40),
               ),
             ),
@@ -195,7 +212,7 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   product.name,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.fg,
                     fontSize: ResponsiveUtils.sf(context, 16),
                     fontWeight: FontWeight.w600,
                   ),
@@ -207,7 +224,7 @@ class _CartScreenState extends State<CartScreen> {
                   Text(
                     '${selectedColor != null ? 'Color: $selectedColor' : ''}${selectedColor != null && selectedSize != null ? ' • ' : ''}${selectedSize != null ? 'Size: $selectedSize' : ''}',
                     style: TextStyle(
-                      color: Colors.grey[400],
+                      color: AppTheme.silver,
                       fontSize: ResponsiveUtils.sf(context, 12),
                     ),
                   ),
@@ -215,7 +232,7 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   CurrencyService.formatPrice(product.price),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.fg,
                     fontSize: ResponsiveUtils.sf(context, 16),
                     fontWeight: FontWeight.bold,
                   ),
@@ -227,15 +244,16 @@ class _CartScreenState extends State<CartScreen> {
             children: [
               Container(
                 decoration: BoxDecoration(
-                  color: AppTheme.cardColorSecondary,
+                  color: AppTheme.surface2,
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: AppTheme.line, width: 1),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: Icon(Icons.remove,
-                          size: ResponsiveUtils.sf(context, 18), color: Colors.white),
+                          size: ResponsiveUtils.sf(context, 18), color: AppTheme.fg),
                       onPressed: quantity > 1
                           ? () {
                               cart.updateQuantity(
@@ -253,7 +271,7 @@ class _CartScreenState extends State<CartScreen> {
                       child: Text(
                         '$quantity',
                         style: TextStyle(
-                          color: Colors.white,
+                          color: AppTheme.fg,
                           fontSize: ResponsiveUtils.sf(context, 14),
                           fontWeight: FontWeight.w600,
                         ),
@@ -261,7 +279,7 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                     IconButton(
                       icon:
-                          Icon(Icons.add, size: ResponsiveUtils.sf(context, 18), color: Colors.white),
+                          Icon(Icons.add, size: ResponsiveUtils.sf(context, 18), color: AppTheme.fg),
                       onPressed: () {
                         cart.updateQuantity(
                           product.id, 
@@ -277,7 +295,7 @@ class _CartScreenState extends State<CartScreen> {
               SizedBox(height: ResponsiveUtils.sh(context, 8)),
               IconButton(
                 icon: Icon(Icons.delete_outline,
-                    size: ResponsiveUtils.sf(context, 20), color: Colors.red),
+                    size: ResponsiveUtils.sf(context, 20), color: AppTheme.danger),
                 onPressed: () {
                   cart.removeFromCart(
                     product.id,
@@ -294,12 +312,13 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCheckoutSection(CartProvider cart) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.blackColor,
-        border: Border(
-            top: BorderSide(color: Colors.white.withOpacity(0.1), width: 1)),
-      ),
+    // Frosted checkout sheet — total, delivery fields and CTA float over
+    // the scrolling cart list.
+    return AppTheme.glass(
+      corners: const BorderRadius.vertical(top: Radius.circular(24)),
+      radius: 24,
+      sigma: 16,
+      fill: Colors.white.withValues(alpha: 0.68),
       child: SingleChildScrollView(
         padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
         child: Column(
@@ -311,7 +330,7 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   'Total',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.fg,
                     fontSize: ResponsiveUtils.sf(context, 18),
                     fontWeight: FontWeight.w600,
                   ),
@@ -319,7 +338,7 @@ class _CartScreenState extends State<CartScreen> {
                 Text(
                   CurrencyService.formatPrice(cart.totalAmount),
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.fg,
                     fontSize: ResponsiveUtils.sf(context, 24),
                     fontWeight: FontWeight.bold,
                   ),
@@ -331,18 +350,18 @@ class _CartScreenState extends State<CartScreen> {
               controller: _nameController,
               decoration: InputDecoration(
                 hintText: 'Nom complet',
-                prefixIcon: const Icon(Icons.person, color: Colors.white),
+                prefixIcon: const Icon(Icons.person, color: AppTheme.silver),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+                  borderSide: const BorderSide(color: AppTheme.accent, width: 2),
                 ),
               ),
             ),
@@ -352,18 +371,18 @@ class _CartScreenState extends State<CartScreen> {
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 hintText: 'Numéro de téléphone',
-                prefixIcon: const Icon(Icons.phone, color: Colors.white),
+                prefixIcon: const Icon(Icons.phone, color: AppTheme.silver),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+                  borderSide: const BorderSide(color: AppTheme.accent, width: 2),
                 ),
               ),
             ),
@@ -376,22 +395,22 @@ class _CartScreenState extends State<CartScreen> {
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 20.0, right: 5),
                   child: IconButton(
-                    icon: const Icon(Icons.location_on, color: Colors.white),
+                    icon: const Icon(Icons.location_on, color: AppTheme.silver),
                     onPressed: _getCurrentLocation,
                     padding: const EdgeInsets.all(8.0),
                   ),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+                  borderSide: const BorderSide(color: AppTheme.line),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppTheme.primaryColor, width: 2),
+                  borderSide: const BorderSide(color: AppTheme.accent, width: 2),
                 ),
               ),
             ),
@@ -404,8 +423,8 @@ class _CartScreenState extends State<CartScreen> {
                   _placeOrder(cart);
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
+                  backgroundColor: AppTheme.fg,
+                  foregroundColor: AppTheme.bg,
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(25),
@@ -444,7 +463,7 @@ class _CartScreenState extends State<CartScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Les autorisations de localisation sont refusées.'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppTheme.danger,
           ),
         );
         return;
@@ -493,7 +512,7 @@ class _CartScreenState extends State<CartScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Position détectée : $address'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppTheme.success,
           ),
         );
       }

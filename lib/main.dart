@@ -403,7 +403,7 @@ class _MainScreenState extends State<MainScreen> {
                   children: [
                     Icon(
                       isSelected ? activeIcon : icon,
-                      color: isSelected ? Colors.white : Colors.grey[600],
+                      color: isSelected ? AppTheme.accent : AppTheme.dim,
                       size: ResponsiveUtils.sf(context, 26),
                     ),
                     if (badge > 0)
@@ -413,7 +413,7 @@ class _MainScreenState extends State<MainScreen> {
                         child: Container(
                           padding: EdgeInsets.all(ResponsiveUtils.sw(context, 4)),
                           decoration: const BoxDecoration(
-                            color: Colors.red,
+                            color: AppTheme.danger,
                             shape: BoxShape.circle,
                           ),
                           constraints: BoxConstraints(
@@ -441,7 +441,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: ResponsiveUtils.sw(context, 5),
                   height: ResponsiveUtils.sh(context, 5),
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: AppTheme.accent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -463,7 +463,7 @@ class _MainScreenState extends State<MainScreen> {
             child: _screens[_currentIndex],
           ),
 
-          // Floating Bottom Navigation Bar with curved design
+          // Floating frosted-glass Bottom Navigation Bar
           Positioned(
             bottom: ResponsiveUtils.sh(context, 35),
             left: 0,
@@ -475,14 +475,16 @@ class _MainScreenState extends State<MainScreen> {
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    // Navigation bar container with custom curve
+                    // Frosted-glass floating navigation bar — content
+                    // scrolls behind it, so the blur reads as real glass.
                     Container(
                       height: ResponsiveUtils.sh(context, 70),
                       margin: EdgeInsets.symmetric(
                           horizontal: ResponsiveUtils.sw(context, 20)),
-                      child: CustomPaint(
-                        painter: CurvedBottomBarPainter(),
-                        child: Container(
+                      child: AppTheme.glass(
+                        radius: 24,
+                        sigma: 16,
+                        child: Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: ResponsiveUtils.sw(context, 10)),
                           child: Row(
@@ -548,58 +550,4 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-}
-
-// Custom painter for rounded bottom navigation bar
-class CurvedBottomBarPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFF1C1C1E).withValues(alpha: 0.80)
-      ..style = PaintingStyle.fill;
-
-    final path = Path();
-
-    // Start from bottom left
-    path.moveTo(0, 20);
-
-    // Top left corner curve
-    path.quadraticBezierTo(0, 0, 20, 0);
-
-    // Flat top edge
-    path.lineTo(size.width - 20, 0);
-
-    // Top right corner curve
-    path.quadraticBezierTo(size.width, 0, size.width, 20);
-
-    // Bottom right corner
-    path.lineTo(size.width, size.height - 20);
-    path.quadraticBezierTo(
-      size.width,
-      size.height,
-      size.width - 20,
-      size.height,
-    );
-
-    // Bottom side
-    path.lineTo(20, size.height);
-
-    // Bottom left corner
-    path.quadraticBezierTo(0, size.height, 0, size.height - 20);
-
-    path.close();
-
-    // Draw the bar
-    canvas.drawPath(path, paint);
-
-    // Draw border
-    final borderPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1;
-    canvas.drawPath(path, borderPaint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

@@ -34,13 +34,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   final GlobalKey _cartKey = GlobalKey();
   final GlobalKey _addToCartButtonKey = GlobalKey();
 
-  // ── Palette
-  static const _bg      = Color(0xFF000000);
-  static const _surface = Color(0xFF151515);
-  static const _card    = Color(0xFF1C1C1E);
-  static const _divider = Color(0xFF1C1C1E);
-  static const _accent  = Color(0xFFFFFFFF);
-  static const _gold    = Color(0xFFFFD700);
+  // ── Palette (Myazz light theme — web globals.css tokens) ──
+  static const _bg      = Color(0xFFFAF9F5); // bg: warm ivory canvas
+  static const _surface = Color(0xFFFFFFFF); // surface: cards
+  static const _card    = Color(0xFFF2F1EC); // surface-2: raised tiles
+  static const _divider = Color(0xFFE4E2DB); // line: hairline borders
+  static const _accent  = Color(0xFF1A1A16); // fg: dark pills / primary emphasis
+  static const _gold    = Color(0xFF9C8A5E); // accent: muted gold-bronze (stars, active rings)
 
   List<Color> get _colorValues {
     return widget.product.colors.map((colorName) {
@@ -99,11 +99,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     return Scaffold(
       backgroundColor: _bg,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            Expanded(
+            // Scrollable content — passes UNDER the frosted CTA bar so the
+            // blur reads as real glass.
+            Positioned.fill(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.only(bottom: 96),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -121,7 +124,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 ),
               ),
             ),
-            _buildBottomBar(),
+            // Floating frosted add-to-cart bar
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: _buildBottomBar(),
+            ),
           ],
         ),
       ),
@@ -144,7 +153,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           const Text(
             'Product Details',
             style: TextStyle(
-              color: Colors.white,
+              color: _accent,
               fontSize: 15,
               fontWeight: FontWeight.w500,
             ),
@@ -163,6 +172,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     key: _cartKey,
                     itemCount: itemCount,
                     iconSize: 20,
+                    iconColor: _accent,
                     onPressed: () {
                       Navigator.pushNamed(context, '/cart');
                     },
@@ -175,7 +185,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   return _iconBtn(
                     isFav ? Icons.favorite : Icons.favorite_border,
                     () => favorites.toggleFavorite(widget.product),
-                    iconColor: Colors.white,
+                    iconColor: isFav ? AppTheme.danger : _accent,
                   );
                 },
               ),
@@ -187,7 +197,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   }
 
   Widget _iconBtn(IconData icon, VoidCallback onTap,
-      {Color iconColor = Colors.white}) {
+      {Color iconColor = _accent}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -196,6 +206,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         decoration: BoxDecoration(
           color: _card,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _divider, width: 1),
         ),
         child: Icon(icon, size: 18, color: iconColor),
       ),
@@ -222,7 +233,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             const Text(
               'Share via',
               style: TextStyle(
-                color: Colors.white,
+                color: _accent,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -316,7 +327,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           Text(
             label,
             style: const TextStyle(
-              color: Colors.white,
+              color: _accent,
               fontSize: 12,
             ),
           ),
@@ -351,6 +362,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         decoration: BoxDecoration(
           color: _surface,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: _divider, width: 1),
         ),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -367,7 +379,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               child: const Text(
                 'Best Seller',
                 style: TextStyle(
-                  color: Colors.black,
+                  color: _bg,
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                 ),
@@ -442,8 +454,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color: _currentImageIndex == index
-                          ? _accent
-                          : _accent.withOpacity(0.3),
+                          ? _gold
+                          : _divider,
                     ),
                   );
                 }),
@@ -474,7 +486,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? _accent : Colors.transparent,
+                            color: isSelected ? _gold : _divider,
                             width: 2,
                           ),
                           color: _card,
@@ -486,19 +498,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                                   imageUrl,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.image, color: Colors.white54, size: 30),
+                                      const Icon(Icons.image, color: AppTheme.dim, size: 30),
                                 )
                               : CachedNetworkImage(
                                   imageUrl: imageUrl,
                                   fit: BoxFit.cover,
                                   placeholder: (context, url) => const Center(
                                     child: CircularProgressIndicator(
-                                      color: _accent,
+                                      color: _gold,
                                       strokeWidth: 2,
                                     ),
                                   ),
                                   errorWidget: (context, url, error) =>
-                                      const Icon(Icons.image, color: Colors.white54, size: 30),
+                                      const Icon(Icons.image, color: AppTheme.dim, size: 30),
                                   memCacheWidth: 200,
                                   memCacheHeight: 200,
                                 ),
@@ -534,7 +546,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   Text(
                     widget.product.name,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: _accent,
                       fontSize: 20,
                       fontWeight: FontWeight.w500,
                     ),
@@ -543,7 +555,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   Text(
                     'by ${widget.product.category}',
                     style: const TextStyle(
-                      color: Color(0xFF666666),
+                      color: AppTheme.silver,
                       fontSize: 13,
                     ),
                   ),
@@ -560,16 +572,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    CurrencyService.formatPrice(widget.product.price * 1.2),
-                    style: const TextStyle(
-                      color: Color(0xFF555555),
-                      fontSize: 11,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: Color(0xFF555555),
+                    const SizedBox(height: 2),
+                    Text(
+                      CurrencyService.formatPrice(widget.product.price * 1.2),
+                      style: const TextStyle(
+                        color: AppTheme.dim,
+                        fontSize: 11,
+                        decoration: TextDecoration.lineThrough,
+                        decorationColor: AppTheme.dim,
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -582,7 +594,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 padding: const EdgeInsets.symmetric(
                     horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _accent.withOpacity(0.12),
+                  color: _gold.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Row(
@@ -603,7 +615,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               const SizedBox(width: 10),
               Text(
                 '${widget.product.reviewCount} Reviews',
-                style: const TextStyle(color: Color(0xFF555555), fontSize: 12),
+                style: const TextStyle(color: AppTheme.silver, fontSize: 12),
               ),
               const Spacer(),
               Row(
@@ -613,8 +625,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     height: 8,
                     decoration: BoxDecoration(
                       color: widget.product.isAvailable
-                          ? const Color(0xFF22C55E)
-                          : Colors.red,
+                          ? AppTheme.success
+                          : AppTheme.danger,
                       shape: BoxShape.circle,
                     ),
                   ),
@@ -623,8 +635,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     widget.product.isAvailable ? 'In Stock' : 'Unavailable',
                     style: TextStyle(
                       color: widget.product.isAvailable
-                          ? const Color(0xFF22C55E)
-                          : Colors.red,
+                          ? AppTheme.success
+                          : AppTheme.danger,
                       fontSize: 12,
                     ),
                   ),
@@ -653,8 +665,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: _surface,
+          color: _card,
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _divider, width: 1),
         ),
         child: Column(
           children: [
@@ -670,7 +683,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
             Text(
               label,
               style: const TextStyle(
-                color: Color(0xFF555555),
+                color: AppTheme.dim,
                 fontSize: 10,
               ),
             ),
@@ -701,7 +714,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               const Text(
                 'Color',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: _accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -709,7 +722,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               Text(
                 '${widget.product.colors.length} options',
                 style: const TextStyle(
-                    color: Color(0xFF555555), fontSize: 12),
+                    color: AppTheme.dim, fontSize: 12),
               ),
             ],
           ),
@@ -729,13 +742,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     color: _colorValues[index],
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: isSelected ? _accent : Colors.transparent,
+                      color: isSelected ? _gold : _divider,
                       width: 2.5,
                     ),
                     boxShadow: isSelected
                         ? [
                             BoxShadow(
-                              color: _accent.withOpacity(0.35),
+                              color: _gold.withOpacity(0.35),
                               blurRadius: 8,
                               spreadRadius: 1,
                             ),
@@ -750,7 +763,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           Text(
             widget.product.colors[_selectedColorIndex],
             style: const TextStyle(
-              color: Color(0xFF666666),
+              color: AppTheme.silver,
               fontSize: 12,
             ),
           ),
@@ -771,7 +784,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               const Text(
                 'Size',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: _accent,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -779,7 +792,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               Text(
                 '${widget.product.sizes.length} options',
                 style: const TextStyle(
-                    color: Color(0xFF555555), fontSize: 12),
+                    color: AppTheme.dim, fontSize: 12),
               ),
             ],
           ),
@@ -798,14 +811,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     color: isSelected ? _accent : _surface,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isSelected ? _accent : const Color(0xFF333333),
+                      color: isSelected ? _accent : _divider,
                       width: 1.5,
                     ),
                   ),
                   child: Text(
                     widget.product.sizes[index],
                     style: TextStyle(
-                      color: isSelected ? Colors.black : const Color(0xFF666666),
+                      color: isSelected ? _bg : AppTheme.silver,
                       fontSize: 13,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                     ),
@@ -830,8 +843,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
           child: Container(
             decoration: BoxDecoration(
-              color: _surface,
+              color: _card,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: _divider, width: 1),
             ),
             padding: const EdgeInsets.all(4),
             child: Row(
@@ -856,8 +870,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: isSelected
-                              ? Colors.black
-                              : const Color(0xFF555555),
+                              ? _bg
+                              : AppTheme.silver,
                           fontWeight: isSelected
                               ? FontWeight.w500
                               : FontWeight.normal,
@@ -893,7 +907,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     'Water-resistant design with seamless connectivity '
                     'to all your devices.',
             style: const TextStyle(
-              color: Color(0xFF666666),
+              color: AppTheme.silver,
               fontSize: 13,
               height: 1.7,
             ),
@@ -912,7 +926,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                       width: 7,
                       height: 7,
                       decoration: const BoxDecoration(
-                        color: _accent,
+                        color: _gold,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -921,7 +935,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                       child: Text(
                         spec,
                         style: const TextStyle(
-                          color: Color(0xFF666666),
+                          color: AppTheme.silver,
                           fontSize: 13,
                           height: 1.5,
                         ),
@@ -945,9 +959,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   children: [
                     const CircleAvatar(
                       radius: 16,
-                      backgroundColor: _accent,
+                      backgroundColor: _gold,
                       child: Icon(Icons.person,
-                          color: Colors.black, size: 16),
+                          color: _surface, size: 16),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -965,7 +979,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                           Text(
                             review.text,
                             style: const TextStyle(
-                              color: Color(0xFF666666),
+                              color: AppTheme.silver,
                               fontSize: 12.5,
                               height: 1.5,
                             ),
@@ -1011,22 +1025,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   Widget _buildBottomBar() {
     return Consumer<CartProvider>(
       builder: (context, cart, _) {
-        return Container(
-          padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(28),
-              topRight: Radius.circular(28),
-            ),
-          ),
-          child: Row(
+        // Frosted CTA strip — product details scroll behind it.
+        return AppTheme.glass(
+          corners: const BorderRadius.vertical(top: Radius.circular(28)),
+          radius: 28,
+          sigma: 16,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            child: Row(
             children: [
               // Sélecteur de quantité
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: _card,
                   borderRadius: BorderRadius.circular(32),
                 ),
                 padding: const EdgeInsets.all(4),
@@ -1042,17 +1054,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: _quantity > 1
-                              ? const Color(0xFFE8E8E8)
-                              : const Color(0xFFF0F0F0),
+                          color: _quantity > 1 ? _surface : _card,
                           shape: BoxShape.circle,
+                          border: Border.all(color: _divider, width: 1),
                         ),
                         child: Icon(
                           Icons.remove,
                           size: 16,
                           color: _quantity > 1
-                              ? const Color(0xFF333333)
-                              : const Color(0xFFBBBBBB),
+                              ? _accent
+                              : AppTheme.dim,
                         ),
                       ),
                     ),
@@ -1062,13 +1073,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                       child: Text(
                         '$_quantity',
                         style: const TextStyle(
-                          color: Color(0xFF111111),
+                          color: _accent,
                           fontWeight: FontWeight.w500,
                           fontSize: 15,
                         ),
                       ),
                     ),
-                    // Bouton plus — cercle blanc
+                    // Bouton plus — cercle sombre (pill CTA)
                     GestureDetector(
                       onTap: () => setState(() => _quantity++),
                       child: Container(
@@ -1079,7 +1090,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.add,
-                            size: 16, color: Colors.black),
+                            size: 16, color: _bg),
                       ),
                     ),
                   ],
@@ -1105,7 +1116,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                             sourceKey: _addToCartButtonKey,
                             cartKey: _cartKey,
                             flyColor: _accent,
-                            iconColor: Colors.black,
+                            iconColor: _bg,
                             onComplete: () {
                               if (!mounted) return;
                               final added = cart.addToCart(
@@ -1129,7 +1140,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                                   const SnackBar(
                                     content: Text(
                                         'This product is currently unavailable'),
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: AppTheme.danger,
                                     duration: Duration(seconds: 2),
                                   ),
                                 );
@@ -1143,15 +1154,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                         const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
                       color: widget.product.isAvailable
-                          ? const Color(0xFF111111)
-                          : Colors.grey,
+                          ? _accent
+                          : AppTheme.dim,
                       borderRadius: BorderRadius.circular(32),
                     ),
                     child: Center(
                       child: Text(
                         widget.product.isAvailable ? 'Add to Cart' : 'Unavailable',
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: _bg,
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
                         ),
@@ -1161,6 +1172,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 ),
               ),
             ],
+            ),
           ),
         );
       },

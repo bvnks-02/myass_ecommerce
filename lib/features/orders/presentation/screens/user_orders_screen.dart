@@ -72,14 +72,14 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
             Icon(
               Icons.receipt_long_outlined,
               size: ResponsiveUtils.sf(context, 72),
-              color: Colors.white24,
+              color: AppTheme.dim,
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 16)),
             Text(
               'Connectez-vous pour voir vos commandes',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: AppTheme.fg,
                 fontSize: ResponsiveUtils.sf(context, 18),
                 fontWeight: FontWeight.w600,
               ),
@@ -89,7 +89,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
               'Vos commandes apparaîtront ici après connexion.',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey,
+                color: AppTheme.silver,
                 fontSize: ResponsiveUtils.sf(context, 14),
               ),
             ),
@@ -97,8 +97,8 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
             ElevatedButton(
               onPressed: () => Navigator.pushNamed(context, '/login'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                foregroundColor: Colors.black,
+                backgroundColor: AppTheme.fg,
+                foregroundColor: AppTheme.bg,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
               ),
@@ -115,17 +115,17 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     final isSignedIn = Supabase.instance.client.auth.currentUser != null;
     try {
       return Scaffold(
-        backgroundColor: AppTheme.blackColor,
+        backgroundColor: AppTheme.bg,
         appBar: AppBar(
-          backgroundColor: AppTheme.blackColor,
-          title: const Text('Order History', style: TextStyle(color: Colors.white)),
+          backgroundColor: AppTheme.bg,
+          title: const Text('Order History', style: TextStyle(color: AppTheme.fg)),
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back, color: AppTheme.fg),
             onPressed: () => Navigator.pop(context),
           ),
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            ? const Center(child: CircularProgressIndicator(color: AppTheme.accent))
             : !isSignedIn
                 ? _buildSignedOut(context)
                 : _orders.isEmpty
@@ -136,13 +136,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Icon(
                           Icons.shopping_bag_outlined,
                           size: ResponsiveUtils.sf(context, 80),
-                          color: Colors.white24,
+                          color: AppTheme.dim,
                         ),
                         SizedBox(height: ResponsiveUtils.sh(context, 20)),
                         Text(
                           'No orders yet',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.fg,
                             fontSize: ResponsiveUtils.sf(context, 18),
                             fontWeight: FontWeight.w600,
                           ),
@@ -151,7 +151,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Text(
                           'Start shopping to see your orders here',
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: AppTheme.silver,
                             fontSize: ResponsiveUtils.sf(context, 14),
                           ),
                         ),
@@ -169,14 +169,14 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
       debugPrint('BUILD ERROR: $e');
       debugPrint('STACK: $stack');
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: AppTheme.bg,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text('Error', style: TextStyle(color: Colors.white, fontSize: 20)),
+              const Text('Error', style: TextStyle(color: AppTheme.fg, fontSize: 20)),
               const SizedBox(height: 10),
-              Text(e.toString(), style: const TextStyle(color: Colors.red)),
+              Text(e.toString(), style: const TextStyle(color: AppTheme.danger)),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
@@ -222,16 +222,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: ResponsiveUtils.sh(context, 20)),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: AppTheme.line,
           width: 1,
         ),
+        boxShadow: [AppTheme.cardShadow],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -252,10 +249,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               fit: BoxFit.contain,
                               alignment: Alignment.center,
                               errorBuilder: (context, error, stackTrace) => Container(
-                                color: const Color(0xFF1C1C1E),
+                                color: AppTheme.surface2,
                                 child: const Icon(
                                   Icons.watch,
-                                  color: Colors.white24,
+                                  color: AppTheme.dim,
                                   size: 50,
                                 ),
                               ),
@@ -265,43 +262,46 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                               fit: BoxFit.contain,
                               alignment: Alignment.center,
                               placeholder: (context, url) => Container(
-                                color: const Color(0xFF1C1C1E),
+                                color: AppTheme.surface2,
                                 child: const Center(
                                   child: CircularProgressIndicator(
-                                    color: Colors.white24,
+                                    color: AppTheme.dim,
                                     strokeWidth: 2,
                                   ),
                                 ),
                               ),
                               errorWidget: (context, url, error) => Container(
-                                color: const Color(0xFF1C1C1E),
+                                color: AppTheme.surface2,
                                 child: const Icon(
                                   Icons.watch,
-                                  color: Colors.white24,
+                                  color: AppTheme.dim,
                                   size: 50,
                                 ),
                               ),
                             ),
                     ),
-                    // Order ID Badge
+                    // Order ID Badge — frosted chip over the product photo
                     Positioned(
                       top: ResponsiveUtils.sh(context, 10),
                       left: ResponsiveUtils.sw(context, 10),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveUtils.sw(context, 12),
-                          vertical: ResponsiveUtils.sh(context, 6),
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.7),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Order #${orderId ?? 'N/A'}',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: ResponsiveUtils.sf(context, 12),
-                            fontWeight: FontWeight.w600,
+                      child: AppTheme.glass(
+                        radius: 20,
+                        sigma: 10,
+                        fill: AppTheme.glassFillSheer,
+                        borderColor: Colors.white.withValues(alpha: 0.6),
+                        shadow: false,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: ResponsiveUtils.sw(context, 12),
+                            vertical: ResponsiveUtils.sh(context, 6),
+                          ),
+                          child: Text(
+                            'Order #${orderId ?? 'N/A'}',
+                            style: TextStyle(
+                              color: AppTheme.fg,
+                              fontSize: ResponsiveUtils.sf(context, 12),
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ),
@@ -320,7 +320,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                 height: ResponsiveUtils.sh(context, 100),
                 width: double.infinity,
                 child: Container(
-                  color: const Color(0xFF1C1C1E),
+                  color: AppTheme.surface2,
                   child: Stack(
                     children: [
                       Positioned(
@@ -332,13 +332,13 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             vertical: ResponsiveUtils.sh(context, 6),
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.7),
+                            color: AppTheme.fg.withOpacity(0.9),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
                             'Order #${orderId ?? 'N/A'}',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppTheme.bg,
                               fontSize: ResponsiveUtils.sf(context, 12),
                               fontWeight: FontWeight.w600,
                             ),
@@ -353,7 +353,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       const Center(
                         child: Icon(
                           Icons.shopping_bag,
-                          color: Colors.white24,
+                          color: AppTheme.dim,
                           size: 50,
                         ),
                       ),
@@ -373,14 +373,14 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       children: [
                         Icon(
                           Icons.calendar_today,
-                          color: Colors.grey[400],
+                          color: AppTheme.silver,
                           size: ResponsiveUtils.sf(context, 14),
                         ),
                         SizedBox(width: ResponsiveUtils.sw(context, 6)),
                         Text(
                           '${_dateFormat.format(orderDate)} at ${_timeFormat.format(orderDate)}',
                           style: TextStyle(
-                            color: Colors.grey[400],
+                            color: AppTheme.silver,
                             fontSize: ResponsiveUtils.sf(context, 12),
                           ),
                         ),
@@ -395,7 +395,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Text(
                           'Items (${orderItems.length})',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.fg,
                             fontSize: ResponsiveUtils.sf(context, 14),
                             fontWeight: FontWeight.w600,
                           ),
@@ -418,8 +418,8 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 Container(
                                   width: ResponsiveUtils.sw(context, 4),
                                   height: ResponsiveUtils.sh(context, 4),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primaryColor,
+                                  decoration: const BoxDecoration(
+                                    color: AppTheme.accent,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
@@ -428,7 +428,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   child: Text(
                                     itemName,
                                     style: TextStyle(
-                                      color: Colors.white70,
+                                      color: AppTheme.silver,
                                       fontSize: ResponsiveUtils.sf(context, 13),
                                     ),
                                     maxLines: 1,
@@ -438,19 +438,19 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 Text(
                                   'x$quantity',
                                   style: TextStyle(
-                                    color: Colors.grey[400],
+                                    color: AppTheme.silver,
                                     fontSize: ResponsiveUtils.sf(context, 12),
                                   ),
                                 ),
                                 SizedBox(width: ResponsiveUtils.sw(context, 8)),
-                                Text(
-                                  '${CurrencyService.formatPrice(price * quantity)}',
-                                  style: TextStyle(
-                                    color: AppTheme.primaryColor,
-                                    fontSize: ResponsiveUtils.sf(context, 12),
-                                    fontWeight: FontWeight.w600,
+                                  Text(
+                                    '${CurrencyService.formatPrice(price * quantity)}',
+                                    style: TextStyle(
+                                      color: AppTheme.fg,
+                                      fontSize: ResponsiveUtils.sf(context, 12),
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           );
@@ -461,7 +461,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                             child: Text(
                               '+${orderItems.length - 3} more items',
                               style: TextStyle(
-                                color: Colors.grey[500],
+                                color: AppTheme.dim,
                                 fontSize: ResponsiveUtils.sf(context, 11),
                               ),
                             ),
@@ -476,8 +476,9 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       vertical: ResponsiveUtils.sh(context, 12),
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.3),
+                      color: AppTheme.surface2,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppTheme.lineSoft, width: 1),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -485,7 +486,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Text(
                           'Total',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppTheme.fg,
                             fontSize: ResponsiveUtils.sf(context, 14),
                             fontWeight: FontWeight.w600,
                           ),
@@ -493,7 +494,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         Text(
                           '${totalAmount.toStringAsFixed(2)} DA',
                           style: TextStyle(
-                            color: AppTheme.primaryColor,
+                            color: AppTheme.fg,
                             fontSize: ResponsiveUtils.sf(context, 16),
                             fontWeight: FontWeight.bold,
                           ),
@@ -510,7 +511,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       child: ElevatedButton(
                         onPressed: () => _showCancelOrderDialog(orderId),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
+                          backgroundColor: AppTheme.danger,
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
@@ -557,24 +558,24 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     switch (status.toLowerCase()) {
       case 'completed':
       case 'delivered':
-        badgeColor = Colors.green;
+        badgeColor = AppTheme.success; // deep green, legible on light
         statusIcon = Icons.check_circle;
         break;
       case 'pending':
       case 'processing':
-        badgeColor = Colors.orange;
+        badgeColor = const Color(0xFFB4690E); // deep amber
         statusIcon = Icons.pending;
         break;
       case 'cancelled':
-        badgeColor = Colors.red;
+        badgeColor = AppTheme.danger;
         statusIcon = Icons.cancel;
         break;
       case 'shipped':
-        badgeColor = Colors.blue;
+        badgeColor = const Color(0xFF2563EB); // deep blue
         statusIcon = Icons.local_shipping;
         break;
       default:
-        badgeColor = Colors.grey;
+        badgeColor = AppTheme.silver;
         statusIcon = Icons.help_outline;
     }
     
@@ -584,7 +585,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
         vertical: ResponsiveUtils.sh(context, 5),
       ),
       decoration: BoxDecoration(
-        color: badgeColor.withOpacity(0.9),
+        color: badgeColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(

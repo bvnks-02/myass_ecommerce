@@ -61,7 +61,7 @@ class DialogConfigs {
     ),
     DialogType.loading: DialogConfig(
       icon: Icons.hourglass_empty,
-      iconColor: Colors.white,
+      iconColor: AppTheme.accent,
       backgroundColor: AppTheme.cardColor,
     ),
   };
@@ -138,76 +138,69 @@ class AppDialog extends StatelessWidget {
       backgroundColor: Colors.transparent,
       elevation: 0,
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-      child: Container(
-        width: double.infinity,
+      child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        decoration: BoxDecoration(
-          color: AppTheme.cardColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
+        // Frosted card floating over the dimmed screen content.
+        child: AppTheme.glass(
+          radius: 24,
+          sigma: 18,
+          fill: Colors.white.withValues(alpha: 0.70),
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon header
+                _buildIconHeader(config),
+
+                // Content
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                  child: Column(
+                    children: [
+                      // Title
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: AppTheme.fg,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: -0.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Message
+                      Text(
+                        message,
+                        style: const TextStyle(
+                          color: AppTheme.silver,
+                          fontSize: 14,
+                          height: 1.5,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      // Custom content
+                      if (customContent != null) ...[
+                        const SizedBox(height: 20),
+                        customContent!,
+                      ],
+
+                      const SizedBox(height: 24),
+
+                      // Actions
+                      if (customActions != null)
+                        ...customActions!
+                      else
+                        _buildDefaultActions(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon header
-            _buildIconHeader(config),
-            
-            // Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Column(
-                children: [
-                  // Title
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: -0.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Message
-                  Text(
-                    message,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 14,
-                      height: 1.5,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  
-                  // Custom content
-                  if (customContent != null) ...[
-                    const SizedBox(height: 20),
-                    customContent!,
-                  ],
-                  
-                  const SizedBox(height: 24),
-                  
-                  // Actions
-                  if (customActions != null)
-                    ...customActions!
-                  else
-                    _buildDefaultActions(),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -221,7 +214,7 @@ class AppDialog extends StatelessWidget {
         width: 72,
         height: 72,
         decoration: BoxDecoration(
-          color: config.iconColor.withOpacity(0.15),
+          color: config.iconColor.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
         child: Icon(
@@ -292,18 +285,18 @@ class AppDialog extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.1),
+          color: AppTheme.surface2,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.white.withOpacity(0.2),
+            color: AppTheme.line,
             width: 1,
           ),
         ),
         child: Text(
           secondaryActionText!,
           textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
+          style: const TextStyle(
+            color: AppTheme.fg,
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -339,46 +332,37 @@ class AppLoadingDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: AppTheme.cardColor,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.4),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 56,
-              height: 56,
-              child: CircularProgressIndicator(
-                strokeWidth: 3,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.white.withOpacity(0.9),
+      // Compact frosted card — kept small so the blurred area stays tight.
+      child: AppTheme.glass(
+        radius: 24,
+        sigma: 18,
+        fill: Colors.white.withValues(alpha: 0.70),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 56,
+                height: 56,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppTheme.accent,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              message,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              const SizedBox(height: 20),
+              Text(
+                message,
+                style: const TextStyle(
+                  color: AppTheme.silver,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -427,59 +411,51 @@ class AppSuccessDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      child: Container(
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1B5E20),
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: const Color(0xFF4CAF50).withOpacity(0.3),
-            width: 1,
+      // Frosted success card — green kept only as the semantic accent.
+      child: AppTheme.glass(
+        radius: 24,
+        sigma: 18,
+        fill: Colors.white.withValues(alpha: 0.70),
+        borderColor: AppTheme.success.withValues(alpha: 0.35),
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppTheme.success.withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: AppTheme.success,
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: AppTheme.fg,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message,
+                style: const TextStyle(
+                  color: AppTheme.silver,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0xFF4CAF50).withOpacity(0.2),
-              blurRadius: 24,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50).withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check_circle,
-                color: Color(0xFF81C784),
-                size: 40,
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              message,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.8),
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ),
       ),
     );
