@@ -332,11 +332,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ),
           ),
           SizedBox(width: ResponsiveUtils.sw(context, 15)),
-          // Favorites
+          // Store — home IS the store tab, so this grounds the user back on
+          // the '/home' root (no-op when already there, pops any pushed
+          // routes otherwise). Favorites stay reachable from Profile.
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: AppTheme.fg),
+            icon: const Icon(Icons.storefront_outlined, color: AppTheme.fg),
             onPressed: () {
-              Navigator.pushNamed(context, '/favorites');
+              Navigator.popUntil(context, ModalRoute.withName('/home'));
             },
           ),
           // Cart (fly-to-cart target + bounce on count increase)
