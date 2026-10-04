@@ -1,8 +1,8 @@
 # MYAZZ Flutter App — AI Review Package
 
-Generated: 2026-09-30 · branch `master` @ `ee82f46` (all work committed & pushed)
+Generated: 2026-09-30 · branch `master` @ `11465da` (all work committed & pushed)
 This zip contains the app's `lib/` source, `pubspec.yaml`, `AGENTS.md` (project conventions) and this document.
-A matching release build exists at `build/app/outputs/flutter-apk/app-release.apk` (64.9 MB).
+A matching release build exists at `build/app/outputs/flutter-apk/app-release.apk` (65.0 MB).
 
 ## What this app is
 
@@ -59,8 +59,38 @@ project `pvxmqjdhmwpcoaqatzjb` is dead; `.env` now points at the website's proje
 - `snackBarTheme`: floating rounded pill; 20px card radius rhythm; success
   SnackBars in accent gold.
 
-### 4. Earlier commits in this series
-- `d23e2fc` light theme + glassmorphism system (website palette)
+### 4. Nav rework per annotation brief (commit `cec43d0`)
+Bottom nav (left→right): watch-logo (`assets/icons/watch.png` → SmartWatch) ·
+brand logo (`assets/images/logo.jpeg` → new BrandScreen at `/brand`) ·
+raised gold center button (`Icons.sports` → Store, default landing index 2) ·
+messages (`Icons.forum`, unread badge kept) · profile (unchanged).
+Top bar: storefront icon replaces the heart (favorites detached — route intact,
+reachable from Profile). Orders detached from nav — reachable via Profile →
+Mes commandes. Placeholders: BrandScreen copy (« Notre histoire, bientôt. »)
+and logo.jpeg rendered in ivory circle tiles (check on device).
+
+### 5. myazz-ui skill pass — Luminous Glass & Gold (commit `11465da`)
+Design system mounted from `myazz-ui/` (SKILL.md + `lib/theme/myazz_tokens.dart`):
+- Pearl background `#F4F3F1→#FFFFFF` painted once at app root (transparent
+  scaffolds); glass fills white .62/.82, hairline white borders, blur 24 cards /
+  32 nav+sheets, radius 28, two-tier shadows.
+- Champagne-gold gradient accent (4 stops `#F7E3A1→#8F6A1F`) replacing the
+  single bronze accent; `GoldShader` for hero/details prices; `GoldCta`
+  (gold ring + navy fill + 6s sheen) on add-to-cart and Place Order.
+- Bottom nav: glass-strong bar with sliding gold pill active state; asset tabs
+  get gold ring+glow when active; raised Sport button uses goldGradient.
+- Effects per skill budget: staggered fade-up on home cards (one-shot, honors
+  `MediaQuery.disableAnimations`), ONE sheen per screen max, ≤3 blur layers
+  per screen.
+- AppTheme remains the single API entry, delegating to `M` (myazz_tokens.dart);
+  `lib/theme/gold_cta.dart` holds the shared CTA implementations.
+- Fonts stay Inter (no google_fonts dep); no Arabic copy injected (app is LTR
+  FR/EN) — the skill's RTL/bilingual checklist is parked until Arabic screens
+  exist.
+
+### 6. Earlier commits in this series
+- `ee82f46` UI improvement pass (PriceText, PressScale, hero, empty states)
+- `d23e2fc` light theme matching website palette + glassmorphism system
 - `105d829` add-to-cart fly animation, home quick-add, screen polish
 - `d4c5919` shared-schema field fallbacks for orders screens
 - `438b42e` docs: shared Supabase project sync instructions
@@ -69,7 +99,7 @@ project `pvxmqjdhmwpcoaqatzjb` is dead; `.env` now points at the website's proje
 - `flutter analyze --no-pub`: **0 errors**, 16 issues (2 pre-existing warnings in
   `admin_orders_screen.dart` + infos). No new lints introduced.
 - No new pub dependencies (glass uses `dart:ui` only). Inter font kept.
-- Release APK rebuilt after the improvement pass: `build/app/outputs/flutter-apk/app-release.apk`.
+- Release APK rebuilt after the myazz-ui pass: `build/app/outputs/flutter-apk/app-release.apk` (65.0 MB).
 
 ## Known follow-ups (not in this zip's scope)
 1. Some screens outside the scoped set (admin, auth, chat, smartwatch, profile,
