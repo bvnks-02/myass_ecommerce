@@ -116,9 +116,10 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
     final isSignedIn = Supabase.instance.client.auth.currentUser != null;
     try {
       return Scaffold(
-        backgroundColor: AppTheme.bg,
+        // Transparent — the root pearl gradient (MaterialApp builder) shows.
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          backgroundColor: AppTheme.bg,
+          backgroundColor: Colors.transparent,
           title: const Text('Order History', style: TextStyle(color: AppTheme.fg)),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: AppTheme.fg),
@@ -470,16 +471,21 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       ],
                     ),
                   SizedBox(height: ResponsiveUtils.sh(context, 16)),
-                  // Total Amount
+                  // Total Amount — glass-strong panel (translucent white fill
+                  // WITHOUT blur: it sits on a flat card, per the skill's
+                  // blur budget) + gold hairline + gold total numerals.
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: ResponsiveUtils.sw(context, 16),
                       vertical: ResponsiveUtils.sh(context, 12),
                     ),
                     decoration: BoxDecoration(
-                      color: AppTheme.surface2,
+                      color: AppTheme.glassStrongFill,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.lineSoft, width: 1),
+                      border: Border.all(
+                        color: AppTheme.accentBright.withValues(alpha: 0.45),
+                        width: 1,
+                      ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -496,6 +502,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                         PriceText(
                           price: totalAmount,
                           fontSize: ResponsiveUtils.sf(context, 17),
+                          gold: true,
                         ),
                       ],
                     ),

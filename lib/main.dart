@@ -35,6 +35,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
 import 'theme/app_theme.dart';
+import 'theme/myazz_tokens.dart';
 import 'core/utils/responsive_utils.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
@@ -275,6 +276,12 @@ class _MyAppState extends State<MyApp> {
         title: 'Myazz',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
+        // Pearl gradient root background (myazz-ui): ONE gradient container
+        // behind the whole app; scaffolds are transparent so glass reads.
+        builder: (context, child) => DecoratedBox(
+          decoration: const BoxDecoration(gradient: AppTheme.pearlGradient),
+          child: child ?? const SizedBox.shrink(),
+        ),
         home: const SplashScreen(),
         onGenerateRoute: (settings) {
           // Handle web hash routing for password reset
@@ -361,6 +368,11 @@ class _MainScreenState extends State<MainScreen> {
   // Default landing tab = Sport/Store (index 2), the raised center button.
   int _currentIndex = 2;
 
+  // Slot the sliding gold pill sits under (-1 = none). The raised center
+  // button (index 2) is pill-skipped — it carries its own gold treatment —
+  // so the pill only ever animates between the four in-bar slots.
+  int _pillIndex = -1;
+
   // 5 tabs by position: Montre (smartwatch, watch-logo icon), Myazz (brand
   // placeholder, logo icon), Sport (Home/store — raised center button,
   // default landing), Messages (chat, unread badge), Profil.
@@ -377,6 +389,7 @@ class _MainScreenState extends State<MainScreen> {
   void _onItemTapped(int index) {
     setState(() {
       _currentIndex = index;
+      if (index != 2) _pillIndex = index;
     });
   }
 
@@ -393,66 +406,57 @@ class _MainScreenState extends State<MainScreen> {
       child: GestureDetector(
         onTap: () => _onItemTapped(index),
         behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              AnimatedScale(
-                scale: isSelected ? 1.1 : 1.0,
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Icon(
-                      isSelected ? activeIcon : icon,
-                      color: isSelected ? AppTheme.accent : AppTheme.dim,
-                      size: ResponsiveUtils.sf(context, 26),
-                    ),
-                    if (badge > 0)
-                      Positioned(
-                        top: -ResponsiveUtils.sh(context, 6),
-                        right: -ResponsiveUtils.sw(context, 8),
-                        child: Container(
-                          padding: EdgeInsets.all(ResponsiveUtils.sw(context, 4)),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.danger,
-                            shape: BoxShape.circle,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedScale(
+              scale: isSelected ? 1.1 : 1.0,
+              duration: M.d2,
+              curve: M.easeOut,
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    isSelected ? activeIcon : icon,
+                    // myazz-ui: active icon fills with gold-4 on the gold
+                    // pill; inactive stays ink-2.
+                    color: isSelected ? AppTheme.goldDeep : AppTheme.silver,
+                    size: ResponsiveUtils.sf(context, 26),
+                  ),
+                  if (badge > 0)
+                    Positioned(
+                      top: -ResponsiveUtils.sh(context, 6),
+                      right: -ResponsiveUtils.sw(context, 8),
+                      child: Container(
+                        padding: EdgeInsets.all(ResponsiveUtils.sw(context, 4)),
+                        decoration: BoxDecoration(
+                          // myazz-ui badge: gold bg, ink text, white ring.
+                          color: AppTheme.accentBright,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppTheme.surface.withValues(alpha: 0.9),
+                            width: 1.5,
                           ),
-                          constraints: BoxConstraints(
-                            minWidth: ResponsiveUtils.sw(context, 16),
-                            minHeight: ResponsiveUtils.sw(context, 16),
-                          ),
-                          child: Text(
-                            badge > 9 ? '9+' : '$badge',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: ResponsiveUtils.sf(context, 9),
-                              fontWeight: FontWeight.bold,
-                            ),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: ResponsiveUtils.sw(context, 16),
+                          minHeight: ResponsiveUtils.sw(context, 16),
+                        ),
+                        child: Text(
+                          badge > 9 ? '9+' : '$badge',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppTheme.fg,
+                            fontSize: ResponsiveUtils.sf(context, 9),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                  ],
-                ),
+                    ),
+                ],
               ),
-              if (isSelected) ...[
-                SizedBox(height: ResponsiveUtils.sh(context, 4)),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  width: ResponsiveUtils.sw(context, 5),
-                  height: ResponsiveUtils.sh(context, 5),
-                  decoration: const BoxDecoration(
-                    color: AppTheme.accent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ],
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -460,8 +464,9 @@ class _MainScreenState extends State<MainScreen> {
 
   /// Nav item rendered with a brand asset (watch.png / logo.jpeg) instead of a
   /// Material icon. Assets sit in a small ivory circle tile so non-transparent
-  /// images (logo.jpeg) read cleanly on the glass bar. Active: accent ring +
-  /// slight scale + full opacity; inactive: hairline ring + dimmed.
+  /// images (logo.jpeg) read cleanly on the glass bar. Active: champagne-gold
+  /// gradient ring + gold glow + full opacity (myazz-ui GoldAccent); inactive:
+  /// hairline ring + dimmed.
   Widget _buildAssetNavItem(
     BuildContext context, {
     required String assetPath,
@@ -479,51 +484,47 @@ class _MainScreenState extends State<MainScreen> {
           children: [
             AnimatedScale(
               scale: isSelected ? 1.1 : 1.0,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
+              duration: M.d2,
+              curve: M.easeOut,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
+                duration: M.d2,
+                curve: M.easeOut,
                 width: size,
                 height: size,
-                padding: EdgeInsets.all(ResponsiveUtils.sw(context, 4)),
+                padding: EdgeInsets.all(ResponsiveUtils.sw(context, isSelected ? 3 : 4)),
                 decoration: BoxDecoration(
-                  color: AppTheme.surface,
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isSelected ? AppTheme.accent : AppTheme.line,
-                    width: isSelected ? 1.5 : 1,
-                  ),
+                  // Active: 2-ishpx gold gradient ring; inactive: hairline.
+                  gradient: isSelected ? AppTheme.goldGradient : null,
+                  color: isSelected ? null : AppTheme.surface,
+                  border: isSelected
+                      ? null
+                      : Border.all(color: AppTheme.line, width: 1),
                   boxShadow: isSelected
-                      ? [
+                      ? const [
                           BoxShadow(
-                            color: AppTheme.accent.withValues(alpha: 0.25),
-                            blurRadius: 8,
+                            color: Color(0x8CE3BC63), // M.goldGlow, tight tier
+                            blurRadius: 14,
                           ),
                         ]
                       : null,
                 ),
-                child: ClipOval(
-                  child: AnimatedOpacity(
-                    opacity: isSelected ? 1.0 : 0.55,
-                    duration: const Duration(milliseconds: 300),
-                    child: Image.asset(assetPath, fit: BoxFit.cover),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: AppTheme.surface,
+                    shape: BoxShape.circle,
+                  ),
+                  padding: EdgeInsets.all(ResponsiveUtils.sw(context, 2)),
+                  child: ClipOval(
+                    child: AnimatedOpacity(
+                      opacity: isSelected ? 1.0 : 0.55,
+                      duration: M.d2,
+                      child: Image.asset(assetPath, fit: BoxFit.cover),
+                    ),
                   ),
                 ),
               ),
             ),
-            if (isSelected) ...[
-              SizedBox(height: ResponsiveUtils.sh(context, 4)),
-              AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                width: ResponsiveUtils.sw(context, 5),
-                height: ResponsiveUtils.sh(context, 5),
-                decoration: const BoxDecoration(
-                  color: AppTheme.accent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -552,10 +553,11 @@ class _MainScreenState extends State<MainScreen> {
                   alignment: Alignment.center,
                   clipBehavior: Clip.none,
                   children: [
-                    // Frosted-glass floating navigation bar — content
-                    // scrolls behind it, so the blur reads as real glass.
-                    // Top padding reserves room for the raised center button
-                    // so its full tap target stays inside the Stack bounds.
+                    // Frosted-glass floating navigation bar — myazz-ui
+                    // "strong" glass (fill .82, blur 32) over the pearl
+                    // gradient. Top padding reserves room for the raised
+                    // center button so its full tap target stays inside the
+                    // Stack bounds.
                     Padding(
                       padding: EdgeInsets.only(
                           top: ResponsiveUtils.sh(context, 16)),
@@ -564,63 +566,123 @@ class _MainScreenState extends State<MainScreen> {
                         margin: EdgeInsets.symmetric(
                             horizontal: ResponsiveUtils.sw(context, 20)),
                         child: AppTheme.glass(
-                          radius: 24,
-                          sigma: 16,
+                          radius: 28,
+                          strong: true,
                           child: Padding(
                             padding: EdgeInsets.symmetric(
                                 horizontal: ResponsiveUtils.sw(context, 10)),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                // Montre (smartwatch) — watch-logo asset tab
-                                _buildAssetNavItem(
-                                  context,
-                                  assetPath: 'assets/icons/watch.png',
-                                  index: 0,
-                                  label: 'Montre',
-                                ),
-                                // Myazz (brand) — logo asset tab
-                                _buildAssetNavItem(
-                                  context,
-                                  assetPath: 'assets/images/logo.jpeg',
-                                  index: 1,
-                                  label: 'Myazz',
-                                ),
-                                // Sport (store) — slot reserved for the
-                                // raised center button painted on top.
-                                SizedBox(width: ResponsiveUtils.sw(context, 60)),
-                                // Messagerie (chat) with unread badge. Selector
-                                // keeps chat updates from rebuilding the whole
-                                // MainScreen (same pattern as the cart badge).
-                                Selector<ChatProvider, int>(
-                                  selector: (_, chat) => chat.unreadCount,
-                                  builder: (context, unread, _) =>
-                                      _buildNavItem(
-                                    context,
-                                    icon: Icons.forum_outlined,
-                                    activeIcon: Icons.forum,
-                                    index: 3,
-                                    label: 'Messages',
-                                    badge: unread,
-                                  ),
-                                ),
-                                // Profile
-                                _buildNavItem(
-                                  context,
-                                  icon: Icons.person_outline,
-                                  activeIcon: Icons.person,
-                                  index: 4,
-                                  label: 'Profil',
-                                ),
-                              ],
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                // Slot geometry: 4 Expanded tabs + the fixed
+                                // spacer under the raised center button.
+                                final spacerW =
+                                    ResponsiveUtils.sw(context, 60);
+                                final slotW =
+                                    (constraints.maxWidth - spacerW) / 4;
+                                double pillLeft(int i) {
+                                  switch (i) {
+                                    case 0:
+                                      return 0;
+                                    case 1:
+                                      return slotW;
+                                    case 3:
+                                      return 2 * slotW + spacerW;
+                                    default:
+                                      return 3 * slotW + spacerW;
+                                  }
+                                }
+
+                                final showPill = _pillIndex >= 0;
+                                return Stack(
+                                  children: [
+                                    // Sliding gold pill (myazz-ui signature
+                                    // active state). Skips the raised center
+                                    // slot — fades out while Sport is active.
+                                    AnimatedPositioned(
+                                      duration: M.d2,
+                                      curve: M.easeOut,
+                                      left: pillLeft(
+                                          showPill ? _pillIndex : 1),
+                                      top: ResponsiveUtils.sh(context, 6),
+                                      bottom: ResponsiveUtils.sh(context, 6),
+                                      width: slotW,
+                                      child: AnimatedOpacity(
+                                        opacity: showPill ? 1 : 0,
+                                        duration: M.d2,
+                                        curve: M.easeOut,
+                                        child: Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal:
+                                                  ResponsiveUtils.sw(
+                                                      context, 3)),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(22),
+                                            gradient: AppTheme.goldSoft,
+                                            boxShadow: AppTheme.goldGlow,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: [
+                                        // Montre (smartwatch) — watch-logo asset tab
+                                        _buildAssetNavItem(
+                                          context,
+                                          assetPath: 'assets/icons/watch.png',
+                                          index: 0,
+                                          label: 'Montre',
+                                        ),
+                                        // Myazz (brand) — logo asset tab
+                                        _buildAssetNavItem(
+                                          context,
+                                          assetPath: 'assets/images/logo.jpeg',
+                                          index: 1,
+                                          label: 'Myazz',
+                                        ),
+                                        // Sport (store) — slot reserved for the
+                                        // raised center button painted on top.
+                                        SizedBox(width: spacerW),
+                                        // Messagerie (chat) with unread badge. Selector
+                                        // keeps chat updates from rebuilding the whole
+                                        // MainScreen (same pattern as the cart badge).
+                                        Selector<ChatProvider, int>(
+                                          selector: (_, chat) =>
+                                              chat.unreadCount,
+                                          builder: (context, unread, _) =>
+                                              _buildNavItem(
+                                            context,
+                                            icon: Icons.forum_outlined,
+                                            activeIcon: Icons.forum,
+                                            index: 3,
+                                            label: 'Messages',
+                                            badge: unread,
+                                          ),
+                                        ),
+                                        // Profile
+                                        _buildNavItem(
+                                          context,
+                                          icon: Icons.person_outline,
+                                          activeIcon: Icons.person,
+                                          index: 4,
+                                          label: 'Profil',
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                         ),
                       ),
                     ),
-                    // Raised center "Sport" tab (store) — floats above the
-                    // glass bar like the old raised-cart pattern: accent gold
-                    // filled circle, ivory icon, hairline ring + soft shadow.
+                    // Raised center "Sport" tab (store) — myazz-ui gold FAB:
+                    // champagne-gold gradient circle, INK icon (skill rule:
+                    // text/icons on gold are ink), white hairline ring, soft
+                    // shadow; active adds the gold glow + slight scale.
                     Positioned(
                       top: 0,
                       child: GestureDetector(
@@ -628,13 +690,13 @@ class _MainScreenState extends State<MainScreen> {
                         behavior: HitTestBehavior.opaque,
                         child: AnimatedScale(
                           scale: _currentIndex == 2 ? 1.06 : 1.0,
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
+                          duration: M.d2,
+                          curve: M.easeOut,
                           child: Container(
                             width: ResponsiveUtils.sw(context, 60),
                             height: ResponsiveUtils.sw(context, 60),
                             decoration: BoxDecoration(
-                              color: AppTheme.accent,
+                              gradient: AppTheme.goldGradient,
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: _currentIndex == 2
@@ -648,18 +710,12 @@ class _MainScreenState extends State<MainScreen> {
                                   blurRadius: 18,
                                   offset: const Offset(0, 8),
                                 ),
-                                if (_currentIndex == 2)
-                                  BoxShadow(
-                                    color:
-                                        AppTheme.accent.withValues(alpha: 0.35),
-                                    blurRadius: 4,
-                                    spreadRadius: 2,
-                                  ),
+                                if (_currentIndex == 2) ...AppTheme.goldGlow,
                               ],
                             ),
                             child: Icon(
                               Icons.sports,
-                              color: AppTheme.bg,
+                              color: AppTheme.fg, // ink icon on gold (skill rule)
                               size: ResponsiveUtils.sf(context, 28),
                             ),
                           ),

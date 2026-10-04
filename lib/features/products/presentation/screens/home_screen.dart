@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use, use_build_context_synchronously, unused_import
 
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/gold_cta.dart';
+import '../../../../theme/myazz_tokens.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -74,7 +77,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('${product.name} added to cart'),
-              backgroundColor: AppTheme.accent, // success = gold accent
+              // Semantic success stays muted (myazz-ui: gold is accent-only).
+              backgroundColor: AppTheme.success,
               duration: const Duration(seconds: 2),
             ),
           );
@@ -238,15 +242,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   /// Frosted header bar: real glass over the scrolling product grid.
   /// Kept as a tight RepaintBoundary'd strip — never a full-screen blur.
+  /// (myazz-ui: blur 24 for card-tier glass; this + hero + nav = 3 layers,
+  /// inside the ≤6 budget.)
   Widget _buildStickyHeader(double topInset, List<ProductEntity> allProducts) {
     return RepaintBoundary(
       child: ClipRect(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
           child: Container(
             padding: EdgeInsets.only(top: topInset + 10, bottom: 9),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: AppTheme.glassFill,
               border: const Border(
                 bottom: BorderSide(color: AppTheme.line, width: 1),
               ),
@@ -304,10 +310,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 decoration: BoxDecoration(
                   // Translucent white pill over the frosted header —
                   // reads as a lighter pane of the same glass.
-                  color: Colors.white.withValues(alpha: 0.55),
+                  color: AppTheme.glassFill,
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.65),
+                    color: AppTheme.glassBorder,
                     width: 1,
                   ),
                 ),
@@ -432,9 +438,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // _buildFeaturedSlider removed for cheetah app design
 
-  /// Wide banner card for the featured product — website-style hierarchy:
-  /// muted category label, bold fg name, big fg numerals with a dim "DA"
-  /// unit, and a dark pill CTA that flies to the header cart.
+  /// Wide banner card for the featured product — myazz-ui ProductCard
+  /// language: GlassCard over the pearl gradient, muted category label, bold
+  /// ink name, GoldShader price numerals with a gold underline, and a
+  /// compact GoldButton that flies to the header cart. (The hero's ONE gold
+  /// accent moment — no sheen here; the sheen budget goes to details/cart.)
   Widget _buildFeaturedHero(ProductEntity product) {
     final buttonKey = _addButtonKeyFor(product.id);
     return Padding(
@@ -447,133 +455,116 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           '/product_details',
           arguments: product,
         ),
-        child: Container(
-          padding: EdgeInsets.all(ResponsiveUtils.sw(context, 16)),
-          decoration: BoxDecoration(
-            color: AppTheme.surface,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: AppTheme.line, width: 1),
-            boxShadow: [AppTheme.cardShadow],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      product.category,
-                      style: TextStyle(
-                        color: AppTheme.silver,
-                        fontSize: ResponsiveUtils.sf(context, 11),
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.4,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: ResponsiveUtils.sh(context, 6)),
-                    Text(
-                      product.name,
-                      style: TextStyle(
-                        color: AppTheme.fg,
-                        fontSize: ResponsiveUtils.sf(context, 20),
-                        fontWeight: FontWeight.bold,
-                        height: 1.15,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    SizedBox(height: ResponsiveUtils.sh(context, 10)),
-                    PriceText(
-                      price: product.price,
-                      fontSize: ResponsiveUtils.sf(context, 24),
-                    ),
-                    SizedBox(height: ResponsiveUtils.sh(context, 14)),
-                    PressScale(
-                      scale: 0.94,
-                      onTap: () => _onAddToCart(product, buttonKey),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveUtils.sw(context, 18),
-                          vertical: ResponsiveUtils.sh(context, 11),
+        child: AppTheme.glass(
+          radius: M.rCard,
+          child: Padding(
+            padding: EdgeInsets.all(ResponsiveUtils.sw(context, 16)),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        product.category,
+                        style: TextStyle(
+                          color: AppTheme.silver,
+                          fontSize: ResponsiveUtils.sf(context, 11),
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.4,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: ResponsiveUtils.sh(context, 6)),
+                      Text(
+                        product.name,
+                        style: TextStyle(
+                          color: AppTheme.fg,
+                          fontSize: ResponsiveUtils.sf(context, 20),
+                          fontWeight: FontWeight.bold,
+                          height: 1.15,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: ResponsiveUtils.sh(context, 10)),
+                      PriceText(
+                        price: product.price,
+                        fontSize: ResponsiveUtils.sf(context, 24),
+                        gold: true,
+                      ),
+                      // Gold underline (myazz-ui ProductCard price treatment)
+                      SizedBox(height: ResponsiveUtils.sh(context, 6)),
+                      Container(
+                        width: ResponsiveUtils.sw(context, 34),
+                        height: 3,
                         decoration: BoxDecoration(
-                          color: product.isAvailable
-                              ? AppTheme.fg
-                              : AppTheme.dim,
-                          borderRadius: BorderRadius.circular(999),
+                          gradient: AppTheme.goldGradient,
+                          borderRadius: BorderRadius.circular(2),
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              product.isAvailable
-                                  ? Icons.add_shopping_cart
-                                  : Icons.block,
-                              color: AppTheme.bg,
-                              size: ResponsiveUtils.sf(context, 15),
+                      ),
+                      SizedBox(height: ResponsiveUtils.sh(context, 14)),
+                      GoldButton(
+                        key: buttonKey,
+                        label: product.isAvailable
+                            ? 'Add to Cart'
+                            : 'Unavailable',
+                        icon: product.isAvailable
+                            ? Icons.add_shopping_cart
+                            : Icons.block,
+                        onTap: product.isAvailable
+                            ? () => _onAddToCart(product, buttonKey)
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: ResponsiveUtils.sw(context, 14)),
+                // Transparent-PNG product shot on a raised pearl tile with
+                // generous padding so it floats instead of touching edges.
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    height: ResponsiveUtils.sh(context, 150),
+                    padding: EdgeInsets.all(ResponsiveUtils.sw(context, 14)),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surface2,
+                      borderRadius: BorderRadius.circular(M.rTile),
+                      border: Border.all(color: AppTheme.lineSoft, width: 1),
+                    ),
+                    child: product.image.startsWith('assets/')
+                        ? Image.asset(
+                            product.image,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                              Icons.watch,
+                              color: AppTheme.dim,
+                              size: 50,
                             ),
-                            SizedBox(width: ResponsiveUtils.sw(context, 8)),
-                            Text(
-                              product.isAvailable ? 'Add to Cart' : 'Unavailable',
-                              style: TextStyle(
-                                color: AppTheme.bg,
-                                fontSize: ResponsiveUtils.sf(context, 13),
-                                fontWeight: FontWeight.w600,
+                          )
+                        : CachedNetworkImage(
+                            imageUrl: product.image,
+                            fit: BoxFit.contain,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(
+                                color: AppTheme.accent,
+                                strokeWidth: 2,
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: ResponsiveUtils.sw(context, 14)),
-              // Transparent-PNG product shot on a raised ivory tile with
-              // generous padding so it floats instead of touching edges.
-              Expanded(
-                flex: 2,
-                child: Container(
-                  height: ResponsiveUtils.sh(context, 150),
-                  padding: EdgeInsets.all(ResponsiveUtils.sw(context, 14)),
-                  decoration: BoxDecoration(
-                    color: AppTheme.surface2,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppTheme.lineSoft, width: 1),
-                  ),
-                  child: product.image.startsWith('assets/')
-                      ? Image.asset(
-                          product.image,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                            Icons.watch,
-                            color: AppTheme.dim,
-                            size: 50,
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: product.image,
-                          fit: BoxFit.contain,
-                          placeholder: (context, url) => const Center(
-                            child: CircularProgressIndicator(
-                              color: AppTheme.accent,
-                              strokeWidth: 2,
+                            errorWidget: (context, url, error) => const Icon(
+                              Icons.watch,
+                              color: AppTheme.dim,
+                              size: 50,
                             ),
                           ),
-                          errorWidget: (context, url, error) => const Icon(
-                            Icons.watch,
-                            color: AppTheme.dim,
-                            size: 50,
-                          ),
-                        ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -720,7 +711,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         itemCount: products.length,
         itemBuilder: (context, index) {
           final product = products[index];
-          return _buildProductCard(product);
+          // myazz-ui entrance: staggered fade-up (40ms stagger, first 8
+          // items only — later cards render instantly). Hand-rolled, no
+          // flutter_animate; honors MediaQuery.disableAnimations.
+          return _StaggerFadeUp(
+            index: index,
+            child: _buildProductCard(product),
+          );
         },
       ),
     );
@@ -738,12 +735,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       },
       child: Container(
         decoration: BoxDecoration(
+          // Solid fill for list/grid items (skill rule: keep blur for
+          // header/nav/sheets, not heavy card lists) + M-style soft shadow.
           color: AppTheme.surface,
           border: Border.all(color: AppTheme.line, width: 1),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(M.rTile),
+          boxShadow: AppTheme.cardShadows,
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(M.rTile),
           child: Stack(
             children: [
               // Product Image on a raised ivory tile — padded so the
@@ -905,6 +905,72 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Hand-rolled staggered fade-up entrance (myazz-ui effect budget:
+/// opacity 0→1 + translateY 16→0, 420ms, 40ms stagger, capped at 8 items;
+/// later items and reduced-motion users get the final state instantly).
+/// One-shot on first mount — data refreshes do not replay it.
+class _StaggerFadeUp extends StatefulWidget {
+  const _StaggerFadeUp({required this.index, required this.child});
+
+  final int index;
+  final Widget child;
+
+  @override
+  State<_StaggerFadeUp> createState() => _StaggerFadeUpState();
+}
+
+class _StaggerFadeUpState extends State<_StaggerFadeUp>
+    with SingleTickerProviderStateMixin {
+  static const int _maxAnimated = 8;
+
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 420),
+  );
+  Timer? _delay;
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    final reduceMotion = MediaQuery.of(context).disableAnimations;
+    if (reduceMotion || widget.index >= _maxAnimated) {
+      _controller.value = 1;
+    } else {
+      _delay = Timer(Duration(milliseconds: 40 * widget.index), () {
+        if (mounted) _controller.forward();
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _delay?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        final t = M.easeOut.transform(_controller.value);
+        return Opacity(
+          opacity: t,
+          child: Transform.translate(
+            offset: Offset(0, 16 * (1 - t)),
+            child: child,
+          ),
+        );
+      },
+      child: RepaintBoundary(child: widget.child),
     );
   }
 }

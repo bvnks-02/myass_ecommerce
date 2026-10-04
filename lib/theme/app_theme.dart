@@ -4,54 +4,85 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
-/// Myazz LIGHT theme — mirrors the website palette
-/// (myazz-ecomerce/web/src/app/globals.css). Warm ivory canvas, white
-/// surfaces, muted gold-bronze accent, dark-pill CTAs.
+import 'myazz_tokens.dart';
+
+/// Myazz "Luminous Glass & Gold" theme — the app-level mapping of the
+/// myazz-ui design tokens ([M], lib/theme/myazz_tokens.dart — the single
+/// source of truth for values).
 ///
-/// ── Legacy name → light mapping (names kept for API compatibility) ──
-///  blackColor         → fg #1A1A16. Historically the dark scaffold bg; it is
-///                         now the "on-accent"/pill color (ivory text on it).
-///  cardColor          → surface #FFFFFF (cards).
-///  cardColorSecondary → surface-2 #F2F1EC (raised tiles / inputs).
-///  primaryColor       → fg #1A1A16. Website primary CTAs are dark pills with
-///                         ivory text, and prices render in fg — so the legacy
-///                         "primary" maps to fg, NOT to the gold accent.
-///  secondaryColor     → fg #1A1A16 (was the dark theme's main text color).
-///  gradientStart/End  → surface → surface-2 (subtle light card gradient).
+/// ── Legacy name → token mapping (names kept for API compatibility) ──
+///  bg                   → pearl #F4F3F1 (solid scaffold base; the pearl
+///                         GRADIENT lives in [pearlGradient], applied once at
+///                         the app root — scaffolds are transparent).
+///  surface              → M.bgMid #FFFFFF (cards).
+///  surface2             → M.bgBottom #F1F0EE (raised tiles / inputs).
+///  fg / blackColor /
+///  primaryColor         → M.ink #14161A (primary text, dark-pill CTAs).
+///  silver               → M.ink2 #5B6068 (secondary text).
+///  dim                  → M.ink3 #9AA0A8 (hints / inactive).
+///  accent               → M.gold3 #C99A3C (champagne gold, deep core —
+///                         active states, focus rings, spinners).
+///  accentBright         → M.gold2 #E3BC63 (gold fills; pair with ink text).
+///  accentDim            → M.gold2 (legacy alias, on-dark gold text).
+///  accentLegacy         → the old bronze #9C8A5E, kept as an alias only.
 ///
-///  Decorative accents (focus rings, active/selected states, spinners, small
-///  bullets) should use [accent] #9C8A5E, matching the website.
+///  Gold is the ONLY accent color (myazz-ui hard rule). Semantic states
+///  (success/danger) stay muted and never replace gold on primary actions.
 class AppTheme {
-  // ── Website tokens (source of truth: globals.css) ──
-  static const Color bg = Color(0xFFFAF9F5); // warm ivory canvas
-  static const Color surface = Color(0xFFFFFFFF); // cards
-  static const Color surface2 = Color(0xFFF2F1EC); // raised tiles / inputs
-  static const Color fg = Color(0xFF1A1A16); // primary text (warm near-black)
-  static const Color silver = Color(0xFF72716A); // secondary text
-  static const Color dim = Color(0xFF9D9C94); // hints / placeholders
-  static const Color line = Color(0xFFE4E2DB); // hairline borders
+  // ── myazz-ui tokens (source of truth: M) ──
+  static const Color pearl = Color(0xFFF4F3F1); // --m-bg solid base
+  static const Color bg = pearl; // scaffold base / ivory-on-dark text
+  static const Color surface = M.bgMid; // cards (white)
+  static const Color surface2 = M.bgBottom; // raised tiles / inputs
+  static const Color fg = M.ink; // primary text (cool near-black)
+  static const Color silver = M.ink2; // secondary text
+  static const Color dim = M.ink3; // hints / placeholders / inactive
+  static const Color line = Color(0xFFE4E2DB); // hairline borders (solid surfaces)
   static const Color lineSoft = Color(0xFFEEEDE8); // softer hairline
-  static const Color accent = Color(0xFF9C8A5E); // muted gold-bronze
-  static const Color accentDim = Color(0xFFB8A87E);
+  static const Color accent = M.gold3; // champagne gold core (deep)
+  static const Color accentBright = M.gold2; // champagne gold (fills, ink text)
+  static const Color accentDim = M.gold2; // legacy alias → gold2
+  static const Color goldDeep = M.gold4; // gold-4: icons/text on gold fills
+  static const Color goldLight = M.gold1; // gold-1: highlights
+  static const Color accentLegacy = Color(0xFF9C8A5E); // old bronze (alias only)
   static const Color danger = Color(0xFFC44040);
   static const Color success = Color(0xFF3A8A4A);
+
+  // ── Gold + night systems (myazz-ui) ──
+  static const LinearGradient goldGradient = M.goldGradient; // 4-stop champagne
+  static const LinearGradient goldSoft = M.goldSoft; // active nav pill fill
+  static const List<BoxShadow> goldGlow = M.goldGlow; // glow, active/primary only
+  static const LinearGradient nightGradient = M.nightGradient; // dark contrast cards
+
+  // ── Glass tokens ──
+  static const Color glassBorder = M.glassBorder; // white .9 hairline edge
+  static const Color glassInner = M.glassInner; // white .5 inner highlight
+
+  /// Pearl gradient — the root background. Applied ONCE in the MaterialApp
+  /// builder (main.dart); scaffolds stay transparent so glass reads over it.
+  static const LinearGradient pearlGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [M.bgTop, M.bgMid, M.bgBottom],
+  );
 
   // ── Legacy API (kept — do not remove/rename) ──
   static const Color blackColor = fg;
   static const Color cardColor = surface;
   static const Color cardColorSecondary = surface2;
-  static const Color primaryColor = fg; // dark-pill CTAs / fg emphasis
+  static const Color primaryColor = fg; // dark-pill CTAs / ink emphasis
   static const Color secondaryColor = fg;
   static const Color gradientStart = surface;
   static const Color gradientEnd = surface2;
 
-  /// NOTE: getter name kept (`darkTheme`) for API compatibility — it now
-  /// returns the LIGHT theme.
+  /// NOTE: getter name kept (`darkTheme`) for API compatibility — it returns
+  /// the LIGHT "Luminous Glass & Gold" theme. Scaffolds are transparent: the
+  /// pearl gradient (MaterialApp builder) is the real root background.
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.light,
       primaryColor: primaryColor,
-      scaffoldBackgroundColor: bg,
+      scaffoldBackgroundColor: Colors.transparent,
       cardColor: cardColor,
       colorScheme: ColorScheme.light(
         primary: fg,
@@ -67,7 +98,7 @@ class AppTheme {
       iconTheme: const IconThemeData(color: fg),
       dividerColor: line,
       appBarTheme: const AppBarTheme(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         foregroundColor: fg,
@@ -81,7 +112,7 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: fg, // dark pill, ivory text (website CTA)
+          backgroundColor: fg, // dark pill, ivory text
           foregroundColor: bg,
           disabledBackgroundColor: dim,
           disabledForegroundColor: bg,
@@ -94,7 +125,7 @@ class AppTheme {
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
-          backgroundColor: surface, // website secondary button
+          backgroundColor: surface,
           foregroundColor: fg,
           side: const BorderSide(color: line, width: 1),
           elevation: 0,
@@ -113,7 +144,7 @@ class AppTheme {
         color: cardColor,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(M.rTile),
           side: const BorderSide(color: line, width: 1),
         ),
       ),
@@ -232,75 +263,86 @@ class AppTheme {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
-      borderRadius: const BorderRadius.all(Radius.circular(16)),
+      borderRadius: const BorderRadius.all(Radius.circular(M.rTile)),
       border: Border.all(color: line, width: 1),
     );
   }
 
-  // ── Glassmorphism system ──
+  // ── Glassmorphism system (myazz-ui "Luminous Glass") ──
   // Real frosted glass = ClipRRect + BackdropFilter blur + translucent white
-  // fill + hairline border + soft warm shadow. Use [glass] for the full
-  // widget stack; [glassDecoration] is the BoxDecoration counterpart (pair it
-  // with your own ClipRRect + BackdropFilter — a fill alone is NOT glass).
-  //
-  // Rules of thumb:
-  //  • Glass only reads over layered/colorful content (imagery, scrolling
-  //    lists). On the flat ivory canvas, prefer solid [surface] + [line].
-  //  • Keep blurred regions tight, wrap them in a RepaintBoundary, and never
-  //    exceed sigma ~18.
+  // fill + diagonal sheen + hairline WHITE border + soft long shadow.
+  //  • standard: fill .62, blur 24 — ordinary cards.
+  //  • strong:   fill .82, blur 32 — nav, sheets, modals (pass strong: true).
+  // Budget: ≤6 blurred layers per screen; over flat white use a translucent
+  // fill WITHOUT blur (skip [glass], use a plain Container + glassStrongFill).
 
-  /// Standard frosted fill — white at 62% over light content.
-  static Color get glassFill => Colors.white.withValues(alpha: 0.62);
+  /// Standard frosted fill — white at ~62%.
+  static Color get glassFill => M.glass;
 
-  /// Sheerer frost (white 40%) for chips/bars over darker photography —
-  /// lets more of the image bleed through.
+  /// Strong frosted fill — white at ~82% (nav, sheets, modals).
+  static Color get glassStrongFill => M.glassStrong;
+
+  /// Sheerer frost (white 40%) for chips/bars over darker photography.
   static Color get glassFillSheer => Colors.white.withValues(alpha: 0.40);
 
-  /// Soft warm shadow that lifts a glass panel off the content behind it.
-  static BoxShadow get glassShadow => BoxShadow(
-        color: fg.withValues(alpha: 0.10),
-        blurRadius: 24,
-        offset: const Offset(0, 8),
-      );
+  /// Soft long shadow that lifts a glass panel off the content behind it
+  /// (first tier of the M-style card shadow).
+  static BoxShadow get glassShadow => M.cardShadow[0];
 
   /// Frosted-glass panel: ClipRRect + BackdropFilter blur + translucent
-  /// white fill + hairline border + warm shadow, isolated in its own
-  /// RepaintBoundary so scrolling content behind it repaints independently.
+  /// white fill + GlassCard-style diagonal sheen (white .35 → .05) + hairline
+  /// white border + M-style soft shadow, isolated in its own RepaintBoundary.
   ///
-  /// [fill] defaults to [glassFill]; pass [glassFillSheer] over photography.
-  /// [corners] overrides [radius] for non-uniform rounding (e.g. a bar that
-  /// only rounds its top edge).
+  /// [strong] switches to the nav/sheet variant (fill .82, blur 32).
+  /// [fill] overrides the fill; [corners] overrides [radius] for non-uniform
+  /// rounding (e.g. a bar that only rounds its top edge).
   static Widget glass({
     required Widget child,
-    double radius = 20,
-    double sigma = 16,
+    double radius = M.rCard,
+    double sigma = 24,
+    bool strong = false,
     Color? fill,
     BorderRadius? corners,
     Color? borderColor,
     bool shadow = true,
+    bool sheen = true,
   }) {
     final BorderRadius borderRadius =
         corners ?? BorderRadius.circular(radius);
+    final double blur = strong ? 32 : sigma;
     return RepaintBoundary(
       child: Container(
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          boxShadow: shadow ? [glassShadow] : null,
+          boxShadow: shadow ? M.cardShadow : null,
         ),
         child: ClipRRect(
           borderRadius: borderRadius,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
+            filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: fill ?? glassFill,
+                color: fill ?? (strong ? M.glassStrong : M.glass),
                 borderRadius: borderRadius,
                 border: Border.all(
-                  color: borderColor ?? line,
+                  color: borderColor ?? glassBorder,
                   width: 1,
                 ),
               ),
-              child: child,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  borderRadius: borderRadius,
+                  // GlassCard sheen: diagonal white highlight .35 → .05.
+                  gradient: sheen
+                      ? const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0x59FFFFFF), Color(0x0DFFFFFF)],
+                        )
+                      : null,
+                ),
+                child: child,
+              ),
             ),
           ),
         ),
@@ -308,28 +350,42 @@ class AppTheme {
     );
   }
 
-  /// BoxDecoration counterpart of [glass] — the frosted white fill with a
-  /// hairline border and warm shadow. Must be combined with a
-  /// ClipRRect + BackdropFilter (see [glass]) to actually frost; on its own
-  /// it is just a translucent panel.
+  /// BoxDecoration counterpart of [glass] — frosted white fill, hairline
+  /// white border, M-style shadow. Combine with ClipRRect + BackdropFilter
+  /// to actually frost; on its own it is just a translucent panel.
   static BoxDecoration get glassDecoration {
     return BoxDecoration(
-      color: glassFill,
-      borderRadius: BorderRadius.circular(20),
+      color: M.glass,
+      borderRadius: BorderRadius.circular(M.rCard),
       border: Border.all(
-        color: line,
+        color: glassBorder,
         width: 1,
       ),
-      boxShadow: [glassShadow],
+      boxShadow: M.cardShadow,
     );
   }
 
   static BoxShadow get cardShadow {
-    // Soft warm shadow — subtle depth on the ivory canvas.
-    return BoxShadow(
-      color: fg.withValues(alpha: 0.06),
-      blurRadius: 20,
-      offset: const Offset(0, 6),
-    );
+    // Soft long shadow — M-style first tier.
+    return M.cardShadow[0];
   }
+
+  /// Full M-style two-tier card shadow (soft long + hairline contact).
+  static List<BoxShadow> get cardShadows => M.cardShadow;
+}
+
+/// Champagne-gold gradient treatment for text/icons (myazz-ui "GoldShader").
+/// Use with restraint: featured-hero + product-details prices, brand
+/// wordmark — never on grid-card prices (those stay ink for calm).
+class GoldShader extends StatelessWidget {
+  const GoldShader({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (r) => M.goldGradient.createShader(r),
+        child: child,
+      );
 }

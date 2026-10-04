@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../products/domain/entities/product_entity.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/gold_cta.dart';
 import '../../../../services/api_service.dart';
 import '../../../../core/utils/responsive_utils.dart';
 import '../../../../core/security/input_sanitizer.dart';
@@ -34,9 +35,10 @@ class _CartScreenState extends State<CartScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.bg,
+      // Transparent — the root pearl gradient (MaterialApp builder) shows.
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: AppTheme.bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppTheme.fg),
@@ -318,13 +320,11 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Widget _buildCheckoutSection(CartProvider cart) {
-    // Frosted checkout sheet — total, delivery fields and CTA float over
-    // the scrolling cart list.
+    // Frosted checkout sheet — myazz-ui "strong" glass (fill .82, blur 32):
+    // total, delivery fields and CTA float over the scrolling cart list.
     return AppTheme.glass(
-      corners: const BorderRadius.vertical(top: Radius.circular(24)),
-      radius: 24,
-      sigma: 16,
-      fill: Colors.white.withValues(alpha: 0.68),
+      corners: const BorderRadius.vertical(top: Radius.circular(28)),
+      strong: true,
       child: SingleChildScrollView(
         padding: EdgeInsets.all(ResponsiveUtils.padding(context)),
         child: Column(
@@ -418,28 +418,16 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 20)),
+            // Primary checkout CTA — myazz-ui StartButton language (gold
+            // ring, navy fill, sheen sweep). The ONE sheen on this screen.
             SizedBox(
               width: double.infinity,
-              height: ResponsiveUtils.sh(context, 50),
-              child: ElevatedButton(
-                onPressed: () {
+              child: GoldCta(
+                label: 'Place Order',
+                height: ResponsiveUtils.sh(context, 52),
+                onTap: () {
                   _placeOrder(cart);
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.fg,
-                  foregroundColor: AppTheme.bg,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                child: Text(
-                  'Place Order',
-                  style: TextStyle(
-                    fontSize: ResponsiveUtils.sf(context, 16),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
               ),
             ),
             SizedBox(height: ResponsiveUtils.sh(context, 20)),

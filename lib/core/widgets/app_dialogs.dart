@@ -141,11 +141,11 @@ class AppDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 400),
-        // Frosted card floating over the dimmed screen content.
+        // Frosted card floating over the dimmed screen content —
+        // myazz-ui "strong" glass (fill .82, blur 32) for modals.
         child: AppTheme.glass(
-          radius: 24,
-          sigma: 18,
-          fill: Colors.white.withValues(alpha: 0.70),
+          radius: 28,
+          strong: true,
           child: SizedBox(
             width: double.infinity,
             child: Column(
@@ -336,11 +336,10 @@ class AppLoadingDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      // Compact frosted card — kept small so the blurred area stays tight.
+      // Compact frosted card — myazz-ui "strong" glass for modals.
       child: AppTheme.glass(
-        radius: 24,
-        sigma: 18,
-        fill: Colors.white.withValues(alpha: 0.70),
+        radius: 28,
+        strong: true,
         child: Padding(
           padding: const EdgeInsets.all(32),
           child: Column(
@@ -415,11 +414,11 @@ class AppSuccessDialog extends StatelessWidget {
     return Dialog(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      // Frosted success card — green kept only as the semantic accent.
+      // Frosted success card — strong glass; green kept only as the
+      // semantic accent.
       child: AppTheme.glass(
-        radius: 24,
-        sigma: 18,
-        fill: Colors.white.withValues(alpha: 0.70),
+        radius: 28,
+        strong: true,
         borderColor: AppTheme.success.withValues(alpha: 0.35),
         child: Padding(
           padding: const EdgeInsets.all(32),

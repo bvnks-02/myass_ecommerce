@@ -8,6 +8,8 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../theme/app_theme.dart';
+import '../../../../theme/gold_cta.dart';
+import '../../../../theme/myazz_tokens.dart';
 import '../../../../core/services/currency_service.dart';
 import '../../../../core/widgets/add_to_cart_animation.dart';
 import '../../../../core/widgets/press_scale.dart';
@@ -36,13 +38,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   final GlobalKey _cartKey = GlobalKey();
   final GlobalKey _addToCartButtonKey = GlobalKey();
 
-  // ── Palette (Myazz light theme — web globals.css tokens) ──
-  static const _bg      = Color(0xFFFAF9F5); // bg: warm ivory canvas
-  static const _surface = Color(0xFFFFFFFF); // surface: cards
-  static const _card    = Color(0xFFF2F1EC); // surface-2: raised tiles
-  static const _divider = Color(0xFFE4E2DB); // line: hairline borders
-  static const _accent  = Color(0xFF1A1A16); // fg: dark pills / primary emphasis
-  static const _gold    = Color(0xFF9C8A5E); // accent: muted gold-bronze (stars, active rings)
+  // ── Palette (myazz-ui "Luminous Glass & Gold" tokens) ──
+  static const _bg      = AppTheme.bg;      // pearl #F4F3F1 (ivory-on-dark text)
+  static const _surface = Color(0xFFFFFFFF); // white cards
+  static const _card    = Color(0xFFF1F0EE); // pearl raised tiles (M.bgBottom)
+  static const _divider = Color(0xFFE4E2DB); // hairline borders
+  static const _accent  = Color(0xFF14161A); // M.ink: dark pills / primary emphasis
+  static const _gold    = Color(0xFFC99A3C); // M.gold3: champagne gold (stars, active rings)
 
   List<Color> get _colorValues {
     return widget.product.colors.map((colorName) {
@@ -99,7 +101,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bg,
+      // Transparent — the root pearl gradient (MaterialApp builder) shows.
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: Stack(
           children: [
@@ -370,20 +373,20 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Badge Meilleure vente
+            // Badge Meilleure vente — champagne gold, ink text (skill rule)
             Container(
               padding:
                   const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: _accent,
+                gradient: AppTheme.goldGradient,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
                 'Best Seller',
                 style: TextStyle(
-                  color: _bg,
+                  color: M.ink,
                   fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
@@ -572,6 +575,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                   PriceText(
                     price: widget.product.price,
                     fontSize: 24,
+                    gold: true,
                   ),
                     const SizedBox(height: 2),
                     Text(
@@ -1026,11 +1030,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
   Widget _buildBottomBar() {
     return Consumer<CartProvider>(
       builder: (context, cart, _) {
-        // Frosted CTA strip — product details scroll behind it.
+        // Frosted CTA strip — myazz-ui "strong" glass (fill .82, blur 32);
+        // product details scroll behind it.
         return AppTheme.glass(
           corners: const BorderRadius.vertical(top: Radius.circular(28)),
-          radius: 28,
-          sigma: 16,
+          strong: true,
           child: Padding(
             padding:
                 const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -1100,11 +1104,16 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 ),
               ),
               const SizedBox(width: 12),
-              // Ajouter au panier — flies to header cart
+              // Ajouter au panier — myazz-ui StartButton language: gold
+              // gradient ring, dark-navy fill, white label, slow sheen sweep
+              // (the ONE sheen on this screen). Flies to header cart.
               Expanded(
-                child: PressScale(
+                child: GoldCta(
                   key: _addToCartButtonKey,
-                  scale: 0.96,
+                  label: widget.product.isAvailable
+                      ? 'Add to Cart'
+                      : 'Unavailable',
+                  height: 50,
                   onTap: widget.product.isAvailable
                       ? () {
                           final selectedColor = widget.product.colors.isNotEmpty
@@ -1135,7 +1144,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                                       content: Text(
                                         '$_quantity × ${widget.product.name}${selectedColor != null ? ' ($selectedColor)' : ''}${selectedSize != null ? ' - $selectedSize' : ''} added to cart',
                                       ),
-                                      backgroundColor: AppTheme.accent, // success = gold accent
+                                      // Semantic success stays muted (gold is
+                                      // accent-only in myazz-ui).
+                                      backgroundColor: AppTheme.success,
                                       duration: const Duration(seconds: 2),
                                     ),
                                   );
@@ -1153,26 +1164,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                           );
                         }
                       : null,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: widget.product.isAvailable
-                          ? _accent
-                          : AppTheme.dim,
-                      borderRadius: BorderRadius.circular(32),
-                    ),
-                    child: Center(
-                      child: Text(
-                        widget.product.isAvailable ? 'Add to Cart' : 'Unavailable',
-                        style: const TextStyle(
-                          color: _bg,
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
               ),
             ],
