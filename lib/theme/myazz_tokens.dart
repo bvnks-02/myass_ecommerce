@@ -30,6 +30,13 @@ class M {
     colors: [Color(0xE6F7E3A1), Color(0xBFC99A3C)],
   );
 
+  // Gold — luxury navbar family (lib/core/widgets/liquid_nav_bar.dart).
+  // Exact reference values kept on purpose: visual fidelity beats token
+  // purity — do NOT retune these toward gold1–gold4.
+  static const goldNavBar = Color(0xFFD4A94A); // rim refraction / underglow
+  static const goldNavBarLight = Color(0xFFE2AB44); // active underline core
+  static const goldNavBarDark = Color(0xFF915A0F); // active underline ends
+
   // Ink
   static const ink = Color(0xFF14161A);
   static const ink2 = Color(0xFF5B6068);
