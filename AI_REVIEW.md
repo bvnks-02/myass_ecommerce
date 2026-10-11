@@ -88,7 +88,32 @@ Design system mounted from `myazz-ui/` (SKILL.md + `lib/theme/myazz_tokens.dart`
   FR/EN) — the skill's RTL/bilingual checklist is parked until Arabic screens
   exist.
 
-### 6. Earlier commits in this series
+### 6. luxury-glass-ui skill pass app-wide (commit `aa62683`)
+Skill mounted from `luxury-glass-ui/` (SKILL.md, tokens.css, materials-and-
+components.md, flutter-port.md). Enrich pass on top of the myazz-ui tokens:
+- `lib/theme/silk_background.dart` — silk root (cream→white→sand + blurred
+  ellipses + 2–3 gold light curves, never behind text), RepaintBoundary'd,
+  replaces the plain pearl gradient at MaterialApp root.
+- Full lg-glass-card stack (fill, blur 24, white hairline, warm two-tier
+  shadows, radius 28, sheen) on home hero, cart checkout sheet, orders totals
+  (glassFlat — no blur on flat bg), brand/health placeholders, dialogs
+  (glass-strong).
+- Gold chip spec (11/700 uppercase, tracking .08em) on cart badge, Best
+  Seller, microbadges.
+- Ink SVG icon family added (search/house/heart/bag/calendar in
+  `assets/icons/`) via flutter_svg; rich icons remain nav-exclusive.
+- Motion: press dip+scale(.96) spring; single loop per screen (nav coin pulse
+  only); `disableAnimations` honored everywhere incl. fly-to-cart, cart
+  bounce, PressScale, GoldCta (now one-shot).
+- Sports coin glyph: user-provided `sports_icon_transparent_4x.png` →
+  `assets/images/sports_wordmark.png` (1024×354) inside the coin, engraved
+  shadow; original 3 PNGs left untracked in the project root as source.
+- Inter kept (skill's Plus Jakarta Sans skipped — project hard rule,
+  myazz-ui tokens preferred where they conflict).
+- flutter analyze: **0 errors, 14 issues (below the 16 baseline)**.
+
+### 7. Earlier commits in this series
+- `1543ef2` luxury liquid-glass navbar integration (user reference impl)
 - `ee82f46` UI improvement pass (PriceText, PressScale, hero, empty states)
 - `d23e2fc` light theme matching website palette + glassmorphism system
 - `105d829` add-to-cart fly animation, home quick-add, screen polish
@@ -96,10 +121,10 @@ Design system mounted from `myazz-ui/` (SKILL.md + `lib/theme/myazz_tokens.dart`
 - `438b42e` docs: shared Supabase project sync instructions
 
 ## Verification status
-- `flutter analyze --no-pub`: **0 errors**, 16 issues (2 pre-existing warnings in
-  `admin_orders_screen.dart` + infos). No new lints introduced.
-- No new pub dependencies (glass uses `dart:ui` only). Inter font kept.
-- Release APK rebuilt after the myazz-ui pass: `build/app/outputs/flutter-apk/app-release.apk` (65.0 MB).
+- `flutter analyze --no-pub`: **0 errors**, 14 issues (below the 16 baseline).
+- No new pub dependencies (flutter_svg was already present). Inter font kept.
+- Release APK rebuilt after the luxury-glass pass:
+  `build/app/outputs/flutter-apk/app-release.apk` (63.0 MB).
 
 ## Known follow-ups (not in this zip's scope)
 1. Some screens outside the scoped set (admin, auth, chat, smartwatch, profile,
