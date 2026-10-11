@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -373,10 +374,15 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                   if (orderDate != null)
                     Row(
                       children: [
-                        Icon(
-                          Icons.calendar_today,
-                          color: AppTheme.silver,
-                          size: ResponsiveUtils.sf(context, 14),
+                        // Ink-family calendar glyph (luxury-glass-ui §6).
+                        SvgPicture.asset(
+                          'assets/icons/calendar.svg',
+                          width: ResponsiveUtils.sf(context, 14),
+                          height: ResponsiveUtils.sf(context, 14),
+                          colorFilter: const ColorFilter.mode(
+                            AppTheme.silver,
+                            BlendMode.srcIn,
+                          ),
                         ),
                         SizedBox(width: ResponsiveUtils.sw(context, 6)),
                         Text(
@@ -446,7 +452,7 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                 ),
                                 SizedBox(width: ResponsiveUtils.sw(context, 8)),
                                   Text(
-                                    '${CurrencyService.formatPrice(price * quantity)}',
+                                    CurrencyService.formatPrice(price * quantity),
                                     style: TextStyle(
                                       color: AppTheme.fg,
                                       fontSize: ResponsiveUtils.sf(context, 12),
@@ -455,8 +461,8 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                                   ),
                               ],
                             ),
-                          );
-                        }).toList(),
+                            );
+                          }),
                         if (orderItems.length > 3)
                           Padding(
                             padding: EdgeInsets.only(top: ResponsiveUtils.sh(context, 4)),
@@ -471,40 +477,36 @@ class _UserOrdersScreenState extends State<UserOrdersScreen> {
                       ],
                     ),
                   SizedBox(height: ResponsiveUtils.sh(context, 16)),
-                  // Total Amount — glass-strong panel (translucent white fill
-                  // WITHOUT blur: it sits on a flat card, per the skill's
-                  // blur budget) + gold hairline + gold total numerals.
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: ResponsiveUtils.sw(context, 16),
-                      vertical: ResponsiveUtils.sh(context, 12),
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppTheme.glassStrongFill,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: AppTheme.accentBright.withValues(alpha: 0.45),
-                        width: 1,
+                  // Total Amount — full lg-card stack WITHOUT blur (flat-bg
+                  // rule: the panel sits on an opaque card, so blur would
+                  // refract nothing): translucent fill + white hairline +
+                  // gold outer rim + warm two-tier shadow + sheen.
+                  AppTheme.glassFlat(
+                    radius: 28,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveUtils.sw(context, 20),
+                        vertical: ResponsiveUtils.sh(context, 12),
                       ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Total',
-                          style: TextStyle(
-                            color: AppTheme.silver,
-                            fontSize: ResponsiveUtils.sf(context, 13),
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.3,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Total',
+                            style: TextStyle(
+                              color: AppTheme.silver,
+                              fontSize: ResponsiveUtils.sf(context, 13),
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: 0.3,
+                            ),
                           ),
-                        ),
-                        PriceText(
-                          price: totalAmount,
-                          fontSize: ResponsiveUtils.sf(context, 17),
-                          gold: true,
-                        ),
-                      ],
+                          PriceText(
+                            price: totalAmount,
+                            fontSize: ResponsiveUtils.sf(context, 17),
+                            gold: true,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: ResponsiveUtils.sh(context, 12)),

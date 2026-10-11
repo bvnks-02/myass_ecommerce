@@ -1,6 +1,7 @@
 // ignore_for_file: deprecated_member_use, unused_import, unused_field, prefer_final_fields, prefer_const_constructors, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -152,7 +153,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _iconBtn(
-            Icons.arrow_back_ios_new_rounded,
+            const Icon(Icons.arrow_back_ios_new_rounded,
+                size: 18, color: _accent),
             () => Navigator.pop(context),
           ),
           const Text(
@@ -166,7 +168,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           Row(
             children: [
               _iconBtn(
-                Icons.share,
+                const Icon(Icons.share, size: 18, color: _accent),
                 () => _showShareBottomSheet(),
               ),
               const SizedBox(width: 4),
@@ -187,10 +189,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
               Consumer<FavoritesProvider>(
                 builder: (context, favorites, _) {
                   final isFav = favorites.isFavorite(widget.product.id);
+                  // Ink-family heart (§6); favorited state tints it with the
+                  // semantic red — ink icons never take gold.
                   return _iconBtn(
-                    isFav ? Icons.favorite : Icons.favorite_border,
+                    SvgPicture.asset(
+                      'assets/icons/heart.svg',
+                      width: 18,
+                      height: 18,
+                      colorFilter: ColorFilter.mode(
+                        isFav ? AppTheme.danger : _accent,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                     () => favorites.toggleFavorite(widget.product),
-                    iconColor: isFav ? AppTheme.danger : _accent,
                   );
                 },
               ),
@@ -201,8 +212,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
     );
   }
 
-  Widget _iconBtn(IconData icon, VoidCallback onTap,
-      {Color iconColor = _accent}) {
+  Widget _iconBtn(Widget icon, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -213,7 +223,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: _divider, width: 1),
         ),
-        child: Icon(icon, size: 18, color: iconColor),
+        child: Center(child: icon),
       ),
     );
   }
@@ -373,20 +383,28 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Badge Meilleure vente — champagne gold, ink text (skill rule)
+            // Badge Meilleure vente — luxury-glass-ui §4 gold chip:
+            // 11/700 uppercase, tracking .08em, ink-gold text on
+            // chip-gold-bg with a 1px chip-gold border (quiet chip, not a
+            // gold fill — keeps gold scarce next to the GoldShader price
+            // and the gold-ring CTA, §5).
             Container(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
               decoration: BoxDecoration(
-                gradient: AppTheme.goldGradient,
-                borderRadius: BorderRadius.circular(20),
+                color: M.chipGoldBg,
+                borderRadius: BorderRadius.circular(99),
+                border: Border.all(color: M.chipGoldBorder, width: 1),
               ),
               child: const Text(
-                'Best Seller',
+                'BEST SELLER',
                 style: TextStyle(
-                  color: M.ink,
+                  color: M.inkGold,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
+                  letterSpacing: 0.9, // .08em @ 11px
+                  fontFamily: 'Inter',
+                  height: 1.2,
                 ),
               ),
             ),
@@ -553,10 +571,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 children: [
                   Text(
                     widget.product.name,
+                    // Card title — 21/700, tracking −.02em (§7).
                     style: const TextStyle(
                       color: _accent,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 21,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.42,
+                      fontFamily: 'Inter',
+                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -574,7 +596,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 children: [
                   PriceText(
                     price: widget.product.price,
-                    fontSize: 24,
+                    // Big metric — 26/700 gold numerals (value gold, §5).
+                    fontSize: 26,
                     gold: true,
                   ),
                     const SizedBox(height: 2),
@@ -678,10 +701,12 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
           children: [
             Text(
               value,
+              // Mini metric — 700 weight (§7 metric family, card scale).
               style: const TextStyle(
                 color: _accent,
                 fontSize: 17,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Inter',
               ),
             ),
             const SizedBox(height: 4),
@@ -913,8 +938,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                     'to all your devices.',
             style: const TextStyle(
               color: AppTheme.silver,
-              fontSize: 13,
-              height: 1.7,
+              // Card description — 13.5, line-height 1.45 (§3/§7).
+              fontSize: 13.5,
+              height: 1.45,
+              fontFamily: 'Inter',
             ),
           ),
         );
@@ -962,11 +989,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen>
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Neutral avatar — gold stays scarce on this screen
+                    // (§5): the gold budget goes to price + CTA + chip.
                     const CircleAvatar(
                       radius: 16,
-                      backgroundColor: _gold,
+                      backgroundColor: _card,
                       child: Icon(Icons.person,
-                          color: _surface, size: 16),
+                          color: AppTheme.silver, size: 16),
                     ),
                     const SizedBox(width: 10),
                     Expanded(

@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 
-/// Lightweight press feedback: the child dips to [scale] while pressed and
-/// springs back on release/cancel. Use for custom (non-Material-ink) tap
-/// targets — pills, circular buttons, cards — so they feel physical.
+import '../../theme/myazz_tokens.dart';
+
+/// Lightweight press feedback per luxury-glass-ui §8: while pressed the child
+/// sinks [dip] logical px (translateY(1px)) and scales to [scale] (.96),
+/// springing back on release/cancel with `--lg-spring` (0.25s) — playful but
+/// short. Use for custom (non-Material-ink) tap targets — pills, circular
+/// buttons, cards, CTAs — so they feel physical.
 class PressScale extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
   final double scale;
+
+  /// Press sink in logical px (CSS `translateY(1px)`). 0 disables the dip.
+  final double dip;
   final Duration duration;
   final HitTestBehavior behavior;
 
@@ -15,7 +22,8 @@ class PressScale extends StatefulWidget {
     required this.child,
     this.onTap,
     this.scale = 0.96,
-    this.duration = const Duration(milliseconds: 120),
+    this.dip = 1.0,
+    this.duration = const Duration(milliseconds: 250),
     this.behavior = HitTestBehavior.opaque,
   });
 
@@ -38,10 +46,23 @@ class _PressScaleState extends State<PressScale> {
       onTapUp: widget.onTap == null ? null : (_) => _setPressed(false),
       onTapCancel: widget.onTap == null ? null : () => _setPressed(false),
       onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _pressed ? widget.scale : 1.0,
-        duration: widget.duration,
-        curve: Curves.easeOut,
+      // One implicit 0→1 driver so the dip and the scale stay perfectly in
+      // sync; the spring curve overshoots slightly past both ends (§8).
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: _pressed ? 1 : 0),
+        // Reduced motion: snap instead of spring (this SDK's implicit
+        // animations do not auto-honor MediaQuery.disableAnimations).
+        duration: MediaQuery.maybeOf(context)?.disableAnimations ?? false
+            ? Duration.zero
+            : widget.duration,
+        curve: M.spring,
+        builder: (context, t, child) => Transform.translate(
+          offset: Offset(0, widget.dip * t),
+          child: Transform.scale(
+            scale: 1 - (1 - widget.scale) * t,
+            child: child,
+          ),
+        ),
         child: widget.child,
       ),
     );

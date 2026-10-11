@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
@@ -320,7 +321,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Row(
                   children: [
                     SizedBox(width: ResponsiveUtils.sw(context, 15)),
-                    Icon(Icons.search, color: AppTheme.dim, size: ResponsiveUtils.sf(context, 20)),
+                    // Ink-family search glyph (luxury-glass-ui §6), dimmed to
+                    // stay a quiet utility icon on the placeholder pill.
+                    SvgPicture.asset(
+                      'assets/icons/search.svg',
+                      width: ResponsiveUtils.sf(context, 18),
+                      height: ResponsiveUtils.sf(context, 18),
+                      colorFilter: const ColorFilter.mode(
+                        AppTheme.dim,
+                        BlendMode.srcIn,
+                      ),
+                    ),
                     SizedBox(width: ResponsiveUtils.sw(context, 10)),
                     Expanded(
                       child: Text(
@@ -341,8 +352,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           // Store — home IS the store tab, so this grounds the user back on
           // the '/home' root (no-op when already there, pops any pushed
           // routes otherwise). Favorites stay reachable from Profile.
+          // Ink-family house glyph (luxury-glass-ui §6).
           IconButton(
-            icon: const Icon(Icons.storefront_outlined, color: AppTheme.fg),
+            icon: SvgPicture.asset(
+              'assets/icons/house.svg',
+              width: 21,
+              height: 21,
+            ),
             onPressed: () {
               Navigator.popUntil(context, ModalRoute.withName('/home'));
             },
@@ -438,11 +454,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   // _buildFeaturedSlider removed for cheetah app design
 
-  /// Wide banner card for the featured product — myazz-ui ProductCard
-  /// language: GlassCard over the pearl gradient, muted category label, bold
-  /// ink name, GoldShader price numerals with a gold underline, and a
-  /// compact GoldButton that flies to the header cart. (The hero's ONE gold
-  /// accent moment — no sheen here; the sheen budget goes to details/cart.)
+  /// Wide banner card for the featured product — luxury-glass-ui §3 glass
+  /// card (full lg-card stack via AppTheme.glass) with the badge → metric →
+  /// description content pattern: quiet gold micro badge (category), 21/700
+  /// ink title, 26/700 GoldShader price (value gold), compact GoldButton
+  /// that flies to the header cart. Gold underline REMOVED — with the badge
+  /// + gold metric + gold button, a fourth gold element would overspend the
+  /// accent budget (§5).
   Widget _buildFeaturedHero(ProductEntity product) {
     final buttonKey = _addButtonKeyFor(product.id);
     return Padding(
@@ -467,44 +485,51 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        product.category,
-                        style: TextStyle(
-                          color: AppTheme.silver,
-                          fontSize: ResponsiveUtils.sf(context, 11),
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.4,
+                      // Micro badge — 11/700 uppercase, tracking .08em,
+                      // ink-gold-label on badge-gold-bg (§3).
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveUtils.sw(context, 10),
+                          vertical: ResponsiveUtils.sh(context, 4),
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                        decoration: BoxDecoration(
+                          color: AppTheme.badgeGoldBg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          product.category.toUpperCase(),
+                          style: TextStyle(
+                            color: AppTheme.inkGoldLabel,
+                            fontSize: ResponsiveUtils.sf(context, 11),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.9, // .08em @ 11px
+                            fontFamily: 'Inter',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      SizedBox(height: ResponsiveUtils.sh(context, 6)),
+                      SizedBox(height: ResponsiveUtils.sh(context, 8)),
+                      // Card title — 21/700, tracking −.02em (§7).
                       Text(
                         product.name,
                         style: TextStyle(
                           color: AppTheme.fg,
-                          fontSize: ResponsiveUtils.sf(context, 20),
-                          fontWeight: FontWeight.bold,
+                          fontSize: ResponsiveUtils.sf(context, 21),
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.42,
                           height: 1.15,
+                          fontFamily: 'Inter',
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: ResponsiveUtils.sh(context, 10)),
+                      SizedBox(height: ResponsiveUtils.sh(context, 8)),
+                      // Big metric — 26/700 GoldShader price (§3/§5).
                       PriceText(
                         price: product.price,
-                        fontSize: ResponsiveUtils.sf(context, 24),
+                        fontSize: ResponsiveUtils.sf(context, 26),
                         gold: true,
-                      ),
-                      // Gold underline (myazz-ui ProductCard price treatment)
-                      SizedBox(height: ResponsiveUtils.sh(context, 6)),
-                      Container(
-                        width: ResponsiveUtils.sw(context, 34),
-                        height: 3,
-                        decoration: BoxDecoration(
-                          gradient: AppTheme.goldGradient,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
                       ),
                       SizedBox(height: ResponsiveUtils.sh(context, 14)),
                       GoldButton(
@@ -661,22 +686,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       children: [
                         Text(
                           category,
+                          // Rail labels — 12.5/600, active 700, tracking
+                          // −.01em (§7 label scale).
                           style: TextStyle(
                             color: isSelected ? AppTheme.fg : AppTheme.silver,
-                            fontWeight:
-                                isSelected ? FontWeight.bold : FontWeight.w500,
-                            fontSize: ResponsiveUtils.sf(context, 15),
+                            fontWeight: isSelected
+                                ? FontWeight.w700
+                                : FontWeight.w600,
+                            fontSize: ResponsiveUtils.sf(context, 12.5),
+                            letterSpacing: -0.125,
                             fontFamily: 'Inter',
                           ),
                         ),
                         SizedBox(height: ResponsiveUtils.sh(context, 5)),
                         if (isSelected)
+                          // Gold underline marker (§5): 32×3 pill, gold-bar
+                          // gradient #915A0F → #E2AB44 → #915A0F.
                           Container(
-                            height: ResponsiveUtils.sh(context, 2.5),
-                            width: ResponsiveUtils.sw(context, 25),
+                            height: 3,
+                            width: ResponsiveUtils.sw(context, 32),
                             decoration: BoxDecoration(
-                              color: AppTheme.accent,
-                              borderRadius: BorderRadius.circular(2),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  M.goldNavBarDark,
+                                  M.goldNavBarLight,
+                                  M.goldNavBarDark,
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(99),
                             ),
                           ),
                       ],
@@ -1000,10 +1037,16 @@ class _FavoriteIconButton extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: AppTheme.line, width: 1),
             ),
-            child: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? AppTheme.danger : AppTheme.silver,
-              size: ResponsiveUtils.sf(context, 18),
+            child: SvgPicture.asset(
+              // Ink-family heart (luxury-glass-ui §6); the favorited state
+              // tints it with the semantic heart red — ink icons never gold.
+              'assets/icons/heart.svg',
+              width: ResponsiveUtils.sf(context, 17),
+              height: ResponsiveUtils.sf(context, 17),
+              colorFilter: ColorFilter.mode(
+                isFavorite ? AppTheme.danger : AppTheme.silver,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         );

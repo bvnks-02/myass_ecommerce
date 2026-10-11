@@ -37,6 +37,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'providers/auth_provider.dart';
 import 'theme/app_theme.dart';
+import 'theme/silk_background.dart';
 import 'core/utils/responsive_utils.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/auth/presentation/screens/register_screen.dart';
@@ -277,12 +278,12 @@ class _MyAppState extends State<MyApp> {
         title: 'Myazz',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.darkTheme,
-        // Pearl gradient root background (myazz-ui): ONE gradient container
-        // behind the whole app; scaffolds are transparent so glass reads.
-        builder: (context, child) => DecoratedBox(
-          decoration: const BoxDecoration(gradient: AppTheme.pearlGradient),
-          child: child ?? const SizedBox.shrink(),
-        ),
+        // Silk root background (luxury-glass-ui §1): cream→sand diagonal
+        // wash + soft ellipse layer + gold light curves, painted ONCE behind
+        // the whole app (RepaintBoundary, no animation). Scaffolds stay
+        // transparent so the glass panels refract the silk.
+        builder: (context, child) =>
+            SilkBackground(child: child ?? const SizedBox.shrink()),
         home: const SplashScreen(),
         onGenerateRoute: (settings) {
           // Handle web hash routing for password reset

@@ -5,9 +5,10 @@ import '../../../../theme/app_theme.dart';
 import '../../../../theme/myazz_tokens.dart';
 
 /// Brand placeholder screen (bottom-nav "Myazz" tab, route '/brand') —
-/// the showcase for the myazz-ui "Luminous Glass & Gold" language:
-/// pearl gradient root (via the MaterialApp builder), one GlassCard,
-/// a gold-ring logo medallion, GoldShader wordmark and a gold underline.
+/// the showcase for the "Luminous Glass & Gold" language: silk root (via the
+/// MaterialApp builder), one lg-card (AppTheme.glass), a gold-ring logo
+/// medallion and a GoldShader wordmark — the screen's two gold moments
+/// (the old third, a gold underline, was cut per luxury-glass-ui §5).
 ///
 /// Replace the copy with the real brand story when it's written.
 class BrandScreen extends StatelessWidget {
@@ -74,20 +75,16 @@ class BrandScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: ResponsiveUtils.sh(context, 10)),
-                    // Gold underline (24×3, radius 2 — skill spec).
-                    Container(
-                      width: 24,
-                      height: 3,
-                      decoration: BoxDecoration(
-                        gradient: M.goldSoft,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveUtils.sh(context, 14)),
+                    // Card description — 13.5, line-height 1.45 (§3/§7).
                     Text(
                       'Notre histoire, bientôt.',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: TextStyle(
+                        color: AppTheme.silver,
+                        fontSize: ResponsiveUtils.sf(context, 13.5),
+                        height: 1.45,
+                        fontFamily: 'Inter',
+                      ),
                     ),
                   ],
                 ),

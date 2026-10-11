@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../theme/myazz_tokens.dart';
 
 /// Fly-to-cart overlay + bounce/shake cart badge used on product grids.
 class AddToCartAnimation {
@@ -22,6 +25,12 @@ class AddToCartAnimation {
         cartKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (sourceBox == null || cartBox == null || !sourceBox.hasSize || !cartBox.hasSize) {
+      onComplete();
+      return;
+    }
+
+    // Reduced motion: skip the flight entirely, just commit the add.
+    if (MediaQuery.maybeOf(context)?.disableAnimations ?? false) {
       onComplete();
       return;
     }
@@ -173,7 +182,8 @@ class _AnimatedCartIconState extends State<AnimatedCartIcon>
   @override
   void didUpdateWidget(covariant AnimatedCartIcon oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.itemCount > oldWidget.itemCount) {
+    if (widget.itemCount > oldWidget.itemCount &&
+        !MediaQuery.disableAnimationsOf(context)) {
       _bounceController.forward(from: 0);
       _shakeController.forward(from: 0);
     }
@@ -204,28 +214,29 @@ class _AnimatedCartIconState extends State<AnimatedCartIcon>
         child: Stack(
           clipBehavior: Clip.none,
           children: [
-            Icon(
-              Icons.shopping_cart_outlined,
-              color: widget.iconColor,
-              size: widget.iconSize,
+            // Ink-family bag icon (luxury-glass-ui §6) — the same silhouette
+            // language as the navbar's custom painters.
+            SvgPicture.asset(
+              'assets/icons/bag.svg',
+              width: widget.iconSize,
+              height: widget.iconSize,
+              colorFilter:
+                  ColorFilter.mode(widget.iconColor, BlendMode.srcIn),
             ),
             if (widget.itemCount > 0)
               Positioned(
                 top: -4,
                 right: -6,
+                // Gold chip (luxury-glass-ui §4): ink-gold numerals on
+                // chip-gold-bg with a 1px chip-gold border — replaces the
+                // old red badge (gold is the only accent).
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 5, vertical: 3),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.red, Colors.redAccent],
-                    ),
+                    color: M.chipGoldBg,
                     shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withValues(alpha: 0.5),
-                        blurRadius: 6,
-                      ),
-                    ],
+                    border: Border.all(color: M.chipGoldBorder, width: 1),
                   ),
                   constraints: const BoxConstraints(
                     minWidth: 18,
@@ -235,9 +246,12 @@ class _AnimatedCartIconState extends State<AnimatedCartIcon>
                     widget.itemCount > 99 ? '99+' : '${widget.itemCount}',
                     textAlign: TextAlign.center,
                     style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+                      color: M.inkGold,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.9, // .08em @ 11px (chip spec §3/§4)
+                      fontFamily: M.fontLat,
+                      height: 1.2,
                     ),
                   ),
                 ),

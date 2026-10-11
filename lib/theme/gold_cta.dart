@@ -6,8 +6,9 @@ import 'app_theme.dart';
 import 'myazz_tokens.dart';
 
 /// Primary CTA in the myazz-ui "StartButton" language: champagne-gold
-/// gradient outer ring (2px), dark-navy inner fill, white label, and a slow
-/// sheen sweep (6s loop).
+/// gradient outer ring (2px), dark-navy inner fill, white label, and a
+/// single sheen sweep on entry — it never LOOPS: per luxury-glass-ui §8 the
+/// nav coin pulse is the only looping animation in the app.
 ///
 /// Effect budget: ONE sheen per screen — use this for the single primary
 /// action only (product-details add-to-cart, cart checkout). Secondary
@@ -42,7 +43,7 @@ class GoldCta extends StatefulWidget {
 class _GoldCtaState extends State<GoldCta> with SingleTickerProviderStateMixin {
   late final AnimationController _sheen = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: 6),
+    duration: const Duration(milliseconds: 1600),
   );
   bool _sweepStarted = false;
 
@@ -52,7 +53,8 @@ class _GoldCtaState extends State<GoldCta> with SingleTickerProviderStateMixin {
     final reduceMotion = MediaQuery.of(context).disableAnimations;
     if (widget.sheen && !reduceMotion && !_sweepStarted) {
       _sweepStarted = true;
-      _sheen.repeat();
+      // One-shot pass of light across the ring (no repeat — §8).
+      _sheen.forward(from: 0);
     } else if ((reduceMotion || !widget.sheen) && _sweepStarted) {
       _sweepStarted = false;
       _sheen.stop();
@@ -124,7 +126,8 @@ class _GoldCtaState extends State<GoldCta> with SingleTickerProviderStateMixin {
                     ),
                   ),
                 ),
-                // Slow sheen sweep — the ONE gold accent animation on screen.
+                // One-shot sheen sweep — the ONE gold accent animation on
+                // screen; it plays once on entry and rests (skill §8).
                 if (enabled && widget.sheen && _sweepStarted)
                   IgnorePointer(
                     child: AnimatedBuilder(

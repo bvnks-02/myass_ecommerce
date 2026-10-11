@@ -586,45 +586,48 @@ class _SportsCoin extends StatelessWidget {
           width: 1.8,
         ),
       ),
-      child: const Center(
-        child: CustomPaint(
-          size: Size(36, 14),
-          painter: _SportsWordmarkPainter(),
-        ),
-      ),
+      child: const Center(child: _SportsWordmark()),
     );
   }
 }
 
-class _SportsWordmarkPainter extends CustomPainter {
-  const _SportsWordmarkPainter();
+/// The "sports" wordmark artwork — user-supplied PNG (4x master, downscaled
+/// at build time to assets/images/sports_wordmark.png) replacing the old
+/// text-painted wordmark. Two stacked paints recreate the reference's
+/// engraved glyph: a warm-white copy offset 0.8px below (§5c light
+/// drop-shadow) under the ink artwork. Width-only sizing keeps the source
+/// aspect ratio (4556×1576) untouched.
+class _SportsWordmark extends StatelessWidget {
+  const _SportsWordmark();
+
+  static const double _width = 38;
+  static const String _asset = 'assets/images/sports_wordmark.png';
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final textPainter = TextPainter(
-      text: const TextSpan(
-        text: 'sports',
-        style: TextStyle(
-          color: Color(0xFF0C1017), // artwork ink — stays literal
-          fontSize: 11.2,
-          fontWeight: FontWeight.w900,
-          fontStyle: FontStyle.italic,
-          letterSpacing: -0.3,
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      clipBehavior: Clip.none,
+      children: [
+        // Engraved light edge — reference: drop-shadow(0 .8px 0 #fff8dc80).
+        Transform.translate(
+          offset: const Offset(0, 0.8),
+          child: Image.asset(
+            _asset,
+            width: _width,
+            color: const Color(0x80FFF8DC),
+            colorBlendMode: BlendMode.srcIn,
+            filterQuality: FilterQuality.medium,
+          ),
         ),
-      ),
-      textDirection: TextDirection.ltr,
-    )..layout();
-
-    // Center text perfectly
-    final offset = Offset(
-      (size.width - textPainter.width) / 2,
-      (size.height - textPainter.height) / 2,
+        Image.asset(
+          _asset,
+          width: _width,
+          filterQuality: FilterQuality.medium,
+        ),
+      ],
     );
-    textPainter.paint(canvas, offset);
   }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // =============================================================================

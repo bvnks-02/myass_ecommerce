@@ -11,9 +11,10 @@ import 'myazz_tokens.dart';
 /// source of truth for values).
 ///
 /// ── Legacy name → token mapping (names kept for API compatibility) ──
-///  bg                   → pearl #F4F3F1 (solid scaffold base; the pearl
-///                         GRADIENT lives in [pearlGradient], applied once at
-///                         the app root — scaffolds are transparent).
+///  bg                   → pearl #F4F3F1 (solid scaffold base; the SILK root
+///                         background — luxury-glass-ui §1 — is painted once
+///                         by SilkBackground at the app root; scaffolds are
+///                         transparent so glass refracts the silk).
 ///  surface              → M.bgMid #FFFFFF (cards).
 ///  surface2             → M.bgBottom #F1F0EE (raised tiles / inputs).
 ///  fg / blackColor /
@@ -55,11 +56,22 @@ class AppTheme {
   static const LinearGradient nightGradient = M.nightGradient; // dark contrast cards
 
   // ── Glass tokens ──
-  static const Color glassBorder = M.glassBorder; // white .9 hairline edge
+  static const Color glassBorder = M.glassBorder; // white .95 hairline edge (--lg-edge-card)
   static const Color glassInner = M.glassInner; // white .5 inner highlight
 
-  /// Pearl gradient — the root background. Applied ONCE in the MaterialApp
-  /// builder (main.dart); scaffolds stay transparent so glass reads over it.
+  // ── luxury-glass-ui (--lg-*) delegates — source of truth: M ──
+  static const Color inkGold = M.inkGold; // chip text (§4)
+  static const Color inkGoldLabel = M.inkGoldLabel; // badge text (§3)
+  static const Color chipGoldBg = M.chipGoldBg; // gold chip fill (§4)
+  static const Color chipGoldBorder = M.chipGoldBorder; // gold chip border (§4)
+  static const Color badgeGoldBg = M.badgeGoldBg; // card badge fill (§3)
+  static const Color goldRim = M.goldRim; // hairline gold outer rim
+  static const LinearGradient silkBase = M.silkBase; // root silk gradient (§1)
+  static const List<BoxShadow> lgCardShadow = M.lgCardShadow; // --lg-shadow-card stack (§3)
+
+  /// Pearl gradient — kept for API compatibility. The app root now paints the
+  /// full silk treatment (SilkBackground, luxury-glass-ui §1) in the
+  /// MaterialApp builder; scaffolds stay transparent so glass reads over it.
   static const LinearGradient pearlGradient = LinearGradient(
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
@@ -268,15 +280,17 @@ class AppTheme {
     );
   }
 
-  // ── Glassmorphism system (myazz-ui "Luminous Glass") ──
+  // ── Glassmorphism system (myazz-ui "Luminous Glass" × luxury-glass-ui §3) ──
   // Real frosted glass = ClipRRect + BackdropFilter blur + translucent white
-  // fill + diagonal sheen + hairline WHITE border + soft long shadow.
-  //  • standard: fill .62, blur 24 — ordinary cards.
+  // fill + diagonal sheen + hairline WHITE border (--lg-edge-card .95) + the
+  // warm two-tier --lg-shadow-card stack.
+  //  • standard: the full lg-card stack — fill .62, blur 24, radius 28.
   //  • strong:   fill .82, blur 32 — nav, sheets, modals (pass strong: true).
-  // Budget: ≤6 blurred layers per screen; over flat white use a translucent
-  // fill WITHOUT blur (skip [glass], use a plain Container + glassStrongFill).
+  // Budget: ≤6 blurred layers per screen; over FLAT backgrounds (e.g. inside
+  // an opaque card) use a translucent fill WITHOUT blur (skip [glass], use a
+  // plain Container + glassStrongFill + lgCardShadow + hairline border).
 
-  /// Standard frosted fill — white at ~62%.
+  /// Standard frosted fill — white at ~62% (--lg-glass-card).
   static Color get glassFill => M.glass;
 
   /// Strong frosted fill — white at ~82% (nav, sheets, modals).
@@ -286,12 +300,13 @@ class AppTheme {
   static Color get glassFillSheer => Colors.white.withValues(alpha: 0.40);
 
   /// Soft long shadow that lifts a glass panel off the content behind it
-  /// (first tier of the M-style card shadow).
-  static BoxShadow get glassShadow => M.cardShadow[0];
+  /// (first tier of the --lg-shadow-card stack).
+  static BoxShadow get glassShadow => M.lgCardShadow[0];
 
   /// Frosted-glass panel: ClipRRect + BackdropFilter blur + translucent
   /// white fill + GlassCard-style diagonal sheen (white .35 → .05) + hairline
-  /// white border + M-style soft shadow, isolated in its own RepaintBoundary.
+  /// white border + warm two-tier --lg-shadow-card shadow, isolated in its
+  /// own RepaintBoundary.
   ///
   /// [strong] switches to the nav/sheet variant (fill .82, blur 32).
   /// [fill] overrides the fill; [corners] overrides [radius] for non-uniform
@@ -314,7 +329,7 @@ class AppTheme {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: borderRadius,
-          boxShadow: shadow ? M.cardShadow : null,
+          boxShadow: shadow ? M.lgCardShadow : null,
         ),
         child: ClipRRect(
           borderRadius: borderRadius,
@@ -350,9 +365,60 @@ class AppTheme {
     );
   }
 
+  /// Flat-background glass panel — the lg-card stack WITHOUT backdrop blur,
+  /// for panels that sit ON an opaque surface (skill §9: glass on flat white
+  /// refracts nothing, and the blur would cost a layer for free): translucent
+  /// fill + white hairline + 1px gold outer rim (the nav-pill refraction
+  /// edge — on a white card this is what delineates the panel) + warm
+  /// two-tier --lg-shadow-card + diagonal sheen.
+  static Widget glassFlat({
+    required Widget child,
+    double radius = M.rCard,
+    Color? fill,
+    bool sheen = true,
+  }) {
+    final BorderRadius borderRadius = BorderRadius.circular(radius);
+    return RepaintBoundary(
+      child: Container(
+        decoration: BoxDecoration(
+          color: fill ?? M.glassStrong,
+          borderRadius: borderRadius,
+          border: Border.all(color: glassBorder, width: 1),
+          boxShadow: const [
+            // 1px gold outer rim (--lg-gold-rim), nav-pill style.
+            BoxShadow(
+              color: M.goldRim,
+              blurRadius: 0,
+              offset: Offset.zero,
+              spreadRadius: 1,
+            ),
+            ...M.lgCardShadow,
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: borderRadius,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: borderRadius,
+              gradient: sheen
+                  ? const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0x59FFFFFF), Color(0x0DFFFFFF)],
+                    )
+                  : null,
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+
   /// BoxDecoration counterpart of [glass] — frosted white fill, hairline
-  /// white border, M-style shadow. Combine with ClipRRect + BackdropFilter
-  /// to actually frost; on its own it is just a translucent panel.
+  /// white border, warm --lg-shadow-card stack. Combine with ClipRRect +
+  /// BackdropFilter to actually frost; on its own it is just a translucent
+  /// panel.
   static BoxDecoration get glassDecoration {
     return BoxDecoration(
       color: M.glass,
@@ -361,16 +427,16 @@ class AppTheme {
         color: glassBorder,
         width: 1,
       ),
-      boxShadow: M.cardShadow,
+      boxShadow: M.lgCardShadow,
     );
   }
 
   static BoxShadow get cardShadow {
-    // Soft long shadow — M-style first tier.
+    // Soft long shadow — warm first tier.
     return M.cardShadow[0];
   }
 
-  /// Full M-style two-tier card shadow (soft long + hairline contact).
+  /// Full two-tier warm card shadow (soft long + hairline contact).
   static List<BoxShadow> get cardShadows => M.cardShadow;
 }
 
